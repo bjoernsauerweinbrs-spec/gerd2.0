@@ -1395,14 +1395,14 @@
           );
 
           const prompt = `Du bist Trainer-Gerd. Ein User lädt eine Taktik ('${entry.name}').
-                          Ursprüngliche Spieler-IDs auf dem Feld: ${JSON.stringify(activePlayerIds)}.
-                          Aktueller Kader-Status: ${JSON.stringify(currentFitness)}.
+                            Ursprüngliche Spieler-IDs auf dem Feld: ${JSON.stringify(activePlayerIds)}.
+                            Aktueller Kader-Status: ${JSON.stringify(currentFitness)}.
 
-                          AUFGABE:
-                          1. Prüfe, ob Spieler auf dem Feld aktuell 'isFit: false' sind.
-                          2. Falls ja, schlage für JEDEN unfitten Spieler einen fitten Ersatz aus dem Kader vor (gleiche Position oder passender OVR).
-                          3. Antworte EXAKT im JSON-Format: {"replacements": {"oldId": "newId", ...}, "report": "Kurze Begründung der Wechsel"}.
-                          4. Falls keine Wechsel nötig sind, gib ein leeres replacements-Objekt zurück.`;
+                            AUFGABE:
+                            1. Prüfe, ob Spieler auf dem Feld aktuell 'isFit: false' sind.
+                            2. Falls ja, schlage für JEDEN unfitten Spieler einen fitten Ersatz aus dem Kader vor (gleiche Position oder passender OVR).
+                            3. Antworte EXAKT im JSON-Format: {"replacements": {"oldId": "newId", ...}, "report": "Kurze Begründung der Wechsel"}.
+                            4. Falls keine Wechsel nötig sind, gib ein leeres replacements-Objekt zurück.`;
 
           try {
             const aiResponse = await askAI(prompt, "Trainer-Gerd");
@@ -1597,8 +1597,8 @@
             };
 
             const prompt = `Du bist Trainer-Gerd. Ein User gibt dir folgenden taktischen Sprachbefehl: "${speechResult}".
-                              Aktueller Board-Status (JSON): ${JSON.stringify(gameState)}.
-                              Analysiere die Anweisung im Kontext der Spielerpositionen und gib eine kurze, prägnante taktische Antwort (max 2 Sätze) im 'Stark Elite' Stil zurück.`;
+                                Aktueller Board-Status (JSON): ${JSON.stringify(gameState)}.
+                                Analysiere die Anweisung im Kontext der Spielerpositionen und gib eine kurze, prägnante taktische Antwort (max 2 Sätze) im 'Stark Elite' Stil zurück.`;
 
             const response = await askAI(prompt, "Trainer-Gerd");
             setGerdFeedback(response);
@@ -1625,7 +1625,7 @@
             `> Gerd Analyst: Berechne Vektor für ${drawing.type}...`,
           );
           const prompt = `Der User hat eine ${drawing.type}-Markierung auf dem Taktikboard gezeichnet (Start: ${Math.round(drawing.start.x)}, ${Math.round(drawing.start.y)} -> Ende: ${Math.round(drawing.end.x)}, ${Math.round(drawing.end.y)}).
-                          Analysiere kurz das Risiko und den taktischen Nutzen dieser Aktion im 'Stark Elite' Stil. Antworte in einem kurzen Satz.`;
+                            Analysiere kurz das Risiko und den taktischen Nutzen dieser Aktion im 'Stark Elite' Stil. Antworte in einem kurzen Satz.`;
 
           const response = await askAI(prompt, "Gerd Analyst");
           setVideoFeedback(`> Analyst: ${response}`);
@@ -1757,12 +1757,12 @@
           setGerdThinking(true);
           setSourcingReport(null);
           const prompt = `Du bist 'Manager-Gerd'. Analysiere den Markt für folgende Anfrage: ${sourcingQuery}.
-                          Erstelle eine strukturierte Analyse mit 3 Preis-Optionen:
-                          1. LOW-BUDGET (Fokus auf Preis)
-                          2. VALUE (Preis-Leistung)
-                          3. PREMIUM (Höchste Qualität)
-                          Erstelle am Ende einen kurzen Entwurf für ein Anschreiben an den günstigsten Anbieter im 'Stark Elite' Stil.
-                          Antworte in einem sauberen Bericht-Layout (JSON-ähnlich strukturiert, aber Text).`;
+                            Erstelle eine strukturierte Analyse mit 3 Preis-Optionen:
+                            1. LOW-BUDGET (Fokus auf Preis)
+                            2. VALUE (Preis-Leistung)
+                            3. PREMIUM (Höchste Qualität)
+                            Erstelle am Ende einen kurzen Entwurf für ein Anschreiben an den günstigsten Anbieter im 'Stark Elite' Stil.
+                            Antworte in einem sauberen Bericht-Layout (JSON-ähnlich strukturiert, aber Text).`;
           const res = await askAI(prompt, "Manager-Gerd");
           setSourcingReport(res);
           setGerdThinking(false);
@@ -1777,11 +1777,11 @@
           setGerdThinking(true);
           setAuditReport("");
           const prompt = `Du bist 'Manager-Gerd' und spezialisiert auf Sportrecht und Finanzen.
-                          Analysiere diesen Text/Vertrag auf finanzielle oder rechtliche Lücken:
-                          ---
-                          ${contractText}
-                          ---
-                          Gib ein kritisches Audit-Feedback und erstelle eine 'Optimierte Version' im professionellen Vereins-Briefkopf-Stil.`;
+                            Analysiere diesen Text/Vertrag auf finanzielle oder rechtliche Lücken:
+                            ---
+                            ${contractText}
+                            ---
+                            Gib ein kritisches Audit-Feedback und erstelle eine 'Optimierte Version' im professionellen Vereins-Briefkopf-Stil.`;
           const res = await askAI(prompt, "Manager-Gerd");
           setAuditReport(res);
           setGerdThinking(false);
@@ -1794,8 +1794,8 @@
         const handleInvestmentCalc = async () => {
           setGerdThinking(true);
           const prompt = `Du bist 'Manager-Gerd'. Ein Budget von €${investmentSum.toLocaleString()} soll investiert werden.
-                          Schlage basierend auf moderner Vereinsführung eine Verteilung vor (z.B. Kader, NLZ, Rücklagen).
-                          Begründe die Entscheidung mit strategischer Weitsicht.`;
+                            Schlage basierend auf moderner Vereinsführung eine Verteilung vor (z.B. Kader, NLZ, Rücklagen).
+                            Begründe die Entscheidung mit strategischer Weitsicht.`;
           const res = await askAI(prompt, "Manager-Gerd");
           setInvestmentAI(res);
           setGerdThinking(false);
@@ -1810,8 +1810,8 @@
           setIsScoutingLoading(true);
           setShadowScoutReport("");
           const prompt = `Du bist 'Shadow Scout'. Suche nach Spielern für folgendes Anforderungsprofil: ${shadowScoutQuery}.
-                          Nenne 3-5 reale passende Spieler (ggf. auch vertragslose aus dem VDV/Duisburg Pool).
-                          Gib für jeden Spieler eine kurze Pro/Contra Analyse im Kontext von 'Stark Elite'.`;
+                            Nenne 3-5 reale passende Spieler (ggf. auch vertragslose aus dem VDV/Duisburg Pool).
+                            Gib für jeden Spieler eine kurze Pro/Contra Analyse im Kontext von 'Stark Elite'.`;
           const res = await askAI(prompt, "Shadow Scout");
           setShadowScoutReport(res);
           setIsScoutingLoading(false);
@@ -1824,8 +1824,8 @@
         const handlePrepareOffer = async (player) => {
           setGerdThinking(true);
           const prompt = `Erstelle ein formelles, professionelles Vertragsangebot (PDF-Layout-Stil) für den Spieler ${player.name}.
-                          Position: ${player.pos}, Marktwert: ${player.val}.
-                          Das Angebot soll im Namen von 'Stark Elite' verfasst sein.`;
+                            Position: ${player.pos}, Marktwert: ${player.val}.
+                            Das Angebot soll im Namen von 'Stark Elite' verfasst sein.`;
           const res = await askAI(prompt, "Manager-Gerd");
           setAuditReport(res); // Temporary view in report area
           setGerdThinking(false);
@@ -1988,15 +1988,15 @@
             : "STARK PERFORMANCE JOURNAL";
 
           const prompt = `Du bist Presse-Gerd. Erstelle die heutige Ausgabe des '${magazineName}'.
-                          Verein: ${clubIdentity.name || "Stark Elite"}.
-                          Kader-Zustand: Top-Performer ist ${topPlayer.name}, verletzte Spieler: ${injuredPlayers || "keine"}, Team-Fitness: ${teamHealth}%.
-                          Aufgaben:
-                          1. Schreibe eine reißerische Headline (Red Bulletin Stil).
-                          2. Ein kurzes Editorial über den aktuellen Spirit im Verein ${clubIdentity.name || ""}.
-                          3. Ein fiktives Interview mit Trainer-Gerd über die Taktik (4-4-2 Fokus bei Heenes) und den Fitness-Zustand.
-                          4. Ein Tactical Update.
-                          5. Ein 'Sponsor-Corner': Ein kurzer Dank an einen fiktiven lokalen Sponsor (z.B. Autohaus Müller oder Sport-Hansen).
-                          Antworte STRENG im JSON-Format: { "headline": "", "editorial": "", "interview": "", "tactics": "", "medical": "", "sponsor": "" }`;
+                            Verein: ${clubIdentity.name || "Stark Elite"}.
+                            Kader-Zustand: Top-Performer ist ${topPlayer.name}, verletzte Spieler: ${injuredPlayers || "keine"}, Team-Fitness: ${teamHealth}%.
+                            Aufgaben:
+                            1. Schreibe eine reißerische Headline (Red Bulletin Stil).
+                            2. Ein kurzes Editorial über den aktuellen Spirit im Verein ${clubIdentity.name || ""}.
+                            3. Ein fiktives Interview mit Trainer-Gerd über die Taktik (4-4-2 Fokus bei Heenes) und den Fitness-Zustand.
+                            4. Ein Tactical Update.
+                            5. Ein 'Sponsor-Corner': Ein kurzer Dank an einen fiktiven lokalen Sponsor (z.B. Autohaus Müller oder Sport-Hansen).
+                            Antworte STRENG im JSON-Format: { "headline": "", "editorial": "", "interview": "", "tactics": "", "medical": "", "sponsor": "" }`;
 
           try {
             const raw = await askAI(prompt, "Presse-Gerd");
@@ -2148,23 +2148,23 @@
                   ? "HOFFNUNGSTRÄGER"
                   : "ENTWICKELBARES TALENT";
             const report = `SCOUT-GERD REPORT: ${player.name} [${player.position}]
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          Gesamtbewertung: ${ovr} OVR — ${tier}
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            Gesamtbewertung: ${ovr} OVR — ${tier}
 
-          Herausragendes Attribut: ${topStat[0]} (${topStat[1]}/99)
-          ${topStat[0] === "PAC" ? "⚡ Der Antritt ist auf nationalem Top-Niveau. Wenn dieser Spieler Raumgewinn erzeugt, bricht er Linien auf." : ""}
-          ${topStat[0] === "DRI" ? "🎩 Das Dribbling ist außergewöhnlich. Enge Ballführung und Körpertäuschungen auf Elite-Niveau." : ""}
-          ${topStat[0] === "PAS" ? "🧠 Spielintelligenz: Der Passrhythmus und die Übersicht sind für das Alter sensationell." : ""}
-          ${topStat[0] === "SHO" ? "🎯 Torabschluss: Ruhige Coolness vor dem Tor. Wird Trainer-Gerd s Torjäger." : ""}
+            Herausragendes Attribut: ${topStat[0]} (${topStat[1]}/99)
+            ${topStat[0] === "PAC" ? "⚡ Der Antritt ist auf nationalem Top-Niveau. Wenn dieser Spieler Raumgewinn erzeugt, bricht er Linien auf." : ""}
+            ${topStat[0] === "DRI" ? "🎩 Das Dribbling ist außergewöhnlich. Enge Ballführung und Körpertäuschungen auf Elite-Niveau." : ""}
+            ${topStat[0] === "PAS" ? "🧠 Spielintelligenz: Der Passrhythmus und die Übersicht sind für das Alter sensationell." : ""}
+            ${topStat[0] === "SHO" ? "🎯 Torabschluss: Ruhige Coolness vor dem Tor. Wird Trainer-Gerd s Torjäger." : ""}
 
-          Physisches Profil:
-          • HRV: ${player.hrv} ms — ${player.hrv > 72 ? "STARK ✅" : "Ausbaufähig ⚠️"}
-          • Schlaf: ${player.sleep}h — ${player.sleep >= 8 ? "Optimal ✅" : "Optimierungspotenzial ⚠️"}
+            Physisches Profil:
+            • HRV: ${player.hrv} ms — ${player.hrv > 72 ? "STARK ✅" : "Ausbaufähig ⚠️"}
+            • Schlaf: ${player.sleep}h — ${player.sleep >= 8 ? "Optimal ✅" : "Optimierungspotenzial ⚠️"}
 
-          Empfehlung:
-          ${ovr >= 78 ? "🚀 SOFORTIGE PRÜFUNG FÜR PROFI-KADER. Der Spieler übertrifft Erwartungen." : ovr >= 70 ? "📈 In 6-12 Monaten profifertig. Weiterführen im Leistungsbereich." : "🔧 Gezielteres Individualprogramm. Technisch stark, physisch noch zu entwickeln."}
+            Empfehlung:
+            ${ovr >= 78 ? "🚀 SOFORTIGE PRÜFUNG FÜR PROFI-KADER. Der Spieler übertrifft Erwartungen." : ovr >= 70 ? "📈 In 6-12 Monaten profifertig. Weiterführen im Leistungsbereich." : "🔧 Gezielteres Individualprogramm. Technisch stark, physisch noch zu entwickeln."}
 
-          [SYSTEM]: Analyse abgeschlossen. Scout-KI v3.1 aktiv.`;
+            [SYSTEM]: Analyse abgeschlossen. Scout-KI v3.1 aktiv.`;
             let i = 0;
             let txt = "";
             const iv = setInterval(() => {
@@ -2658,12 +2658,12 @@
           const handleMorningCall = async () => {
             setIsBriefingLoading(true);
             const prompt = `Du bist CEO/Manager-Gerd. Erstelle ein kurzes, prägnantes Executive-Briefing (Morning Call) basierend auf diesen Daten:
-                              - Squad Readiness: ${avgReadiness}%
-                              - Aktuelle Taktik: ${lastTactic}
-                              - Budget Status: € ${budgetVal}M
-                              - Scouting Focus: ${targetOfDay.name}
-                              - NLZ Juwel: ${nlzHighlight.name}
-                              Fasse die Top-Prio für heute zusammen. Maximal 3 Sätze. Sei professionell, visionär und elite-orientiert.`;
+                                - Squad Readiness: ${avgReadiness}%
+                                - Aktuelle Taktik: ${lastTactic}
+                                - Budget Status: € ${budgetVal}M
+                                - Scouting Focus: ${targetOfDay.name}
+                                - NLZ Juwel: ${nlzHighlight.name}
+                                Fasse die Top-Prio für heute zusammen. Maximal 3 Sätze. Sei professionell, visionär und elite-orientiert.`;
 
             try {
               const response = await askAI(prompt);
@@ -3029,9 +3029,9 @@
             }));
 
             const prompt = `Analysiere folgende taktische Formation (JSON-DUMP): ${JSON.stringify(playerJson)}.
-                              Modus: ${currentMode.toUpperCase()}.
-                              Gib ein kurzes, analytisches Feedback zur Positionierung (Abstände, Halbräume, Pressing-Fallen).
-                              Stil: Hochprofessionell, analytisch, Red Bull Elite. Max 2 Sätze.`;
+                                Modus: ${currentMode.toUpperCase()}.
+                                Gib ein kurzes, analytisches Feedback zur Positionierung (Abstände, Halbräume, Pressing-Fallen).
+                                Stil: Hochprofessionell, analytisch, Red Bull Elite. Max 2 Sätze.`;
 
             const response = await askAI(prompt, "Trainer-Gerd");
             return response;
@@ -3924,9 +3924,9 @@
           try {
             const response = await askAI(
               `Generiere mir ein Array von 15 Spielern für den Verein ${clubIdentity.name}.
-          Antworte NUR mit valider JSON (ohne Markdown-Tags, nur das '[' und ']').
-          Format-Beispiel: [{"id": 1, "name": "M. Neuer", "position": "TW", "number": 1, "status": "fit", "sleep": 8.0, "hrv": 65, "stress": 30, "isInjured": false}]
-          Bitte wähle die 15 bekanntesten/wichtigsten Spieler der aktuellen Ersten Mannschaft aus.`,
+            Antworte NUR mit valider JSON (ohne Markdown-Tags, nur das '[' und ']').
+            Format-Beispiel: [{"id": 1, "name": "M. Neuer", "position": "TW", "number": 1, "status": "fit", "sleep": 8.0, "hrv": 65, "stress": 30, "isInjured": false}]
+            Bitte wähle die 15 bekanntesten/wichtigsten Spieler der aktuellen Ersten Mannschaft aus.`,
               "strategy",
               true,
             );
@@ -4525,15 +4525,15 @@
                 : "Turniereinladung";
 
           const prompt = `Du bist Manager Gerd, der erfahrene und rhetorisch gewandte Sportdirektor des Vereins 'Stark Elite'.
-                          Erstelle eine hochprofessionelle, formelle E-Mail zum Thema: ${scenarioText}.
-                          Zusätzlicher Kontext: ${commExtra}.
+                            Erstelle eine hochprofessionelle, formelle E-Mail zum Thema: ${scenarioText}.
+                            Zusätzlicher Kontext: ${commExtra}.
 
-                          Anforderungen:
-                          - Ton: Geschäftlich, respektvoll, souverän, aber modern.
-                          - Struktur: Betreffzeile, förmliche Anrede, strukturierter Hauptteil, überzeugender Schluss, professionelle Grußformel.
-                          - Ziel: Maximale Überzeugungskraft und Professionalität.
+                            Anforderungen:
+                            - Ton: Geschäftlich, respektvoll, souverän, aber modern.
+                            - Struktur: Betreffzeile, förmliche Anrede, strukturierter Hauptteil, überzeugender Schluss, professionelle Grußformel.
+                            - Ziel: Maximale Überzeugungskraft und Professionalität.
 
-                          Antworte NUR mit dem fertigen E-Mail-Text, ohne weitere Einleitung.`;
+                            Antworte NUR mit dem fertigen E-Mail-Text, ohne weitere Einleitung.`;
 
           const response = await askAI(prompt, "Manager-Gerd");
           setCommEmail(response);
@@ -4992,3788 +4992,3789 @@
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-          };
-
-              // --- NLZ / YOUTH ACADEMY COMPONENT ---
-              const FuchsNLZ = ({
-                youthPlayers,
-                setYouthPlayers,
-                nlzTab,
-                setNlzTab,
-                scoutModal,
-                setScoutModal,
-                dnaModules,
-                setDnaModules,
-                askAI,
-                gerdSpeak,
-                updateYouthPlayer,
-                addYouthPlayer,
-                deleteYouthPlayer,
-                promoteToProSquad,
-                openScoutModal,
-          }) => {
-            const [ageGroup, setAgeGroup] = useState("funino"); // 'funino' | 'kleinfeld' | 'grossfeld'
-              const [trainingFocus, setTrainingFocus] = useState("dribbling");
-              const [isGenerating, setIsGenerating] = useState(false);
-              const [trainingPlan, setTrainingPlan] = useState(null);
-              const [activeNlzView, setActiveNlzView] = useState("board"); // 'board' | 'dossier' | 'seasonbook'
-              const [activeDossierPlayerId, setActiveDossierPlayerId] =
-              useState(null);
-              const [activeRatingPlayerId, setActiveRatingPlayerId] =
-              useState(null);
-
-            // Quick Rating Logic
-            const handleQuickRating = (type) => {
-              if (!activeRatingPlayerId) return;
-              if (navigator.vibrate) navigator.vibrate(50);
-
-              const player = youthPlayers.find(
-                (p) => p.id === activeRatingPlayerId,
-              );
-              if (!player) return;
-
-              let update = { };
-              if (type === "top") {
-                update = {
-                  focus: Math.min(10, (player.focus || 5) + 1),
-                  pac: Math.min(99, (player.pac || 60) + 1),
-                };
-              gerdSpeak(
-              `${player.name}: Top Aktion registriert! +1 Fokus.`,
-              "Trainer-Gerd",
-              );
-              } else if (type === "neutral") {
-                gerdSpeak(
-                  `${player.name}: Aktion neutral bewertet.`,
-                  "Trainer-Gerd",
-                );
-              } else if (type === "correction") {
-                update = {
-                  frustration: Math.min(10, (player.frustration || 5) + 1),
-                };
-              gerdSpeak(
-              `${player.name}: Korrektur-Bedarf notiert.`,
-              "Trainer-Gerd",
-              );
-              }
-
-              if (Object.keys(update).length > 0) {
-                Object.entries(update).forEach(([key, val]) => {
-                  updateYouthPlayer(activeRatingPlayerId, key, val);
-                });
-              }
-            };
-
-              // Psycho Tracking State
-              const [psychoScores, setPsychoScores] = useState({
-                focus: 5,
-              effort: 5,
-              teamplay: 5,
-              frustration: 5,
-            });
-              const [isGeneratingPsychReport, setIsGeneratingPsychReport] =
-              useState(false);
-
-              // Season Book State
-              const [seasonBookData, setSeasonBookData] = useState(null);
-              const [isGeneratingBook, setIsGeneratingBook] = useState(false);
-
-              // Video Analysis State
-              const [videoFile, setVideoFile] = useState(null);
-              const [isAnalyzing, setIsAnalyzing] = useState(false);
-              const [analysisReport, setAnalysisReport] = useState(null);
-              const [videoSrc, setVideoSrc] = useState(null);
-
-              const ageClasses = [
-              {id: "funino", label: "Funino U6-U9", icon: "smile" },
-              {id: "kleinfeld", label: "Kleinfeld U10-U13", icon: "layout" },
-              {id: "grossfeld", label: "Großfeld U14+", icon: "maximize" },
-              ];
-
-              const foci = [
-              {id: "dribbling", label: "Dribbling & 1v1", icon: "zap" },
-              {id: "passing", label: "Passspiel & Raum", icon: "repeat" },
-              {id: "shooting", label: "Torschuss & Abschluss", icon: "target" },
-              {
-                id: "coordination",
-              label: "Koordination & Speed",
-              icon: "activity",
-              },
-              ];
-
-            const generatePlan = async () => {
-                setIsGenerating(true);
-              setTrainingPlan(null);
-              try {
-                const prompt = `Du bist der NLZ-Direktor vom 'Fuchs Leistungszentrum'.
-              Erstelle einen hochprofessionellen, aber für Laien leicht verständlichen Trainingsplan für die Altersklasse [${ageGroup}].
-              Schwerpunkt: ${trainingFocus}.
-              TEILE DEN PLAN IN 3 PHASEN:
-              1. WARM-UP (Mobilisation & Koordination)
-              2. HAUPTTEIL (Spielformen & Technik)
-              3. ABSCHLUSS-SPIEL (Wettkampf unter Provokationsregeln)
-              Antworte in einem sauberen Listenformat, motivierend und sportwissenschaftlich fundiert.`;
-
-              const res = await askAI(prompt, "NLZ-Direktor");
-              setTrainingPlan(res);
-              gerdSpeak(
-              "Trainingsplan für das Fuchs Leistungszentrum wurde erstellt. Bereit zur Umsetzung.",
-              "NLZ-Direktor",
-              );
-              } catch (e) {
-                setTrainingPlan("Fehler beim Abruf des Trainingsplans.");
-              } finally {
-                setIsGenerating(false);
-              }
-            };
-
-            const handleVideoUpload = (e) => {
-              const file = e.target.files[0];
-              if (file) {
-                setVideoFile(file);
-              setVideoSrc(URL.createObjectURL(file));
-              startAnalysis();
-              }
-            };
-
-            const startAnalysis = async () => {
-                setIsAnalyzing(true);
-              setAnalysisReport(null);
-
-              // Simulate scanning animation time
-              setTimeout(async () => {
-                const prompt = `Du bist Biomechanik-Experte im Fuchs Leistungszentrum.
-              Analysiere eine fiktive Videoaufnahme eines Nachwuchsspielers beim ${trainingFocus}.
-              Gib Feedback zu:
-              1. Standfuß-Positionierung
-              2. Körperhaltung/Schwerpunkt
-              3. Armeinsatz zur Balance
-              4. Eindeutiger Korrektur-Tipp für den Amateur-Trainer.
-              Antworte prägnant im 'Stark Elite' Stil.`;
-
-              const res = await askAI(prompt, "Biomechanik-Expert");
-              setAnalysisReport(res);
-              setIsAnalyzing(false);
-              gerdSpeak(
-              "Biomechanik-Analyse abgeschlossen. Haltungskorrekturen liegen vor.",
-              "Trainer-Gerd",
-              );
-              }, 4000);
-            };
-
-            const saveVideoToTresor = () => {
-              if (!activeDossierPlayerId || !videoSrc || !analysisReport) {
-                alert(
-                  "Bitte zuerst einen Spieler auswählen und ein Video analysieren.",
-                );
-              return;
-              }
-              const newVideo = {
-                date: new Date().toLocaleDateString("de-DE"),
-              title: `${trainingFocus.toUpperCase()} Analyse`,
-              feedback: analysisReport,
-              videoSrc: videoSrc,
-              };
-              const p = youthPlayers.find((p) => p.id === activeDossierPlayerId);
-              const currentVideos = p && p.videoTresor ? p.videoTresor : [];
-              updateYouthPlayer(activeDossierPlayerId, "videoTresor", [
-              ...currentVideos,
-              newVideo,
-              ]);
-              gerdSpeak(
-              "Video erfolgreich in den Tresor des Spielers verschoben.",
-              "Trainer-Gerd",
-              );
-              setVideoSrc(null);
-              setAnalysisReport(null);
-            };
-
-            const generatePsychReport = async (playerId) => {
-                setIsGeneratingPsychReport(true);
-              try {
-                const prompt = `Du bist 'NLZ-Sportpsychologe' für das Fuchs Leistungszentrum.
-              Erstelle einen kurzen diagnostischen Bericht (max 3 Sätze) basierend auf folgenden Trainer-Bewertungen (1-10):
-              Fokus: ${psychoScores.focus}, Einsatz: ${psychoScores.effort}, Teamplay: ${psychoScores.teamplay}, Frustrationstoleranz: ${psychoScores.frustration}.
-              Stil: Professionell, entwicklungsorientiert.`;
-
-              const report = await askAI(prompt, "NLZ-Sportpsychologe");
-
-              const newEntry = {
-                date: new Date().toLocaleDateString("de-DE"),
-              scores: {...psychoScores},
-              aiReport: report,
-                };
-
-                const player = youthPlayers.find((p) => p.id === playerId);
-              updateYouthPlayer(playerId, "psychHistory", [
-              ...(player.psychHistory || []),
-              newEntry,
-              ]);
-              gerdSpeak(
-              "Psychologisches Profil aktualisiert.",
-              "NLZ-Sportpsychologe",
-              );
-              } catch (e) {
-                console.error("Fehler bei Psycho-Report:", e);
-              } finally {
-                setIsGeneratingPsychReport(false);
-              }
-            };
-
-            const generateSeasonBook = async () => {
-                setIsGeneratingBook(true);
-              setSeasonBookData(null);
-              try {
-                const squadData = youthPlayers.map((p) => ({
-                name: p.name,
-              pos: p.position,
-              ovr: Math.round(
-              (p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6,
-              ),
-              psych:
-                    p.psychHistory && p.psychHistory.length > 0
-              ? p.psychHistory[p.psychHistory.length - 1].scores
-              : {focus: 5, effort: 5, teamplay: 5, frustration: 5 },
-                }));
-
-              const prompt = `Erstelle Inhalte für das 'Saison-Fachbuch' der Akademie.
-              Hier sind die Daten der Top-Talente: ${JSON.stringify(squadData)}.
-              Schreibe für jeden Spieler eine prägnante 'Scouting-Zusammenfassung' (ca. 40 Wörter), die Leistung und Psychologie verbindet.
-              Antworte als JSON-Array: [{"name": "...", "report": "..." }, ...]`;
-
-              const res = await askAI(prompt, "NLZ-Direktor");
-              const jsonMatch = res.match(/\[[\s\S]*\]/);
-              if (jsonMatch) {
-                setSeasonBookData(JSON.parse(jsonMatch[0]));
-              gerdSpeak(
-              "Das Saison-Fachbuch wurde erfolgreich generiert.",
-              "NLZ-Direktor",
-              );
-                } else {
-                setSeasonBookData([
-                  {
-                    name: "System",
-                    report: "Fehler beim Parsen der Buchdaten.",
-                  },
-                ]);
-                }
-              } catch (e) {
-                setSeasonBookData([
-                  { name: "System", report: "Netzwerkfehler beim Abruf." },
-                ]);
-              } finally {
-                setIsGeneratingBook(false);
-              }
-            };
-
-            const renderPitch = () => {
-              if (ageGroup === "funino") {
-                return (
-              <svg
-                viewBox="0 0 420 300"
-                className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
-              >
-                {/* Funino Pitch */}
-                <rect
-                  x="10"
-                  y="10"
-                  width="400"
-                  height="280"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.5"
-                />
-                <line
-                  x1="210"
-                  y1="10"
-                  x2="210"
-                  y2="290"
-                  stroke="white"
-                  strokeWidth="1"
-                  strokeDasharray="5,5"
-                  opacity="0.3"
-                />
-
-                {/* 6m Shooting Zones */}
-                <line
-                  x1="70"
-                  y1="10"
-                  x2="70"
-                  y2="290"
-                  stroke="#00f3ff"
-                  strokeWidth="2"
-                  strokeDasharray="4,4"
-                  opacity="0.6"
-                />
-                <line
-                  x1="350"
-                  y1="10"
-                  x2="350"
-                  y2="290"
-                  stroke="#00f3ff"
-                  strokeWidth="2"
-                  strokeDasharray="4,4"
-                  opacity="0.6"
-                />
-                <text
-                  x="40"
-                  y="150"
-                  fill="#00f3ff"
-                  fontSize="10"
-                  transform="rotate(-90, 40, 150)"
-                  opacity="0.5"
-                >
-                  SCHUSSZONE
-                </text>
-                <text
-                  x="380"
-                  y="150"
-                  fill="#00f3ff"
-                  fontSize="10"
-                  transform="rotate(90, 380, 150)"
-                  opacity="0.5"
-                >
-                  SCHUSSZONE
-                </text>
-
-                {/* 4 Mini Goals */}
-                <g opacity="0.8">
-                  <rect
-                    x="5"
-                    y="40"
-                    width="10"
-                    height="40"
-                    fill="#ff4444"
-                    rx="2"
-                  />
-                  <rect
-                    x="5"
-                    y="220"
-                    width="10"
-                    height="40"
-                    fill="#ff4444"
-                    rx="2"
-                  />
-                  <rect
-                    x="405"
-                    y="40"
-                    width="10"
-                    height="40"
-                    fill="#ff4444"
-                    rx="2"
-                  />
-                  <rect
-                    x="405"
-                    y="220"
-                    width="10"
-                    height="40"
-                    fill="#ff4444"
-                    rx="2"
-                  />
-                </g>
-              </svg>
-              );
-              }
-              if (ageGroup === "kleinfeld") {
-                return (
-              <svg
-                viewBox="0 0 420 300"
-                className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
-              >
-                <rect
-                  x="10"
-                  y="10"
-                  width="400"
-                  height="280"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.5"
-                />
-                <line
-                  x1="210"
-                  y1="10"
-                  x2="210"
-                  y2="290"
-                  stroke="white"
-                  strokeWidth="1"
-                  opacity="0.5"
-                />
-                <circle
-                  cx="210"
-                  cy="150"
-                  r="40"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                  opacity="0.5"
-                />
-                {/* Penalty Areas */}
-                <rect
-                  x="10"
-                  y="75"
-                  width="60"
-                  height="150"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                  opacity="0.5"
-                />
-                <rect
-                  x="350"
-                  y="75"
-                  width="60"
-                  height="150"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                  opacity="0.5"
-                />
-              </svg>
-              );
-              }
-              return (
-              <svg
-                viewBox="0 0 420 300"
-                className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
-              >
-                <rect
-                  x="10"
-                  y="10"
-                  width="400"
-                  height="280"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.8"
-                />
-                <line
-                  x1="210"
-                  y1="10"
-                  x2="210"
-                  y2="290"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.8"
-                />
-                <circle
-                  cx="210"
-                  cy="150"
-                  r="50"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.8"
-                />
-                {/* Penalty Areas Full */}
-                <rect
-                  x="10"
-                  y="50"
-                  width="80"
-                  height="200"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.8"
-                />
-                <rect
-                  x="330"
-                  y="50"
-                  width="80"
-                  height="200"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  opacity="0.8"
-                />
-              </svg>
-              );
-            };
-
-              return (
-              <div className="w-full">
-                <div className="space-y-8 animate-fade-in pb-20">
-                  {/* Header Section */}
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#111] p-8 rounded-2xl border-l-8 border-neon shadow-2xl carbon-fiber relative overflow-hidden">
-                    <div className="absolute right-0 top-0 opacity-5 pointer-events-none">
-                      <Icon name="framer" size={240} />
-                    </div>
-                    <div className="relative z-10">
-                      <h2 className="text-5xl font-black italic tracking-tighter text-white flex items-center gap-4 uppercase mb-2">
-                        <Icon name="award" size={42} className="text-neon" />{" "}
-                        Fuchs Leistungszentrum
-                      </h2>
-                      <div className="text-[10px] font-mono text-neon tracking-[0.4em] uppercase font-black">
-                        Elite Youth Academy System | Psycho & Performance Hub
-                      </div>
-                    </div>
-                    <div className="mt-6 md:mt-0 flex gap-4">
-                      <button
-                        onClick={() => setActiveNlzView("board")}
-                        className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${activeNlzView === "board" ? "bg-neon text-navy border-neon shadow-[0_0_25px_rgba(0,243,255,0.4)]" : "bg-transparent text-white/40 border-white/10 hover:border-white/30"}`}
-                      >
-                        <Icon name="layout" size={16} /> Tactical Board
-                      </button>
-                      <button
-                        onClick={() => setActiveNlzView("dossier")}
-                        className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${activeNlzView === "dossier" ? "bg-redbull text-white border-redbull shadow-[0_0_25px_rgba(226,27,77,0.4)]" : "bg-transparent text-white/40 border-white/10 hover:border-white/30"}`}
-                      >
-                        <Icon name="users" size={16} /> Player Dossiers
-                      </button>
-                      <button
-                        onClick={() => setActiveNlzView("seasonbook")}
-                        className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${activeNlzView === "seasonbook" ? "bg-gold text-navy border-gold shadow-[0_0_25px_rgba(212,175,55,0.4)]" : "bg-transparent text-white/40 border-white/10 hover:border-white/30"}`}
-                      >
-                        <Icon name="book-open" size={16} /> Season Book
-                      </button>
-                    </div>
                   </div>
+                    )}
+                  </div>
+                  );
+            };
 
-                  {activeNlzView === "board" && (
-                    <div className="space-y-8 animate-fade-in">
-                      <div className="flex gap-4">
-                        {ageClasses.map((ac) => (
+                  // --- NLZ / YOUTH ACADEMY COMPONENT ---
+                  const FuchsNLZ = ({
+                    youthPlayers,
+                    setYouthPlayers,
+                    nlzTab,
+                    setNlzTab,
+                    scoutModal,
+                    setScoutModal,
+                    dnaModules,
+                    setDnaModules,
+                    askAI,
+                    gerdSpeak,
+                    updateYouthPlayer,
+                    addYouthPlayer,
+                    deleteYouthPlayer,
+                    promoteToProSquad,
+                    openScoutModal,
+            }) => {
+              const [ageGroup, setAgeGroup] = useState("funino"); // 'funino' | 'kleinfeld' | 'grossfeld'
+                  const [trainingFocus, setTrainingFocus] = useState("dribbling");
+                  const [isGenerating, setIsGenerating] = useState(false);
+                  const [trainingPlan, setTrainingPlan] = useState(null);
+                  const [activeNlzView, setActiveNlzView] = useState("board"); // 'board' | 'dossier' | 'seasonbook'
+                  const [activeDossierPlayerId, setActiveDossierPlayerId] =
+                  useState(null);
+                  const [activeRatingPlayerId, setActiveRatingPlayerId] =
+                  useState(null);
+
+              // Quick Rating Logic
+              const handleQuickRating = (type) => {
+                if (!activeRatingPlayerId) return;
+                  if (navigator.vibrate) navigator.vibrate(50);
+
+                  const player = youthPlayers.find(
+                  (p) => p.id === activeRatingPlayerId,
+                  );
+                  if (!player) return;
+
+                  let update = { };
+                  if (type === "top") {
+                    update = {
+                      focus: Math.min(10, (player.focus || 5) + 1),
+                      pac: Math.min(99, (player.pac || 60) + 1),
+                    };
+                  gerdSpeak(
+                  `${player.name}: Top Aktion registriert! +1 Fokus.`,
+                  "Trainer-Gerd",
+                  );
+                } else if (type === "neutral") {
+                    gerdSpeak(
+                      `${player.name}: Aktion neutral bewertet.`,
+                      "Trainer-Gerd",
+                    );
+                } else if (type === "correction") {
+                    update = {
+                      frustration: Math.min(10, (player.frustration || 5) + 1),
+                    };
+                  gerdSpeak(
+                  `${player.name}: Korrektur-Bedarf notiert.`,
+                  "Trainer-Gerd",
+                  );
+                }
+
+                if (Object.keys(update).length > 0) {
+                    Object.entries(update).forEach(([key, val]) => {
+                      updateYouthPlayer(activeRatingPlayerId, key, val);
+                    });
+                }
+              };
+
+                  // Psycho Tracking State
+                  const [psychoScores, setPsychoScores] = useState({
+                    focus: 5,
+                  effort: 5,
+                  teamplay: 5,
+                  frustration: 5,
+              });
+                  const [isGeneratingPsychReport, setIsGeneratingPsychReport] =
+                  useState(false);
+
+                  // Season Book State
+                  const [seasonBookData, setSeasonBookData] = useState(null);
+                  const [isGeneratingBook, setIsGeneratingBook] = useState(false);
+
+                  // Video Analysis State
+                  const [videoFile, setVideoFile] = useState(null);
+                  const [isAnalyzing, setIsAnalyzing] = useState(false);
+                  const [analysisReport, setAnalysisReport] = useState(null);
+                  const [videoSrc, setVideoSrc] = useState(null);
+
+                  const ageClasses = [
+                  {id: "funino", label: "Funino U6-U9", icon: "smile" },
+                  {id: "kleinfeld", label: "Kleinfeld U10-U13", icon: "layout" },
+                  {id: "grossfeld", label: "Großfeld U14+", icon: "maximize" },
+                  ];
+
+                  const foci = [
+                  {id: "dribbling", label: "Dribbling & 1v1", icon: "zap" },
+                  {id: "passing", label: "Passspiel & Raum", icon: "repeat" },
+                  {id: "shooting", label: "Torschuss & Abschluss", icon: "target" },
+                  {
+                    id: "coordination",
+                  label: "Koordination & Speed",
+                  icon: "activity",
+                },
+                  ];
+
+              const generatePlan = async () => {
+                    setIsGenerating(true);
+                  setTrainingPlan(null);
+                  try {
+                  const prompt = `Du bist der NLZ-Direktor vom 'Fuchs Leistungszentrum'.
+                  Erstelle einen hochprofessionellen, aber für Laien leicht verständlichen Trainingsplan für die Altersklasse [${ageGroup}].
+                  Schwerpunkt: ${trainingFocus}.
+                  TEILE DEN PLAN IN 3 PHASEN:
+                  1. WARM-UP (Mobilisation & Koordination)
+                  2. HAUPTTEIL (Spielformen & Technik)
+                  3. ABSCHLUSS-SPIEL (Wettkampf unter Provokationsregeln)
+                  Antworte in einem sauberen Listenformat, motivierend und sportwissenschaftlich fundiert.`;
+
+                  const res = await askAI(prompt, "NLZ-Direktor");
+                  setTrainingPlan(res);
+                  gerdSpeak(
+                  "Trainingsplan für das Fuchs Leistungszentrum wurde erstellt. Bereit zur Umsetzung.",
+                  "NLZ-Direktor",
+                  );
+                } catch (e) {
+                    setTrainingPlan("Fehler beim Abruf des Trainingsplans.");
+                } finally {
+                    setIsGenerating(false);
+                }
+              };
+
+              const handleVideoUpload = (e) => {
+                const file = e.target.files[0];
+                  if (file) {
+                    setVideoFile(file);
+                  setVideoSrc(URL.createObjectURL(file));
+                  startAnalysis();
+                }
+              };
+
+              const startAnalysis = async () => {
+                    setIsAnalyzing(true);
+                  setAnalysisReport(null);
+
+                // Simulate scanning animation time
+                setTimeout(async () => {
+                  const prompt = `Du bist Biomechanik-Experte im Fuchs Leistungszentrum.
+                  Analysiere eine fiktive Videoaufnahme eines Nachwuchsspielers beim ${trainingFocus}.
+                  Gib Feedback zu:
+                  1. Standfuß-Positionierung
+                  2. Körperhaltung/Schwerpunkt
+                  3. Armeinsatz zur Balance
+                  4. Eindeutiger Korrektur-Tipp für den Amateur-Trainer.
+                  Antworte prägnant im 'Stark Elite' Stil.`;
+
+                  const res = await askAI(prompt, "Biomechanik-Expert");
+                  setAnalysisReport(res);
+                  setIsAnalyzing(false);
+                  gerdSpeak(
+                  "Biomechanik-Analyse abgeschlossen. Haltungskorrekturen liegen vor.",
+                  "Trainer-Gerd",
+                  );
+                }, 4000);
+              };
+
+              const saveVideoToTresor = () => {
+                if (!activeDossierPlayerId || !videoSrc || !analysisReport) {
+                    alert(
+                      "Bitte zuerst einen Spieler auswählen und ein Video analysieren.",
+                    );
+                  return;
+                }
+                  const newVideo = {
+                    date: new Date().toLocaleDateString("de-DE"),
+                  title: `${trainingFocus.toUpperCase()} Analyse`,
+                  feedback: analysisReport,
+                  videoSrc: videoSrc,
+                };
+                const p = youthPlayers.find((p) => p.id === activeDossierPlayerId);
+                  const currentVideos = p && p.videoTresor ? p.videoTresor : [];
+                  updateYouthPlayer(activeDossierPlayerId, "videoTresor", [
+                  ...currentVideos,
+                  newVideo,
+                  ]);
+                  gerdSpeak(
+                  "Video erfolgreich in den Tresor des Spielers verschoben.",
+                  "Trainer-Gerd",
+                  );
+                  setVideoSrc(null);
+                  setAnalysisReport(null);
+              };
+
+              const generatePsychReport = async (playerId) => {
+                    setIsGeneratingPsychReport(true);
+                  try {
+                  const prompt = `Du bist 'NLZ-Sportpsychologe' für das Fuchs Leistungszentrum.
+                  Erstelle einen kurzen diagnostischen Bericht (max 3 Sätze) basierend auf folgenden Trainer-Bewertungen (1-10):
+                  Fokus: ${psychoScores.focus}, Einsatz: ${psychoScores.effort}, Teamplay: ${psychoScores.teamplay}, Frustrationstoleranz: ${psychoScores.frustration}.
+                  Stil: Professionell, entwicklungsorientiert.`;
+
+                  const report = await askAI(prompt, "NLZ-Sportpsychologe");
+
+                  const newEntry = {
+                    date: new Date().toLocaleDateString("de-DE"),
+                  scores: {...psychoScores},
+                  aiReport: report,
+                  };
+
+                  const player = youthPlayers.find((p) => p.id === playerId);
+                  updateYouthPlayer(playerId, "psychHistory", [
+                  ...(player.psychHistory || []),
+                  newEntry,
+                  ]);
+                  gerdSpeak(
+                  "Psychologisches Profil aktualisiert.",
+                  "NLZ-Sportpsychologe",
+                  );
+                } catch (e) {
+                    console.error("Fehler bei Psycho-Report:", e);
+                } finally {
+                    setIsGeneratingPsychReport(false);
+                }
+              };
+
+              const generateSeasonBook = async () => {
+                    setIsGeneratingBook(true);
+                  setSeasonBookData(null);
+                  try {
+                  const squadData = youthPlayers.map((p) => ({
+                    name: p.name,
+                  pos: p.position,
+                  ovr: Math.round(
+                  (p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6,
+                  ),
+                  psych:
+                      p.psychHistory && p.psychHistory.length > 0
+                  ? p.psychHistory[p.psychHistory.length - 1].scores
+                  : {focus: 5, effort: 5, teamplay: 5, frustration: 5 },
+                  }));
+
+                  const prompt = `Erstelle Inhalte für das 'Saison-Fachbuch' der Akademie.
+                  Hier sind die Daten der Top-Talente: ${JSON.stringify(squadData)}.
+                  Schreibe für jeden Spieler eine prägnante 'Scouting-Zusammenfassung' (ca. 40 Wörter), die Leistung und Psychologie verbindet.
+                  Antworte als JSON-Array: [{"name": "...", "report": "..." }, ...]`;
+
+                  const res = await askAI(prompt, "NLZ-Direktor");
+                  const jsonMatch = res.match(/\[[\s\S]*\]/);
+                  if (jsonMatch) {
+                    setSeasonBookData(JSON.parse(jsonMatch[0]));
+                  gerdSpeak(
+                  "Das Saison-Fachbuch wurde erfolgreich generiert.",
+                  "NLZ-Direktor",
+                  );
+                  } else {
+                    setSeasonBookData([
+                      {
+                        name: "System",
+                        report: "Fehler beim Parsen der Buchdaten.",
+                      },
+                    ]);
+                  }
+                } catch (e) {
+                    setSeasonBookData([
+                      { name: "System", report: "Netzwerkfehler beim Abruf." },
+                    ]);
+                } finally {
+                    setIsGeneratingBook(false);
+                }
+              };
+
+              const renderPitch = () => {
+                if (ageGroup === "funino") {
+                  return (
+                  <svg
+                    viewBox="0 0 420 300"
+                    className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
+                  >
+                    {/* Funino Pitch */}
+                    <rect
+                      x="10"
+                      y="10"
+                      width="400"
+                      height="280"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.5"
+                    />
+                    <line
+                      x1="210"
+                      y1="10"
+                      x2="210"
+                      y2="290"
+                      stroke="white"
+                      strokeWidth="1"
+                      strokeDasharray="5,5"
+                      opacity="0.3"
+                    />
+
+                    {/* 6m Shooting Zones */}
+                    <line
+                      x1="70"
+                      y1="10"
+                      x2="70"
+                      y2="290"
+                      stroke="#00f3ff"
+                      strokeWidth="2"
+                      strokeDasharray="4,4"
+                      opacity="0.6"
+                    />
+                    <line
+                      x1="350"
+                      y1="10"
+                      x2="350"
+                      y2="290"
+                      stroke="#00f3ff"
+                      strokeWidth="2"
+                      strokeDasharray="4,4"
+                      opacity="0.6"
+                    />
+                    <text
+                      x="40"
+                      y="150"
+                      fill="#00f3ff"
+                      fontSize="10"
+                      transform="rotate(-90, 40, 150)"
+                      opacity="0.5"
+                    >
+                      SCHUSSZONE
+                    </text>
+                    <text
+                      x="380"
+                      y="150"
+                      fill="#00f3ff"
+                      fontSize="10"
+                      transform="rotate(90, 380, 150)"
+                      opacity="0.5"
+                    >
+                      SCHUSSZONE
+                    </text>
+
+                    {/* 4 Mini Goals */}
+                    <g opacity="0.8">
+                      <rect
+                        x="5"
+                        y="40"
+                        width="10"
+                        height="40"
+                        fill="#ff4444"
+                        rx="2"
+                      />
+                      <rect
+                        x="5"
+                        y="220"
+                        width="10"
+                        height="40"
+                        fill="#ff4444"
+                        rx="2"
+                      />
+                      <rect
+                        x="405"
+                        y="40"
+                        width="10"
+                        height="40"
+                        fill="#ff4444"
+                        rx="2"
+                      />
+                      <rect
+                        x="405"
+                        y="220"
+                        width="10"
+                        height="40"
+                        fill="#ff4444"
+                        rx="2"
+                      />
+                    </g>
+                  </svg>
+                  );
+                }
+                  if (ageGroup === "kleinfeld") {
+                  return (
+                  <svg
+                    viewBox="0 0 420 300"
+                    className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
+                  >
+                    <rect
+                      x="10"
+                      y="10"
+                      width="400"
+                      height="280"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.5"
+                    />
+                    <line
+                      x1="210"
+                      y1="10"
+                      x2="210"
+                      y2="290"
+                      stroke="white"
+                      strokeWidth="1"
+                      opacity="0.5"
+                    />
+                    <circle
+                      cx="210"
+                      cy="150"
+                      r="40"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      opacity="0.5"
+                    />
+                    {/* Penalty Areas */}
+                    <rect
+                      x="10"
+                      y="75"
+                      width="60"
+                      height="150"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="350"
+                      y="75"
+                      width="60"
+                      height="150"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1"
+                      opacity="0.5"
+                    />
+                  </svg>
+                  );
+                }
+                  return (
+                  <svg
+                    viewBox="0 0 420 300"
+                    className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
+                  >
+                    <rect
+                      x="10"
+                      y="10"
+                      width="400"
+                      height="280"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    />
+                    <line
+                      x1="210"
+                      y1="10"
+                      x2="210"
+                      y2="290"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    />
+                    <circle
+                      cx="210"
+                      cy="150"
+                      r="50"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    />
+                    {/* Penalty Areas Full */}
+                    <rect
+                      x="10"
+                      y="50"
+                      width="80"
+                      height="200"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    />
+                    <rect
+                      x="330"
+                      y="50"
+                      width="80"
+                      height="200"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    />
+                  </svg>
+                  );
+              };
+
+                  return (
+                  <div className="w-full">
+                    <div className="space-y-8 animate-fade-in pb-20">
+                      {/* Header Section */}
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-[#111] p-8 rounded-2xl border-l-8 border-neon shadow-2xl carbon-fiber relative overflow-hidden">
+                        <div className="absolute right-0 top-0 opacity-5 pointer-events-none">
+                          <Icon name="framer" size={240} />
+                        </div>
+                        <div className="relative z-10">
+                          <h2 className="text-5xl font-black italic tracking-tighter text-white flex items-center gap-4 uppercase mb-2">
+                            <Icon name="award" size={42} className="text-neon" />{" "}
+                            Fuchs Leistungszentrum
+                          </h2>
+                          <div className="text-[10px] font-mono text-neon tracking-[0.4em] uppercase font-black">
+                            Elite Youth Academy System | Psycho & Performance Hub
+                          </div>
+                        </div>
+                        <div className="mt-6 md:mt-0 flex gap-4">
                           <button
-                            key={ac.id}
-                            onClick={() => setAgeGroup(ac.id)}
-                            className={`px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all border flex items-center gap-2 ${ageGroup === ac.id ? "bg-neon text-navy border-neon shadow-[0_0_15px_rgba(0,243,255,0.3)]" : "bg-black/40 text-white/40 border-white/10 hover:border-white/30"}`}
+                            onClick={() => setActiveNlzView("board")}
+                            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${activeNlzView === "board" ? "bg-neon text-navy border-neon shadow-[0_0_25px_rgba(0,243,255,0.4)]" : "bg-transparent text-white/40 border-white/10 hover:border-white/30"}`}
                           >
-                            <Icon name={ac.icon} size={14} /> {ac.label}
+                            <Icon name="layout" size={16} /> Tactical Board
                           </button>
-                        ))}
+                          <button
+                            onClick={() => setActiveNlzView("dossier")}
+                            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${activeNlzView === "dossier" ? "bg-redbull text-white border-redbull shadow-[0_0_25px_rgba(226,27,77,0.4)]" : "bg-transparent text-white/40 border-white/10 hover:border-white/30"}`}
+                          >
+                            <Icon name="users" size={16} /> Player Dossiers
+                          </button>
+                          <button
+                            onClick={() => setActiveNlzView("seasonbook")}
+                            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border-2 flex items-center gap-3 ${activeNlzView === "seasonbook" ? "bg-gold text-navy border-gold shadow-[0_0_25px_rgba(212,175,55,0.4)]" : "bg-transparent text-white/40 border-white/10 hover:border-white/30"}`}
+                          >
+                            <Icon name="book-open" size={16} /> Season Book
+                          </button>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                        {/* LEFT: Tactic Board & Planning */}
-                        <div className="xl:col-span-2 space-y-8">
-                          <div className="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
-                            <div className="flex items-center justify-between mb-8">
-                              <h3 className="text-white font-black uppercase text-sm tracking-widest flex items-center gap-3">
-                                <Icon
-                                  name="map"
-                                  className="text-neon"
-                                  size={22}
-                                />{" "}
-                                Chamäleon-Spielfeld
-                              </h3>
-                              <div className="text-[8px] font-black text-neon/40 uppercase tracking-widest bg-neon/5 px-3 py-1 rounded-full border border-neon/10">
-                                Dynamic Geometry Core
-                              </div>
-                            </div>
 
-                            <div
-                              className="relative group overflow-hidden"
-                              style={{ touchAction: "none" }}
-                            >
-                              {renderPitch()}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
-
-                              {/* Quick Video Icon (Task 4) */}
-                              <label
-                                htmlFor="biomech-capture"
-                                className="absolute top-4 right-4 bg-redbull p-3 rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform z-30 border-2 border-white/20"
+                      {activeNlzView === "board" && (
+                        <div className="space-y-8 animate-fade-in">
+                          <div className="flex gap-4">
+                            {ageClasses.map((ac) => (
+                              <button
+                                key={ac.id}
+                                onClick={() => setAgeGroup(ac.id)}
+                                className={`px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all border flex items-center gap-2 ${ageGroup === ac.id ? "bg-neon text-navy border-neon shadow-[0_0_15px_rgba(0,243,255,0.3)]" : "bg-black/40 text-white/40 border-white/10 hover:border-white/30"}`}
                               >
-                                <Icon
-                                  name="camera"
-                                  size={24}
-                                  className="text-white"
-                                />
-                              </label>
-                            </div>
+                                <Icon name={ac.icon} size={14} /> {ac.label}
+                              </button>
+                            ))}
+                          </div>
+                          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                            {/* LEFT: Tactic Board & Planning */}
+                            <div className="xl:col-span-2 space-y-8">
+                              <div className="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                                <div className="flex items-center justify-between mb-8">
+                                  <h3 className="text-white font-black uppercase text-sm tracking-widest flex items-center gap-3">
+                                    <Icon
+                                      name="map"
+                                      className="text-neon"
+                                      size={22}
+                                    />{" "}
+                                    Chamäleon-Spielfeld
+                                  </h3>
+                                  <div className="text-[8px] font-black text-neon/40 uppercase tracking-widest bg-neon/5 px-3 py-1 rounded-full border border-neon/10">
+                                    Dynamic Geometry Core
+                                  </div>
+                                </div>
 
-                            {/* Mobile Player Horizontal List (Task 3) */}
-                            <div className="md:hidden mt-4 pb-4 overflow-x-auto flex gap-3 custom-scrollbar">
-                              {youthPlayers.slice(0, 15).map((p) => (
-                                <button
-                                  key={p.id}
-                                  onClick={() => setActiveRatingPlayerId(p.id)}
-                                  className={`shrink-0 p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${activeRatingPlayerId === p.id ? "bg-neon border-neon text-navy" : "bg-white/5 border-white/10 text-white/40"}`}
+                                <div
+                                  className="relative group overflow-hidden"
+                                  style={{ touchAction: "none" }}
                                 >
-                                  <div className="text-[10px] font-black">
-                                    {p.position}
-                                  </div>
-                                  <div className="text-[9px] truncate w-16 text-center">
-                                    {p.name}
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
+                                  {renderPitch()}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
 
-                            {/* Quick Rating Bar (Task 2) */}
-                            {activeRatingPlayerId && (
-                              <div className="mt-6 p-4 bg-navy/40 rounded-2xl border border-white/5 animate-slide-up mobile-only">
-                                <div className="flex justify-between items-center mb-4">
-                                  <div className="text-[10px] font-black uppercase text-neon tracking-widest">
-                                    Quick-Rating:{" "}
-                                    {(() => {
-                                      const p = youthPlayers.find(
-                                        (p) => p.id === activeRatingPlayerId,
-                                      );
-                                      return p ? p.name : "";
-                                    })()}
-                                  </div>
-                                  <button
-                                    onClick={() => setActiveRatingPlayerId(null)}
-                                    className="text-white/40 hover:text-white"
+                                  {/* Quick Video Icon (Task 4) */}
+                                  <label
+                                    htmlFor="biomech-capture"
+                                    className="absolute top-4 right-4 bg-redbull p-3 rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform z-30 border-2 border-white/20"
                                   >
-                                    <Icon name="x" size={14} />
-                                  </button>
+                                    <Icon
+                                      name="camera"
+                                      size={24}
+                                      className="text-white"
+                                    />
+                                  </label>
                                 </div>
-                                <div className="flex gap-2 h-14">
-                                  <button
-                                    onClick={() => handleQuickRating("top")}
-                                    className="flex-1 bg-green-500 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20"
-                                  >
-                                    <Icon
-                                      name="star"
-                                      size={24}
-                                      className="text-white"
-                                    />
-                                  </button>
-                                  <button
-                                    onClick={() => handleQuickRating("neutral")}
-                                    className="flex-1 bg-yellow-500 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)] border border-white/20"
-                                  >
-                                    <Icon
-                                      name="minus"
-                                      size={24}
-                                      className="text-white"
-                                    />
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleQuickRating("correction")
-                                    }
-                                    className="flex-1 bg-redbull rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(226,27,77,0.4)] border border-white/20"
-                                  >
-                                    <Icon
-                                      name="alert-triangle"
-                                      size={24}
-                                      className="text-white"
-                                    />
-                                  </button>
-                                </div>
-                              </div>
-                            )}
 
-                            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-black/40 p-8 rounded-2xl border border-white/5 shadow-inner">
-                              <div>
-                                <label className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-4 block">
-                                  Ziele der Einheit festlegen
-                                </label>
-                                <div className="grid grid-cols-2 gap-3">
-                                  {foci.map((f) => (
+                                {/* Mobile Player Horizontal List (Task 3) */}
+                                <div className="md:hidden mt-4 pb-4 overflow-x-auto flex gap-3 custom-scrollbar">
+                                  {youthPlayers.slice(0, 15).map((p) => (
                                     <button
-                                      key={f.id}
-                                      onClick={() => setTrainingFocus(f.id)}
-                                      className={`p-4 rounded-xl border text-[10px] font-black uppercase tracking-widest flex flex-col items-center gap-3 transition-all ${trainingFocus === f.id ? "bg-white text-navy border-white shadow-xl" : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10 hover:border-white/20"}`}
+                                      key={p.id}
+                                      onClick={() => setActiveRatingPlayerId(p.id)}
+                                      className={`shrink-0 p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${activeRatingPlayerId === p.id ? "bg-neon border-neon text-navy" : "bg-white/5 border-white/10 text-white/40"}`}
                                     >
-                                      <Icon name={f.icon} size={20} /> {f.label}
+                                      <div className="text-[10px] font-black">
+                                        {p.position}
+                                      </div>
+                                      <div className="text-[9px] truncate w-16 text-center">
+                                        {p.name}
+                                      </div>
                                     </button>
                                   ))}
                                 </div>
-                              </div>
-                              <div className="flex flex-col items-center justify-center text-center p-6 border-l border-white/10">
-                                <Icon
-                                  name="cpu"
-                                  size={48}
-                                  className={`text-neon mb-4 ${isGenerating ? "animate-spin" : ""}`}
-                                />
-                                <h4 className="text-white font-black uppercase text-xs tracking-widest mb-3">
-                                  KI-Trainingsplaner
-                                </h4>
-                                <p className="text-white/40 text-[10px] leading-relaxed uppercase mb-6">
-                                  Persona: NLZ-Direktor Fuchs. Erstellt
-                                  altersgerechte Elite-Einheiten.
-                                </p>
-                                <button
-                                  onClick={generatePlan}
-                                  disabled={isGenerating}
-                                  className="w-full bg-neon text-navy py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(0,243,255,0.4)] disabled:opacity-50"
-                                >
-                                  {isGenerating
-                                    ? "Generiere Blueprint..."
-                                    : "Trainingseinheit generieren"}
-                                </button>
-                              </div>
-                            </div>
 
-                            {trainingPlan && (
-                              <div className="mt-8 p-10 bg-[#0a0a0a] border border-neon/30 rounded-3xl animate-slide-up relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-4 opacity-10">
-                                  <Icon name="file-text" size={100} />
-                                </div>
-                                <div className="flex items-center gap-4 mb-8">
-                                  <div className="w-12 h-12 rounded-full bg-neon flex items-center justify-center text-navy shadow-[0_0_15px_rgba(0,243,255,0.5)]">
-                                    <Icon name="check" size={24} />
-                                  </div>
-                                  <div>
-                                    <h4 className="text-neon font-black uppercase text-lg tracking-tighter">
-                                      Plan Verifiziert
-                                    </h4>
-                                    <div className="text-[10px] text-white/40 uppercase font-mono tracking-widest">
-                                      NLZ-Direktor Freigabe erteilt
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="prose prose-invert max-w-none font-mono text-sm leading-relaxed text-white/80 whitespace-pre-wrap">
-                                  {trainingPlan}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* RIGHT: Biomechanics Scanner */}
-                          <div className="space-y-8">
-                            <div className="glass-panel p-8 rounded-3xl border border-redbull/20 shadow-2xl carbon-fiber">
-                              <h3 className="text-redbull font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                                <Icon name="scan" size={22} /> Biomechanik-Scanner
-                              </h3>
-
-                              <div className="relative w-full aspect-video bg-black/80 rounded-2xl border border-white/5 overflow-hidden group">
-                                {videoSrc ? (
-                                  <video
-                                    src={videoSrc}
-                                    className="w-full h-full object-cover"
-                                    autoPlay
-                                    loop
-                                    muted
-                                  />
-                                ) : (
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                                    <Icon
-                                      name="video"
-                                      size={48}
-                                      className="text-white/10"
-                                    />
-                                    <p className="text-white/20 text-[10px] uppercase font-black tracking-widest">
-                                      Kein Video geladen
-                                    </p>
-                                  </div>
-                                )}
-
-                                {/* Scanner Grid Overlay */}
-                                {isAnalyzing && (
-                                  <div className="absolute inset-0 pointer-events-none">
-                                    <div className="absolute inset-0 bg-redbull/5 animate-pulse"></div>
-                                    <div className="absolute top-0 left-0 w-full h-[2px] bg-redbull shadow-[0_0_15px_#E21B4D] animate-scan"></div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <div className="grid grid-cols-4 grid-rows-4 gap-4 w-4/5 h-4/5">
-                                        {[...Array(16)].map((_, i) => (
-                                          <div
-                                            key={i}
-                                            className="border border-redbull/20 rounded-sm flex items-center justify-center"
-                                          >
-                                            <div
-                                              className="w-1 h-1 bg-redbull/40 rounded-full animate-ping"
-                                              style={{
-                                                animationDelay: `${i * 0.1}s`,
-                                              }}
-                                            ></div>
-                                          </div>
-                                        ))}
+                                {/* Quick Rating Bar (Task 2) */}
+                                {activeRatingPlayerId && (
+                                  <div className="mt-6 p-4 bg-navy/40 rounded-2xl border border-white/5 animate-slide-up mobile-only">
+                                    <div className="flex justify-between items-center mb-4">
+                                      <div className="text-[10px] font-black uppercase text-neon tracking-widest">
+                                        Quick-Rating:{" "}
+                                        {(() => {
+                                          const p = youthPlayers.find(
+                                            (p) => p.id === activeRatingPlayerId,
+                                          );
+                                          return p ? p.name : "";
+                                        })()}
                                       </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="mt-6">
-                                <input
-                                  type="file"
-                                  id="biomech-upload"
-                                  accept="video/*"
-                                  className="hidden"
-                                  onChange={handleVideoUpload}
-                                />
-                                <label
-                                  htmlFor="biomech-upload"
-                                  className="w-full bg-white/5 border border-white/10 hover:border-redbull hover:bg-white/10 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all cursor-pointer"
-                                >
-                                  <Icon name="upload-cloud" size={18} /> Video zur
-                                  Analyse hochladen
-                                </label>
-                                <input
-                                  type="file"
-                                  id="biomech-capture"
-                                  accept="video/*"
-                                  capture="environment"
-                                  className="hidden"
-                                  onChange={handleVideoUpload}
-                                />
-                                <label
-                                  htmlFor="biomech-capture"
-                                  className="md:hidden mt-3 w-full bg-redbull/20 border border-redbull hover:bg-redbull text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all cursor-pointer shadow-[0_0_15px_rgba(226,27,77,0.4)]"
-                                >
-                                  <Icon name="camera" size={18} /> Quick Scan
-                                  (Kamera)
-                                </label>
-                              </div>
-
-                              {isAnalyzing && (
-                                <div className="mt-6 flex flex-col gap-4">
-                                  <div className="flex justify-between items-center text-[10px] font-black uppercase text-redbull tracking-widest">
-                                    <span>Extrahiere Skelett-Daten...</span>
-                                    <span className="animate-pulse">Active</span>
-                                  </div>
-                                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-redbull animate-progress"></div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {analysisReport && (
-                                <div className="mt-8 p-6 bg-redbull/5 border border-redbull/30 rounded-2xl animate-scale-in">
-                                  <h4 className="text-redbull font-black uppercase text-[10px] tracking-widest mb-4 flex items-center gap-2">
-                                    <Icon name="activity" size={14} />{" "}
-                                    KI-Analysebericht
-                                  </h4>
-                                  <div className="font-mono text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">
-                                    {analysisReport}
-                                  </div>
-                                  <div className="mt-6 border-t border-redbull/20 pt-4 flex justify-between items-center">
-                                    <button className="text-redbull text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors">
-                                      <Icon name="youtube" size={14} /> Passendes
-                                      Technik-Tutorial ansehen
-                                    </button>
-                                    {activeDossierPlayerId && videoSrc && (
                                       <button
-                                        onClick={saveVideoToTresor}
-                                        className="bg-redbull text-white px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-redbull transition-all"
+                                        onClick={() => setActiveRatingPlayerId(null)}
+                                        className="text-white/40 hover:text-white"
                                       >
-                                        Tresor Speichern
+                                        <Icon name="x" size={14} />
                                       </button>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* === DOSSIER VIEW === */}
-                  {activeNlzView === "dossier" && (
-                    <div className="space-y-8 animate-fade-in">
-                      <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
-                        {youthPlayers.map((p) => (
-                          <button
-                            key={p.id}
-                            onClick={() => setActiveDossierPlayerId(p.id)}
-                            className={`shrink-0 flex items-center gap-3 p-4 rounded-xl border ${activeDossierPlayerId === p.id ? "bg-redbull border-redbull shadow-[0_0_15px_#E21B4D]" : "bg-black/40 border-white/10 text-white/40"}`}
-                          >
-                            <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center font-black text-neon">
-                              {p.position}
-                            </div>
-                            <div className="text-left">
-                              <div className="font-black text-white">
-                                {p.name}
-                              </div>
-                              <div className="text-[10px] uppercase">
-                                OVR:{" "}
-                                {Math.round(
-                                  (p.pac +
-                                    p.sho +
-                                    p.pas +
-                                    p.dri +
-                                    p.def +
-                                    p.phy) /
-                                  6,
-                                )}
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-
-                      {activeDossierPlayerId &&
-                        (() => {
-                          const p = youthPlayers.find(
-                            (x) => x.id === activeDossierPlayerId,
-                          );
-                          if (!p) return null;
-                          return (
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                              <div className="space-y-8">
-                                <div className="bg-[#111] p-6 rounded-2xl border border-white/10 carbon-fiber shadow-2xl">
-                                  <h4 className="text-white font-black uppercase text-sm mb-6 flex items-center gap-3">
-                                    <Icon name="activity" className="text-neon" />{" "}
-                                    Formkurve / Psycho-Tracker
-                                  </h4>
-
-                                  <div className="bg-black/40 p-4 rounded-xl mb-8 border border-white/5 w-full overflow-hidden">
-                                    <svg
-                                      width="100%"
-                                      height="80"
-                                      viewBox="0 0 400 80"
-                                      preserveAspectRatio="none"
-                                    >
-                                      <path
-                                        d={`M 0 40 ${p.psychHistory &&
-                                            p.psychHistory.length > 0
-                                            ? p.psychHistory
-                                              .map((entry, i) => {
-                                                const focus =
-                                                  entry.scores &&
-                                                    entry.scores.focus
-                                                    ? entry.scores.focus
-                                                    : 5;
-                                                const effort =
-                                                  entry.scores &&
-                                                    entry.scores.effort
-                                                    ? entry.scores.effort
-                                                    : 5;
-                                                const teamplay =
-                                                  entry.scores &&
-                                                    entry.scores.teamplay
-                                                    ? entry.scores.teamplay
-                                                    : 5;
-                                                const frustration =
-                                                  entry.scores &&
-                                                    entry.scores.frustration
-                                                    ? entry.scores.frustration
-                                                    : 5;
-                                                return (
-                                                  "L " +
-                                                  (i + 1) *
-                                                  (400 /
-                                                    Math.max(
-                                                      1,
-                                                      p.psychHistory.length,
-                                                    )) +
-                                                  " " +
-                                                  (80 -
-                                                    ((focus +
-                                                      effort +
-                                                      teamplay +
-                                                      (10 - frustration)) /
-                                                      4) *
-                                                    8)
-                                                );
-                                              })
-                                              .join(" ")
-                                            : "L 400 40"
-                                          }`}
-                                        fill="none"
-                                        stroke="#00f3ff"
-                                        strokeWidth="3"
-                                      />
-                                    </svg>
-                                  </div>
-
-                                  <div className="space-y-4">
-                                    {Object.keys(psychoScores).map((key) => (
-                                      <div key={key}>
-                                        <div className="flex justify-between text-[10px] text-white/60 uppercase font-black mb-2">
-                                          <span>{key}</span>
-                                          <span>{psychoScores[key]}</span>
-                                        </div>
-                                        <input
-                                          type="range"
-                                          min="1"
-                                          max="10"
-                                          step="0.5"
-                                          value={psychoScores[key]}
-                                          onChange={(e) =>
-                                            setPsychoScores({
-                                              ...psychoScores,
-                                              [key]: parseFloat(e.target.value),
-                                            })
-                                          }
-                                          className="w-full accent-neon dossier-slider-mobile"
-                                        />
-                                      </div>
-                                    ))}
-                                    <button
-                                      onClick={() => generatePsychReport(p.id)}
-                                      disabled={isGeneratingPsychReport}
-                                      className="w-full mt-4 bg-neon text-navy py-4 font-black uppercase text-[10px] rounded flex justify-center items-center gap-2"
-                                    >
-                                      {isGeneratingPsychReport ? (
+                                    </div>
+                                    <div className="flex gap-2 h-14">
+                                      <button
+                                        onClick={() => handleQuickRating("top")}
+                                        className="flex-1 bg-green-500 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-white/20"
+                                      >
                                         <Icon
-                                          name="loader"
-                                          className="animate-spin"
-                                          size={16}
+                                          name="star"
+                                          size={24}
+                                          className="text-white"
                                         />
-                                      ) : (
-                                        <Icon name="cpu" size={16} />
-                                      )}
-                                      {isGeneratingPsychReport
-                                        ? "Diagnose läuft..."
-                                        : "Psycho-Review Generieren"}
+                                      </button>
+                                      <button
+                                        onClick={() => handleQuickRating("neutral")}
+                                        className="flex-1 bg-yellow-500 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)] border border-white/20"
+                                      >
+                                        <Icon
+                                          name="minus"
+                                          size={24}
+                                          className="text-white"
+                                        />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleQuickRating("correction")
+                                        }
+                                        className="flex-1 bg-redbull rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(226,27,77,0.4)] border border-white/20"
+                                      >
+                                        <Icon
+                                          name="alert-triangle"
+                                          size={24}
+                                          className="text-white"
+                                        />
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-black/40 p-8 rounded-2xl border border-white/5 shadow-inner">
+                                  <div>
+                                    <label className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-4 block">
+                                      Ziele der Einheit festlegen
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {foci.map((f) => (
+                                        <button
+                                          key={f.id}
+                                          onClick={() => setTrainingFocus(f.id)}
+                                          className={`p-4 rounded-xl border text-[10px] font-black uppercase tracking-widest flex flex-col items-center gap-3 transition-all ${trainingFocus === f.id ? "bg-white text-navy border-white shadow-xl" : "bg-white/5 text-white/40 border-white/5 hover:bg-white/10 hover:border-white/20"}`}
+                                        >
+                                          <Icon name={f.icon} size={20} /> {f.label}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col items-center justify-center text-center p-6 border-l border-white/10">
+                                    <Icon
+                                      name="cpu"
+                                      size={48}
+                                      className={`text-neon mb-4 ${isGenerating ? "animate-spin" : ""}`}
+                                    />
+                                    <h4 className="text-white font-black uppercase text-xs tracking-widest mb-3">
+                                      KI-Trainingsplaner
+                                    </h4>
+                                    <p className="text-white/40 text-[10px] leading-relaxed uppercase mb-6">
+                                      Persona: NLZ-Direktor Fuchs. Erstellt
+                                      altersgerechte Elite-Einheiten.
+                                    </p>
+                                    <button
+                                      onClick={generatePlan}
+                                      disabled={isGenerating}
+                                      className="w-full bg-neon text-navy py-4 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(0,243,255,0.4)] disabled:opacity-50"
+                                    >
+                                      {isGenerating
+                                        ? "Generiere Blueprint..."
+                                        : "Trainingseinheit generieren"}
                                     </button>
                                   </div>
-                                  {p.psychHistory &&
-                                    p.psychHistory.length > 0 && (
-                                      <div className="mt-6 p-4 bg-neon/10 border border-neon/20 rounded font-mono text-[10px] text-neon/80 whitespace-pre-wrap leading-relaxed">
-                                        <div className="font-bold mb-1 text-white uppercase tracking-widest border-b border-neon/20 pb-1">
-                                          {
-                                            p.psychHistory[
-                                              p.psychHistory.length - 1
-                                            ].date
-                                          }
-                                        </div>
-                                        {
-                                          p.psychHistory[
-                                            p.psychHistory.length - 1
-                                          ].aiReport
-                                        }
-                                      </div>
-                                    )}
                                 </div>
+
+                                {trainingPlan && (
+                                  <div className="mt-8 p-10 bg-[#0a0a0a] border border-neon/30 rounded-3xl animate-slide-up relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                                      <Icon name="file-text" size={100} />
+                                    </div>
+                                    <div className="flex items-center gap-4 mb-8">
+                                      <div className="w-12 h-12 rounded-full bg-neon flex items-center justify-center text-navy shadow-[0_0_15px_rgba(0,243,255,0.5)]">
+                                        <Icon name="check" size={24} />
+                                      </div>
+                                      <div>
+                                        <h4 className="text-neon font-black uppercase text-lg tracking-tighter">
+                                          Plan Verifiziert
+                                        </h4>
+                                        <div className="text-[10px] text-white/40 uppercase font-mono tracking-widest">
+                                          NLZ-Direktor Freigabe erteilt
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="prose prose-invert max-w-none font-mono text-sm leading-relaxed text-white/80 whitespace-pre-wrap">
+                                      {trainingPlan}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
 
-                              <div className="bg-[#111] p-6 rounded-2xl border border-redbull/20 shadow-2xl carbon-fiber">
-                                <h4 className="text-redbull font-black uppercase text-sm mb-6 flex items-center gap-3">
-                                  <Icon name="film" /> Video-Tresor
-                                </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  {p.videoTresor && p.videoTresor.length > 0 ? (
-                                    p.videoTresor.map((vid, idx) => (
-                                      <div
-                                        key={idx}
-                                        className="bg-black/60 rounded-xl overflow-hidden border border-white/10 group cursor-pointer hover:border-redbull transition-all"
-                                      >
-                                        <video
-                                          src={vid.videoSrc}
-                                          className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                              {/* RIGHT: Biomechanics Scanner */}
+                              <div className="space-y-8">
+                                <div className="glass-panel p-8 rounded-3xl border border-redbull/20 shadow-2xl carbon-fiber">
+                                  <h3 className="text-redbull font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                                    <Icon name="scan" size={22} /> Biomechanik-Scanner
+                                  </h3>
+
+                                  <div className="relative w-full aspect-video bg-black/80 rounded-2xl border border-white/5 overflow-hidden group">
+                                    {videoSrc ? (
+                                      <video
+                                        src={videoSrc}
+                                        className="w-full h-full object-cover"
+                                        autoPlay
+                                        loop
+                                        muted
+                                      />
+                                    ) : (
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                                        <Icon
+                                          name="video"
+                                          size={48}
+                                          className="text-white/10"
                                         />
-                                        <div className="p-3">
-                                          <div className="text-[10px] text-white font-black uppercase truncate">
-                                            {vid.title}
-                                          </div>
-                                          <div className="text-[8px] text-white/40 mb-2">
-                                            {vid.date}
-                                          </div>
-                                          <div className="text-[9px] font-mono text-redbull/80 line-clamp-2">
-                                            {vid.feedback}
+                                        <p className="text-white/20 text-[10px] uppercase font-black tracking-widest">
+                                          Kein Video geladen
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Scanner Grid Overlay */}
+                                    {isAnalyzing && (
+                                      <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute inset-0 bg-redbull/5 animate-pulse"></div>
+                                        <div className="absolute top-0 left-0 w-full h-[2px] bg-redbull shadow-[0_0_15px_#E21B4D] animate-scan"></div>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                          <div className="grid grid-cols-4 grid-rows-4 gap-4 w-4/5 h-4/5">
+                                            {[...Array(16)].map((_, i) => (
+                                              <div
+                                                key={i}
+                                                className="border border-redbull/20 rounded-sm flex items-center justify-center"
+                                              >
+                                                <div
+                                                  className="w-1 h-1 bg-redbull/40 rounded-full animate-ping"
+                                                  style={{
+                                                    animationDelay: `${i * 0.1}s`,
+                                                  }}
+                                                ></div>
+                                              </div>
+                                            ))}
                                           </div>
                                         </div>
                                       </div>
-                                    ))
-                                  ) : (
-                                    <div className="col-span-full py-12 text-center text-white/20 text-[10px] font-black uppercase tracking-widest border-2 border-dashed border-white/10 rounded-xl">
-                                      Keine Videos im Tresor
+                                    )}
+                                  </div>
+
+                                  <div className="mt-6">
+                                    <input
+                                      type="file"
+                                      id="biomech-upload"
+                                      accept="video/*"
+                                      className="hidden"
+                                      onChange={handleVideoUpload}
+                                    />
+                                    <label
+                                      htmlFor="biomech-upload"
+                                      className="w-full bg-white/5 border border-white/10 hover:border-redbull hover:bg-white/10 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all cursor-pointer"
+                                    >
+                                      <Icon name="upload-cloud" size={18} /> Video zur
+                                      Analyse hochladen
+                                    </label>
+                                    <input
+                                      type="file"
+                                      id="biomech-capture"
+                                      accept="video/*"
+                                      capture="environment"
+                                      className="hidden"
+                                      onChange={handleVideoUpload}
+                                    />
+                                    <label
+                                      htmlFor="biomech-capture"
+                                      className="md:hidden mt-3 w-full bg-redbull/20 border border-redbull hover:bg-redbull text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all cursor-pointer shadow-[0_0_15px_rgba(226,27,77,0.4)]"
+                                    >
+                                      <Icon name="camera" size={18} /> Quick Scan
+                                      (Kamera)
+                                    </label>
+                                  </div>
+
+                                  {isAnalyzing && (
+                                    <div className="mt-6 flex flex-col gap-4">
+                                      <div className="flex justify-between items-center text-[10px] font-black uppercase text-redbull tracking-widest">
+                                        <span>Extrahiere Skelett-Daten...</span>
+                                        <span className="animate-pulse">Active</span>
+                                      </div>
+                                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-redbull animate-progress"></div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {analysisReport && (
+                                    <div className="mt-8 p-6 bg-redbull/5 border border-redbull/30 rounded-2xl animate-scale-in">
+                                      <h4 className="text-redbull font-black uppercase text-[10px] tracking-widest mb-4 flex items-center gap-2">
+                                        <Icon name="activity" size={14} />{" "}
+                                        KI-Analysebericht
+                                      </h4>
+                                      <div className="font-mono text-[11px] leading-relaxed text-white/70 whitespace-pre-wrap">
+                                        {analysisReport}
+                                      </div>
+                                      <div className="mt-6 border-t border-redbull/20 pt-4 flex justify-between items-center">
+                                        <button className="text-redbull text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:text-white transition-colors">
+                                          <Icon name="youtube" size={14} /> Passendes
+                                          Technik-Tutorial ansehen
+                                        </button>
+                                        {activeDossierPlayerId && videoSrc && (
+                                          <button
+                                            onClick={saveVideoToTresor}
+                                            className="bg-redbull text-white px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-redbull transition-all"
+                                          >
+                                            Tresor Speichern
+                                          </button>
+                                        )}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
                               </div>
                             </div>
-                          );
-                        })()}
-                    </div>
-                  )}
-
-                  {/* === SEASON BOOK VIEW === */}
-                  {activeNlzView === "seasonbook" && (
-                    <div className="space-y-8 animate-fade-in">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gold/10 p-8 rounded-xl border border-gold/30">
-                        <div>
-                          <h3 className="text-gold font-black uppercase text-xl tracking-widest flex items-center gap-3 mb-2">
-                            <Icon name="book-open" size={28} /> Saison-Fachbuch
-                            Generator
-                          </h3>
-                          <p className="text-white/60 text-xs font-mono uppercase">
-                            Automatische Erstellung von Jahresberichten via
-                            KI-Synthese
-                          </p>
+                          </div>
                         </div>
-                        <button
-                          onClick={generateSeasonBook}
-                          disabled={isGeneratingBook}
-                          className="mt-6 md:mt-0 bg-gold text-navy px-8 py-4 rounded-xl font-black uppercase text-sm shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:bg-white transition-all transform hover:scale-105"
-                        >
-                          {isGeneratingBook
-                            ? "KI Generiert..."
-                            : "Fachbuch Erstellen"}
-                        </button>
-                      </div>
+                      )}
 
-                      {seasonBookData && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
-                          {seasonBookData.map((report, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-[#f0f0f0] text-navy p-8 rounded-sm shadow-2xl relative"
-                            >
-                              <div className="absolute top-0 right-0 bg-redbull text-white px-3 py-1 text-[8px] font-black uppercase tracking-widest">
-                                CONFIDENTIAL
-                              </div>
-                              <div className="w-16 h-16 bg-navy/10 rounded-full mb-6 flex items-center justify-center">
-                                <img
-                                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${report.name}`}
-                                  className="w-16 h-16 rounded-full opacity-60 grayscale"
-                                  loading="lazy"
-                                  alt="Avatar"
-                                />
-                              </div>
-                              <h4 className="text-2xl font-black tracking-tighter uppercase mb-4">
-                                {report.name}
-                              </h4>
-                              <div className="h-[3px] w-12 bg-redbull mb-6"></div>
-                              <p className="font-serif text-sm leading-relaxed text-black/80">
-                                {report.report}
+                      {/* === DOSSIER VIEW === */}
+                      {activeNlzView === "dossier" && (
+                        <div className="space-y-8 animate-fade-in">
+                          <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                            {youthPlayers.map((p) => (
+                              <button
+                                key={p.id}
+                                onClick={() => setActiveDossierPlayerId(p.id)}
+                                className={`shrink-0 flex items-center gap-3 p-4 rounded-xl border ${activeDossierPlayerId === p.id ? "bg-redbull border-redbull shadow-[0_0_15px_#E21B4D]" : "bg-black/40 border-white/10 text-white/40"}`}
+                              >
+                                <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center font-black text-neon">
+                                  {p.position}
+                                </div>
+                                <div className="text-left">
+                                  <div className="font-black text-white">
+                                    {p.name}
+                                  </div>
+                                  <div className="text-[10px] uppercase">
+                                    OVR:{" "}
+                                    {Math.round(
+                                      (p.pac +
+                                        p.sho +
+                                        p.pas +
+                                        p.dri +
+                                        p.def +
+                                        p.phy) /
+                                      6,
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+
+                          {activeDossierPlayerId &&
+                            (() => {
+                              const p = youthPlayers.find(
+                                (x) => x.id === activeDossierPlayerId,
+                              );
+                              if (!p) return null;
+                              return (
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                                  <div className="space-y-8">
+                                    <div className="bg-[#111] p-6 rounded-2xl border border-white/10 carbon-fiber shadow-2xl">
+                                      <h4 className="text-white font-black uppercase text-sm mb-6 flex items-center gap-3">
+                                        <Icon name="activity" className="text-neon" />{" "}
+                                        Formkurve / Psycho-Tracker
+                                      </h4>
+
+                                      <div className="bg-black/40 p-4 rounded-xl mb-8 border border-white/5 w-full overflow-hidden">
+                                        <svg
+                                          width="100%"
+                                          height="80"
+                                          viewBox="0 0 400 80"
+                                          preserveAspectRatio="none"
+                                        >
+                                          <path
+                                            d={`M 0 40 ${p.psychHistory &&
+                                              p.psychHistory.length > 0
+                                              ? p.psychHistory
+                                                .map((entry, i) => {
+                                                  const focus =
+                                                    entry.scores &&
+                                                      entry.scores.focus
+                                                      ? entry.scores.focus
+                                                      : 5;
+                                                  const effort =
+                                                    entry.scores &&
+                                                      entry.scores.effort
+                                                      ? entry.scores.effort
+                                                      : 5;
+                                                  const teamplay =
+                                                    entry.scores &&
+                                                      entry.scores.teamplay
+                                                      ? entry.scores.teamplay
+                                                      : 5;
+                                                  const frustration =
+                                                    entry.scores &&
+                                                      entry.scores.frustration
+                                                      ? entry.scores.frustration
+                                                      : 5;
+                                                  return (
+                                                    "L " +
+                                                    (i + 1) *
+                                                    (400 /
+                                                      Math.max(
+                                                        1,
+                                                        p.psychHistory.length,
+                                                      )) +
+                                                    " " +
+                                                    (80 -
+                                                      ((focus +
+                                                        effort +
+                                                        teamplay +
+                                                        (10 - frustration)) /
+                                                        4) *
+                                                      8)
+                                                  );
+                                                })
+                                                .join(" ")
+                                              : "L 400 40"
+                                              }`}
+                                            fill="none"
+                                            stroke="#00f3ff"
+                                            strokeWidth="3"
+                                          />
+                                        </svg>
+                                      </div>
+
+                                      <div className="space-y-4">
+                                        {Object.keys(psychoScores).map((key) => (
+                                          <div key={key}>
+                                            <div className="flex justify-between text-[10px] text-white/60 uppercase font-black mb-2">
+                                              <span>{key}</span>
+                                              <span>{psychoScores[key]}</span>
+                                            </div>
+                                            <input
+                                              type="range"
+                                              min="1"
+                                              max="10"
+                                              step="0.5"
+                                              value={psychoScores[key]}
+                                              onChange={(e) =>
+                                                setPsychoScores({
+                                                  ...psychoScores,
+                                                  [key]: parseFloat(e.target.value),
+                                                })
+                                              }
+                                              className="w-full accent-neon dossier-slider-mobile"
+                                            />
+                                          </div>
+                                        ))}
+                                        <button
+                                          onClick={() => generatePsychReport(p.id)}
+                                          disabled={isGeneratingPsychReport}
+                                          className="w-full mt-4 bg-neon text-navy py-4 font-black uppercase text-[10px] rounded flex justify-center items-center gap-2"
+                                        >
+                                          {isGeneratingPsychReport ? (
+                                            <Icon
+                                              name="loader"
+                                              className="animate-spin"
+                                              size={16}
+                                            />
+                                          ) : (
+                                            <Icon name="cpu" size={16} />
+                                          )}
+                                          {isGeneratingPsychReport
+                                            ? "Diagnose läuft..."
+                                            : "Psycho-Review Generieren"}
+                                        </button>
+                                      </div>
+                                      {p.psychHistory &&
+                                        p.psychHistory.length > 0 && (
+                                          <div className="mt-6 p-4 bg-neon/10 border border-neon/20 rounded font-mono text-[10px] text-neon/80 whitespace-pre-wrap leading-relaxed">
+                                            <div className="font-bold mb-1 text-white uppercase tracking-widest border-b border-neon/20 pb-1">
+                                              {
+                                                p.psychHistory[
+                                                  p.psychHistory.length - 1
+                                                ].date
+                                              }
+                                            </div>
+                                            {
+                                              p.psychHistory[
+                                                p.psychHistory.length - 1
+                                              ].aiReport
+                                            }
+                                          </div>
+                                        )}
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-[#111] p-6 rounded-2xl border border-redbull/20 shadow-2xl carbon-fiber">
+                                    <h4 className="text-redbull font-black uppercase text-sm mb-6 flex items-center gap-3">
+                                      <Icon name="film" /> Video-Tresor
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      {p.videoTresor && p.videoTresor.length > 0 ? (
+                                        p.videoTresor.map((vid, idx) => (
+                                          <div
+                                            key={idx}
+                                            className="bg-black/60 rounded-xl overflow-hidden border border-white/10 group cursor-pointer hover:border-redbull transition-all"
+                                          >
+                                            <video
+                                              src={vid.videoSrc}
+                                              className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                            />
+                                            <div className="p-3">
+                                              <div className="text-[10px] text-white font-black uppercase truncate">
+                                                {vid.title}
+                                              </div>
+                                              <div className="text-[8px] text-white/40 mb-2">
+                                                {vid.date}
+                                              </div>
+                                              <div className="text-[9px] font-mono text-redbull/80 line-clamp-2">
+                                                {vid.feedback}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="col-span-full py-12 text-center text-white/20 text-[10px] font-black uppercase tracking-widest border-2 border-dashed border-white/10 rounded-xl">
+                                          Keine Videos im Tresor
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                        </div>
+                      )}
+
+                      {/* === SEASON BOOK VIEW === */}
+                      {activeNlzView === "seasonbook" && (
+                        <div className="space-y-8 animate-fade-in">
+                          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gold/10 p-8 rounded-xl border border-gold/30">
+                            <div>
+                              <h3 className="text-gold font-black uppercase text-xl tracking-widest flex items-center gap-3 mb-2">
+                                <Icon name="book-open" size={28} /> Saison-Fachbuch
+                                Generator
+                              </h3>
+                              <p className="text-white/60 text-xs font-mono uppercase">
+                                Automatische Erstellung von Jahresberichten via
+                                KI-Synthese
                               </p>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Academy Showcase */}
-                  <div className="glass-panel p-8 rounded-3xl border border-gold/20 bg-gold/5">
-                    <h3 className="text-gold font-black uppercase text-sm tracking-widest mb-4 flex items-center gap-3">
-                      <Icon name="star" size={20} /> Stark Elite Tutorials
-                    </h3>
-                    <p className="text-white/40 text-[10px] uppercase font-black mb-6">
-                      Offizielle Referenz-Videos der Akademie
-                    </p>
-                    <div className="space-y-4">
-                      {[
-                        "Dribbling Masterclass",
-                        "Ballkontrolle U12",
-                        "Funino Prinzipien",
-                      ].map((t, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-white/5 hover:border-gold/50 cursor-pointer transition-all"
-                        >
-                          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
-                            <Icon name="play" size={20} className="text-gold" />
-                          </div>
-                          <div className="text-[10px] font-black text-white uppercase tracking-widest">
-                            {t}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              );
-          };
-
-          // 6. Performance Journal
-          const renderJournal = () => {
-            return (
-              <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-20 text-white font-sans">
-                {/* MAGAZINE HEADER */}
-                <div className="flex flex-col md:flex-row justify-between items-end border-b-8 border-redbull pb-6 gap-6">
-                  <div className="flex items-center gap-6">
-                    <div className="bg-redbull p-4 text-white shadow-[0_0_30px_rgba(226,27,77,0.4)]">
-                      <Icon name="newspaper" size={56} />
-                    </div>
-                    <div>
-                      <h2
-                        className={`text-7xl font-black italic tracking-tighter uppercase leading-none ${journal.magazineName === "HEENES-KURIER" ? "text-neon" : "text-white"}`}
-                      >
-                        {journal.magazineName === "HEENES-KURIER"
-                          ? "HEENES"
-                          : "STARK"}
-                      </h2>
-                      <h3 className="text-4xl font-light tracking-[0.2em] text-white/60 uppercase leading-none mt-1">
-                        {journal.magazineName === "HEENES-KURIER"
-                          ? "KURIER"
-                          : "PERFORMANCE"}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-3 p-1 px-3 bg-white/5 w-fit rounded border border-white/10">
-                        <span className="font-mono text-redbull tracking-widest text-[10px] font-black uppercase">
-                          EPISODE {new Date().toLocaleDateString("de-DE")}
-                        </span>
-                        <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                        <span className="font-mono text-white/40 tracking-widest text-[10px] uppercase">
-                          CONFIDENTIAL
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <button
-                      onClick={generateJournalContent}
-                      disabled={isJournalLoading}
-                      className={`group bg-white text-navy px-8 py-4 rounded-sm font-black uppercase tracking-widest text-xs hover:bg-neon transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-95 ${isJournalLoading ? "opacity-50 cursor-wait" : ""}`}
-                    >
-                      <Icon
-                        name="refresh-cw"
-                        className={
-                          isJournalLoading
-                            ? "animate-spin"
-                            : "group-hover:rotate-180 transition-all duration-700"
-                        }
-                        size={18}
-                      />
-                      JOURNAL GENERIEREN
-                    </button>
-                  </div>
-                </div>
-
-                {!journal ? (
-                  <div
-                    className="h-[60vh] flex flex-col items-center justify-center border-4 border-dashed border-white/5 rounded-3xl bg-white/2 cursor-pointer group hover:bg-white/5 transition-all"
-                    onClick={generateJournalContent}
-                  >
-                    <div className="relative">
-                      <Icon
-                        name="newspaper"
-                        size={120}
-                        className="text-white/5 group-hover:text-redbull/20 transition-all duration-700"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Icon
-                          name="plus"
-                          size={40}
-                          className="text-redbull animate-pulse"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-white/40 font-black uppercase tracking-[0.3em] text-sm mt-8">
-                      System wartet auf Redaktions-Input
-                    </p>
-                    <p className="text-white/20 text-xs mt-2 uppercase">
-                      Initialisiere Presse-Gerd Kern für Erstausgabe
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12">
-                    {/* LEFT COLUMN: COVER & EDITORIAL (7 cols) */}
-                    <div className="lg:col-span-8 space-y-12">
-                      <div className="relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-2 h-20 bg-redbull"></div>
-                        <h3 className="text-8xl font-black text-white italic tracking-tighter uppercase mb-2 leading-[0.85] transition-all duration-700 group-hover:text-redbull">
-                          {journal.title}
-                        </h3>
-                        <div className="bg-white/10 h-[1px] w-full my-8"></div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                          <div className="space-y-6">
-                            <div className="flex items-center gap-3 text-redbull font-black uppercase text-xs tracking-[0.2em]">
-                              <span className="w-8 h-[2px] bg-redbull"></span>{" "}
-                              EDITORIAL
-                            </div>
-                            <p className="text-2xl font-light text-white/90 leading-tight italic border-l-2 border-white/10 pl-6">
-                              "{journal.editorial}"
-                            </p>
-                          </div>
-                          <div className="bg-navy/40 p-8 border border-white/5 rounded-sm relative">
-                            <Icon
-                              name="quote"
-                              className="absolute -top-4 -left-4 text-redbull opacity-40"
-                              size={40}
-                            />
-                            <h4 className="text-neon font-black uppercase text-[10px] tracking-widest mb-4">
-                              TRAINER-GERD INTERVIEW
-                            </h4>
-                            <blockquote className="text-lg font-serif italic text-white/80 leading-relaxed">
-                              {journal.interview}
-                            </blockquote>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-10 bg-black/40 border-t border-b border-white/10">
-                        <div className="flex items-center gap-4 mb-6">
-                          <Icon name="zap" size={24} className="text-gold" />
-                          <h4 className="text-gold font-black uppercase text-sm tracking-[0.3em]">
-                            TAKTISCHES UPDATE
-                          </h4>
-                        </div>
-                        <p className="text-xl font-mono text-white/60 leading-relaxed uppercase">
-                          {journal.tactics}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* RIGHT COLUMN: SIDEBAR (4 cols) */}
-                    <div className="lg:col-span-4 space-y-8">
-                      {/* MEDICAL UPDATE BOX */}
-                    </div>
-
-                    {/* SPONSOR CORNER */}
-                    {journal.sponsor && (
-                      <div className="bg-navy p-8 border border-gold/30 shadow-[0_10px_40px_rgba(212,175,55,0.15)] relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                          <Icon name="award" size={80} className="text-gold" />
-                        </div>
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="bg-gold p-2 rounded-full">
-                            <Icon name="star" size={16} className="text-navy" />
-                          </div>
-                          <h4 className="text-gold font-black uppercase text-xs tracking-widest">
-                            Sponsoren-Ecke
-                          </h4>
-                        </div>
-                        <p className="text-white/80 font-serif italic text-lg leading-relaxed border-l-2 border-gold/20 pl-6">
-                          {journal.sponsor}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* SCAN QR / DIGITAL TWIN */}
-                    <div className="glass-panel p-8 border border-white/5 flex flex-col items-center text-center gap-4">
-                      <div className="w-32 h-32 bg-white p-2">
-                        <img
-                          src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=STARK-ELITE-JOURNAL"
-                          alt="QR Code"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div>
-                        <h5 className="font-black text-[10px] uppercase tracking-widest text-white/40">
-                          DIGITAL EDITION
-                        </h5>
-                        <p className="text-[9px] font-mono text-neon mt-1">
-                          SCAN FOR MOBILE DEEP DIVE
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* ADS / PARTNERS */}
-                    <div className="p-6 border border-white/5 bg-white/2 flex justify-between items-center opacity-40 hover:opacity-100 transition-opacity">
-                      <span className="text-[8px] font-black uppercase tracking-[0.5em]">
-                        PARTNER: RED BULL ALPHA
-                      </span>
-                      <Icon name="shield-check" size={16} />
-                    </div>
-                  </div>
-                )}
-              </div>
-              );
-          };
-
-          // --- A-FRAME VR INTEGRATION ---
-          useEffect(() => {
-            if (typeof AFRAME === "undefined") return;
-
-              // Register component only once
-              if (!AFRAME.components["video-telestrator"]) {
-                AFRAME.registerComponent("video-telestrator", {
-                  init: function () {
-                    this.el.addEventListener("mousedown", (e) => {
-                      if (activeVideoTool === "none") return;
-                      const intersect = e.detail.intersection.uv;
-                      const canvasPos = {
-                        clientX:
-                          intersect.x * canvasRef.current.offsetWidth +
-                          canvasRef.current.getBoundingClientRect().left,
-                        clientY:
-                          (1 - intersect.y) * canvasRef.current.offsetHeight +
-                          canvasRef.current.getBoundingClientRect().top,
-                      };
-                      handleMouseDown(canvasPos);
-                    });
-                    this.el.addEventListener("mousemove", (e) => {
-                      if (!isDrawing || activeVideoTool === "none") return;
-                      const intersect = e.detail.intersection.uv;
-                      const canvasPos = {
-                        clientX:
-                          intersect.x * canvasRef.current.offsetWidth +
-                          canvasRef.current.getBoundingClientRect().left,
-                        clientY:
-                          (1 - intersect.y) * canvasRef.current.offsetHeight +
-                          canvasRef.current.getBoundingClientRect().top,
-                      };
-                      handleMouseMove(canvasPos);
-                    });
-                    this.el.addEventListener("mouseup", (e) => {
-                      if (!isDrawing || activeVideoTool === "none") return;
-                      const intersect = e.detail.intersection.uv;
-                      const canvasPos = {
-                        clientX:
-                          intersect.x * canvasRef.current.offsetWidth +
-                          canvasRef.current.getBoundingClientRect().left,
-                        clientY:
-                          (1 - intersect.y) * canvasRef.current.offsetHeight +
-                          canvasRef.current.getBoundingClientRect().top,
-                      };
-                      handleMouseUp(canvasPos);
-                    });
-                  },
-                });
-            }
-          }, [activeVideoTool, isDrawing]);
-
-              // VR ↔ React State Bridge
-              const vrEditRef = React.useRef({field: "", value: "", playerId: -1 });
-          useEffect(() => {
-            const handlePlayerMoved = (e) => {
-              const {id, vrX, vrZ} = e.detail;
-              // Update vrX/vrZ on the player
-              setPlayers((prev) =>
-                prev.map((p) => (p.id === id ? {...p, vrX, vrZ} : p)),
-              );
-              // Also write back into playerPositions (3D table → 2D field coordinate mapping)
-              // VR table: x [-2.2, 2.2], z [-1.5, 1.5] → field px: x [0,420], y [0,640]
-              const fieldX = ((vrX + 2.2) / 4.4) * 420;
-              const fieldY = ((vrZ + 1.5) / 3.0) * 640;
-              setPlayerPositions((prev) => {
-                const next = {
-                ...prev,
-                [id]: {x: Math.round(fieldX), y: Math.round(fieldY) },
-                };
-              localStorage.setItem(
-              "gerd_playerPositions",
-              JSON.stringify(next),
-              );
-              return next;
-              });
-            };
-            const handleOpenTab = (e) => {
-              const {tab} = e.detail;
-
-              // If in VR, don't exit! Just teleport to the relevant panel area
-              if (view === "vr") {
-                const rig = document.getElementById("vr-rig");
-              if (!rig) return;
-
-              // Define teleport targets based on panel positions
-              const targets = {
-                video: "-6 0 6",
-              medical: "-3.5 0 -7",
-              cfo: "0 0 -8",
-              nlz: "7 0 0",
-              tactical: "4 0 4",
-                };
-
-              if (targets[tab]) {
-                rig.setAttribute("position", targets[tab]);
-
-              // Vocal Triggers for VR Proximity
-              if (tab === "medical")
-              gerdSpeak(
-              "Medizinisches Labor aktiv. Scanne Spieler-Vitalwerte...",
-              "Arzt-Gerd",
-              );
-              else if (tab === "video")
-              gerdSpeak(
-              "Video-Analyse-Hub bereit. Lade taktisches Material.",
-              "Gerd Analyst",
-              );
-              else if (tab === "cfo")
-              gerdSpeak(
-              "Finanz-Dashboard geladen. Wir müssen wirtschaftlich effizient bleiben.",
-              "Manager-Gerd",
-              );
-              else if (tab === "nlz")
-              gerdSpeak(
-              "NLZ Bereich betreten. Fokus auf die Talent-Schmiede.",
-              "Trainer-Gerd",
-              );
-                }
-              return;
-              }
-
-              // Otherwise, switch to dashboard
-              setView("dashboard");
-              setActiveTab(tab); // Direct switch is cleaner
-            };
-            // VR keyboard: which field is currently being edited
-            const handleEditField = (e) => {
-                vrEditRef.current = e.detail;
-              vrEditRef.current.value = e.detail.value || "";
-              setKbValue(e.detail.value || "");
-            };
-            // VR key press → build string, commit on CLOSE
-            const handleKeyPress = (e) => {
-              const {char} = e.detail;
-              const ref = vrEditRef.current;
-              if (char === "CLOSE") {
-                // Hide keyboard
-                const kb = document.getElementById("vr-keyboard");
-              if (kb) kb.setAttribute("visible", "false");
-              // Commit value to React state
-              const val = ref.value;
-              if (ref.field === "budget") {
-                  const num = parseFloat(val);
-              if (!isNaN(num)) setBudget(num * 1000000);
-                } else if (ref.field === "name" && ref.playerId >= 0) {
-                setPlayers((prev) =>
-                  prev.map((p) =>
-                    p.id === ref.playerId ? { ...p, name: val } : p,
-                  ),
-                );
-                }
-              vrEditRef.current = {field: "", value: "", playerId: -1 };
-              setKbValue("");
-              } else if (char === "BACKSPACE") {
-                ref.value = ref.value.slice(0, -1);
-              setKbValue(ref.value);
-              } else if (char === "SPACE") {
-                ref.value += " ";
-              setKbValue(ref.value);
-              } else {
-                ref.value += char;
-              setKbValue(ref.value);
-              }
-            };
-            const handleKeyShift = () => {
-                setIsShift((prev) => !prev);
-            };
-            const handleKeySym = () => {
-                setIsSymbols((prev) => !prev);
-            };
-              window.addEventListener("vr-player-moved", handlePlayerMoved);
-              window.addEventListener("vr-open-tab", handleOpenTab);
-              window.addEventListener("vr-edit-field", handleEditField);
-              window.addEventListener("vr-key-press", handleKeyPress);
-              window.addEventListener("vr-key-shift", handleKeyShift);
-              window.addEventListener("vr-key-sym", handleKeySym);
-            return () => {
-                window.removeEventListener("vr-player-moved", handlePlayerMoved);
-              window.removeEventListener("vr-open-tab", handleOpenTab);
-              window.removeEventListener("vr-edit-field", handleEditField);
-              window.removeEventListener("vr-key-press", handleKeyPress);
-              window.removeEventListener("vr-key-shift", handleKeyShift);
-              window.removeEventListener("vr-key-sym", handleKeySym);
-            };
-          }, []);
-
-              if (view === "vr") {
-            // Register A-Frame custom components (idempotent)
-            if (typeof AFRAME !== "undefined") {
-              // --- STARK GRABBABLE: grab & move any element with laser ---
-              if (!AFRAME.components["stark-grabbable"]) {
-                AFRAME.registerComponent("stark-grabbable", {
-                  init() {
-                    this.grabbed = false;
-                    this.grabOffset = new THREE.Vector3();
-                    this.el.classList.add("grabbable");
-                    this.el.addEventListener("mousedown", (e) => {
-                      this.grabbed = true;
-                      this.el.setAttribute("material", "emissive", "#00f3ff");
-                      this.el.setAttribute(
-                        "material",
-                        "emissiveIntensity",
-                        "0.3",
-                      );
-                      this.lastIntersect = e.detail.intersection;
-                    });
-                    window.addEventListener("mouseup", () => {
-                      if (this.grabbed) {
-                        this.grabbed = false;
-                        this.el.setAttribute("material", "emissive", "#000000");
-                        this.el.setAttribute(
-                          "material",
-                          "emissiveIntensity",
-                          "0",
-                        );
-                      }
-                    });
-                    this.el.addEventListener("mousemove", (e) => {
-                      if (!this.grabbed || !e.detail.intersection) return;
-                      const pos = e.detail.intersection.point;
-                      this.el.setAttribute(
-                        "position",
-                        `${pos.x.toFixed(2)} ${(parseFloat(this.el.getAttribute("position").y) || 1.5).toFixed(2)} ${pos.z.toFixed(2)}`,
-                      );
-                    });
-                  },
-                });
-              }
-              // --- PLAYER TOKEN DRAG: move players on the tactic table & sync to React ---
-              if (!AFRAME.components["player-drag"]) {
-                AFRAME.registerComponent("player-drag", {
-                  schema: { playerId: { type: "number", default: 0 } },
-                  init() {
-                    this.grabbed = false;
-                    this.el.classList.add("draggable");
-                    this.el.addEventListener("mousedown", () => {
-                      this.grabbed = true;
-                    });
-                    window.addEventListener("mouseup", () => {
-                      this.grabbed = false;
-                    });
-                    this.el.addEventListener("mousemove", (e) => {
-                      if (!this.grabbed || !e.detail.intersection) return;
-                      const pt = e.detail.intersection.point;
-                      // Clamp to table bounds
-                      const x = Math.max(-2.2, Math.min(2.2, pt.x));
-                      const z = Math.max(-1.5, Math.min(1.5, pt.z));
-                      this.el.setAttribute(
-                        "position",
-                        `${x.toFixed(2)} 0.82 ${z.toFixed(2)}`,
-                      );
-                      // Sync back to React via custom event
-                      window.dispatchEvent(
-                        new CustomEvent("vr-player-moved", {
-                          detail: {
-                            id: this.data.playerId,
-                            vrX: parseFloat(x.toFixed(2)),
-                            vrZ: parseFloat(z.toFixed(2)),
-                          },
-                        }),
-                      );
-                    });
-                  },
-                });
-              }
-              // --- VR TELEPORT: click floor to move ---
-              if (!AFRAME.components["vr-teleport"]) {
-                AFRAME.registerComponent("vr-teleport", {
-                  init() {
-                    this.el.addEventListener("click", (e) => {
-                      if (!e.detail.intersection) return;
-                      const pt = e.detail.intersection.point;
-                      const rig = document.getElementById("vr-rig");
-                      if (rig)
-                        rig.setAttribute(
-                          "position",
-                          `${pt.x.toFixed(2)} 0 ${pt.z.toFixed(2)}`,
-                        );
-                    });
-                  },
-                });
-              }
-              // --- VR PANEL CLICK → open 2D Dashboard tab ---
-              if (!AFRAME.components["panel-link"]) {
-                AFRAME.registerComponent("panel-link", {
-                  schema: { tab: { type: "string", default: "" } },
-                  init() {
-                    this.el.addEventListener("click", () => {
-                      window.dispatchEvent(
-                        new CustomEvent("vr-open-tab", {
-                          detail: { tab: this.data.tab },
-                        }),
-                      );
-                    });
-                  },
-                });
-              }
-              // --- VR EDITABLE FIELD: click to open keyboard and edit a value ---
-              if (!AFRAME.components["vr-editable"]) {
-                AFRAME.registerComponent("vr-editable", {
-                  schema: {
-                    field: { type: "string", default: "" },
-                    value: { type: "string", default: "" },
-                    playerId: { type: "number", default: -1 },
-                  },
-                  init() {
-                    this.el.classList.add("clickable");
-                    this.el.addEventListener("click", (e) => {
-                      // Stop propagation so parent panel-link doesn't fire!
-                      if (e.detail && e.detail.cursorEl) {
-                        // Common in A-Frame to stop bubbling on custom events
-                      }
-                      e.stopPropagation();
-
-                      const kb = document.getElementById("vr-keyboard");
-                      const rig = document.getElementById("vr-rig");
-                      const camera = document.querySelector("a-camera");
-
-                      if (kb && rig && camera) {
-                        // Get camera's world position and direction
-                        const worldPos = new THREE.Vector3();
-                        camera.object3D.getWorldPosition(worldPos);
-
-                        const direction = new THREE.Vector3(0, 0, -1);
-                        direction.applyQuaternion(
-                          camera.object3D.getWorldQuaternion(
-                            new THREE.Quaternion(),
-                          ),
-                        );
-
-                        // Position keyboard 1.2m in front of camera
-                        const kbPos = worldPos
-                          .clone()
-                          .add(direction.multiplyScalar(1.2));
-
-                        kb.setAttribute(
-                          "position",
-                          `${kbPos.x} ${kbPos.y} ${kbPos.z}`,
-                        );
-
-                        // Rotate keyboard to face camera (y-axis only)
-                        const camRot = camera.getAttribute("rotation") || {
-                          y: 0,
-                        };
-                        kb.setAttribute("rotation", `0 ${camRot.y} 0`);
-                        kb.setAttribute("visible", "true");
-                      }
-
-                      window.dispatchEvent(
-                        new CustomEvent("vr-edit-field", {
-                          detail: {
-                            field: this.data.field,
-                            value: this.data.value,
-                            playerId: this.data.playerId,
-                          },
-                        }),
-                      );
-                    });
-                  },
-                });
-              }
-              // --- VR KEYBOARD CONTROLLER: distribute key clicks to edit state ---
-              if (!AFRAME.components["vr-key-handler"]) {
-                AFRAME.registerComponent("vr-key-handler", {
-                  schema: { char: { type: "string", default: "" } },
-                  init() {
-                    this.el.classList.add("clickable");
-                    this.el.addEventListener("click", () => {
-                      if (this.data.char === "SHIFT") {
-                        window.dispatchEvent(new CustomEvent("vr-key-shift"));
-                      } else if (this.data.char === "SYM") {
-                        window.dispatchEvent(new CustomEvent("vr-key-sym"));
-                      } else {
-                        window.dispatchEvent(
-                          new CustomEvent("vr-key-press", {
-                            detail: { char: this.data.char },
-                          }),
-                        );
-                      }
-                    });
-                  },
-                });
-              }
-
-              // --- BOUNDARY CHECK: Keep user within a specific radius ---
-              if (!AFRAME.components["boundary-check"]) {
-                AFRAME.registerComponent("boundary-check", {
-                  schema: { radius: { type: "number", default: 15 } },
-                  tick() {
-                    const rig = this.el.parentNode; // The vr-rig
-                    if (!rig) return;
-                    const pos = rig.getAttribute("position");
-                    if (!pos) return;
-
-                    const dist = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
-                    if (dist > this.data.radius) {
-                      // Calculate direction vector to center
-                      const factor = this.data.radius / dist;
-                      rig.setAttribute("position", {
-                        x: pos.x * factor,
-                        y: pos.y,
-                        z: pos.z * factor,
-                      });
-                    }
-                  },
-                });
-              }
-            }
-
-              return (
-              <div className="w-screen h-screen relative bg-black">
-                <button
-                  onClick={() => setView("dashboard")}
-                  className="absolute top-6 left-6 z-[100] bg-redbull border-2 border-transparent hover:border-white px-8 py-3 rounded font-black uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(226,27,77,0.7)] transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <Icon name="log-out" /> Dash-Log
-                </button>
-
-                <a-scene
-                  xr-mode-ui="enabled: true"
-                  renderer="antialias: true; colorManagement: true"
-                  shadow="type: pcfsoft"
-                >
-                  <a-assets>
-                    <canvas
-                      id="telestrator-texture"
-                      width="1280"
-                      height="720"
-                    ></canvas>
-                  </a-assets>
-
-                  {/* ========== STADIUM ATMOSPHERE: EXTREME HIGH-TECH STADIUM ========== */}
-                  <a-sky color="#050a1b"></a-sky>
-
-                  {/* Stadium Floodlights (4 corners) */}
-                  <a-entity position="-15 15 -15">
-                    <a-light
-                      type="spot"
-                      color="#fff"
-                      intensity="1.5"
-                      angle="45"
-                      target="#vr-pitch"
-                    ></a-light>
-                    <a-cylinder
-                      radius="0.2"
-                      height="15"
-                      color="#333"
-                    ></a-cylinder>
-                    <a-box
-                      width="2"
-                      height="1"
-                      depth="0.5"
-                      position="0 7.5 0"
-                      color="#111"
-                    >
-                      <a-sphere
-                        radius="0.1"
-                        position="-0.5 0 0.3"
-                        color="#fff"
-                        material="emissive: #fff; emissiveIntensity: 2"
-                      ></a-sphere>
-                      <a-sphere
-                        radius="0.1"
-                        position="0 0 0.3"
-                        color="#fff"
-                        material="emissive: #fff; emissiveIntensity: 2"
-                      ></a-sphere>
-                      <a-sphere
-                        radius="0.1"
-                        position="0.5 0 0.3"
-                        color="#fff"
-                        material="emissive: #fff; emissiveIntensity: 2"
-                      ></a-sphere>
-                    </a-box>
-                  </a-entity>
-                  <a-entity position="15 15 -15">
-                    <a-light
-                      type="spot"
-                      color="#fff"
-                      intensity="1.5"
-                      angle="45"
-                      target="#vr-pitch"
-                    ></a-light>
-                    <a-cylinder
-                      radius="0.2"
-                      height="15"
-                      color="#333"
-                    ></a-cylinder>
-                    <a-box
-                      width="2"
-                      height="1"
-                      depth="0.5"
-                      position="0 7.5 0"
-                      color="#111"
-                    >
-                      <a-sphere
-                        radius="0.1"
-                        position="-0.5 0 0.3"
-                        color="#fff"
-                        material="emissive: #fff; emissiveIntensity: 2"
-                      ></a-sphere>
-                      <a-sphere
-                        radius="0.1"
-                        position="0 0 0.3"
-                        color="#fff"
-                        material="emissive: #fff; emissiveIntensity: 2"
-                      ></a-sphere>
-                      <a-sphere
-                        radius="0.1"
-                        position="0.5 0 0.3"
-                        color="#fff"
-                        material="emissive: #fff; emissiveIntensity: 2"
-                      ></a-sphere>
-                    </a-box>
-                  </a-entity>
-
-                  {/* Distant Stadium Stands (Silhouettes) */}
-                  <a-entity position="0 0 -20">
-                    <a-box
-                      width="40"
-                      height="10"
-                      depth="1"
-                      color="#111"
-                      opacity="0.8"
-                    ></a-box>
-                    <a-text
-                      value="STARK ELITE ARENA"
-                      align="center"
-                      position="0 6 0.6"
-                      color="#00f3ff"
-                      width="30"
-                      font="exo2bold"
-                      opacity="0.3"
-                    ></a-text>
-                  </a-entity>
-
-                  {/* ========== NEON-CYAN FLOOR GRID ========== */}
-                  <a-entity position="0 0 0" rotation="-90 0 0">
-                    <a-grid
-                      width="100"
-                      height="100"
-                      color="#00f3ff"
-                      opacity="0.05"
-                      cell-size="2"
-                    ></a-grid>
-                  </a-entity>
-                  <a-plane
-                    position="0 0.01 0"
-                    rotation="-90 0 0"
-                    width="100"
-                    height="100"
-                    opacity="0.01"
-                    class="teleport-floor"
-                    vr-teleport
-                  ></a-plane>
-
-                  {/* ========== AMBIENT + ACCENT LIGHTING ========== */}
-                  <a-light
-                    type="ambient"
-                    color="#1a202c"
-                    intensity="1.2"
-                  ></a-light>
-                  <a-light
-                    type="point"
-                    position="0 8 0"
-                    color="#00f3ff"
-                    intensity="1.2"
-                    distance="30"
-                  ></a-light>
-
-                  {/* ========== CENTRAL TACTICAL PITCH (0 0 0) ========== */}
-                  <a-entity position="0 0.8 0">
-                    {/* Table Base & Glowing Rim */}
-                    <a-cylinder
-                      radius="2.3"
-                      height="0.1"
-                      color="#111"
-                      metalness="0.5"
-                      roughness="0.5"
-                    >
-                      <a-ring
-                        radius-inner="2.2"
-                        radius-outer="2.25"
-                        position="0 0.051 0"
-                        rotation="-90 0 0"
-                        color="#00f3ff"
-                        material="emissive: #00f3ff; emissiveIntensity: 2; opacity: 0.5"
-                      ></a-ring>
-                    </a-cylinder>
-                    {isOptimizing && (
-                      <a-text
-                        value="KI-OPTIMIERUNG LÄUFT..."
-                        align="center"
-                        position="0 1.2 0"
-                        color="#00f3ff"
-                        font="exo2bold"
-                        width="3"
-                        animation="property: opacity; from: 0.3; to: 1; dur: 500; loop: true"
-                      ></a-text>
-                    )}
-                    {isOptimizing && (
-                      <a-ring
-                        radius-inner="2.3"
-                        radius-outer="2.4"
-                        rotation="-90 0 0"
-                        position="0 0.06 0"
-                        color="#00f3ff"
-                        animation="property: opacity; from: 0.1; to: 0.8; dur: 500; loop: true"
-                      ></a-ring>
-                    )}
-
-                    {/* The High-Fidelity Pitch */}
-                    <a-plane
-                      width="4"
-                      height="2.8"
-                      rotation="-90 0 0"
-                      position="0 0.051 0"
-                      color="#0d2b1d"
-                    >
-                      {/* Boundary White Lines */}
-                      <a-plane
-                        width="3.8"
-                        height="0.02"
-                        position="0 1.35 0.01"
-                        color="#fff"
-                        opacity="0.8"
-                      ></a-plane>{" "}
-                      {/* Top */}
-                      <a-plane
-                        width="3.8"
-                        height="0.02"
-                        position="0 -1.35 0.01"
-                        color="#fff"
-                        opacity="0.8"
-                      ></a-plane>{" "}
-                      {/* Bottom */}
-                      <a-plane
-                        width="0.02"
-                        height="2.72"
-                        position="1.9 0 0.01"
-                        color="#fff"
-                        opacity="0.8"
-                      ></a-plane>{" "}
-                      {/* Right Goal Line */}
-                      <a-plane
-                        width="0.02"
-                        height="2.72"
-                        position="-1.9 0 0.01"
-                        color="#fff"
-                        opacity="0.8"
-                      ></a-plane>{" "}
-                      {/* Left Goal Line */}
-                      {/* Midfield & Center Circle */}
-                      <a-plane
-                        width="0.02"
-                        height="2.72"
-                        position="0 0 0.01"
-                        color="#fff"
-                        opacity="0.6"
-                      ></a-plane>
-                      <a-ring
-                        radius-inner="0.39"
-                        radius-outer="0.41"
-                        position="0 0 0.01"
-                        color="#fff"
-                        opacity="0.6"
-                      ></a-ring>
-                      <a-circle
-                        radius="0.03"
-                        position="0 0 0.02"
-                        color="#fff"
-                      ></a-circle>
-                      {/* Penalty Area (Left) - 16m Box */}
-                      <a-plane
-                        width="0.6"
-                        height="0.02"
-                        position="-1.6 0.7 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.6"
-                        height="0.02"
-                        position="-1.6 -0.7 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.02"
-                        height="1.42"
-                        position="-1.3 0 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      {/* Goal Area (Left) - 5m Box */}
-                      <a-plane
-                        width="0.2"
-                        height="0.02"
-                        position="-1.8 0.35 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.2"
-                        height="0.02"
-                        position="-1.8 -0.35 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.02"
-                        height="0.72"
-                        position="-1.7 0 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      {/* Penalty Area (Right) - 16m Box */}
-                      <a-plane
-                        width="0.6"
-                        height="0.02"
-                        position="1.6 0.7 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.6"
-                        height="0.02"
-                        position="1.6 -0.7 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.02"
-                        height="1.42"
-                        position="1.3 0 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      {/* Goal Area (Right) - 5m Box */}
-                      <a-plane
-                        width="0.2"
-                        height="0.02"
-                        position="1.8 0.35 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.2"
-                        height="0.02"
-                        position="1.8 -0.35 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      <a-plane
-                        width="0.02"
-                        height="0.72"
-                        position="1.7 0 0.01"
-                        color="#fff"
-                      ></a-plane>
-                      {/* Penalty Arcs */}
-                      <a-ring
-                        radius-inner="0.39"
-                        radius-outer="0.41"
-                        theta-start="-70"
-                        theta-length="140"
-                        position="-1.3 0 0.01"
-                        color="#fff"
-                        opacity="0.4"
-                      ></a-ring>
-                      <a-ring
-                        radius-inner="0.39"
-                        radius-outer="0.41"
-                        theta-start="110"
-                        theta-length="140"
-                        position="1.3 0 0.01"
-                        color="#fff"
-                        opacity="0.4"
-                      ></a-ring>
-                    </a-plane>
-
-                    {/* Miniature 3D Goals */}
-                    <a-entity position="-1.9 0.06 0">
-                      <a-box
-                        width="0.02"
-                        height="0.15"
-                        depth="0.5"
-                        position="0 0.075 0"
-                        color="#fff"
-                        material="wireframe: true; opacity: 0.5"
-                      ></a-box>
-                      <a-plane
-                        width="0.5"
-                        height="0.15"
-                        position="0.01 0.075 0"
-                        rotation="0 90 0"
-                        color="#fff"
-                        material="wireframe: true; opacity: 0.3"
-                      ></a-plane>
-                    </a-entity>
-                    <a-entity position="1.9 0.06 0">
-                      <a-box
-                        width="0.02"
-                        height="0.15"
-                        depth="0.5"
-                        position="0 0.075 0"
-                        color="#fff"
-                        material="wireframe: true; opacity: 0.5"
-                      ></a-box>
-                      <a-plane
-                        width="0.5"
-                        height="0.15"
-                        position="-0.01 0.075 0"
-                        rotation="0 -90 0"
-                        color="#fff"
-                        material="wireframe: true; opacity: 0.3"
-                      ></a-plane>
-                    </a-entity>
-
-                    {Object.entries(playerPositions).map(([id, pos]) => {
-                      const p = players.find(
-                        (player) => player.id === parseInt(id),
-                      );
-                      if (!p) return null;
-                      // Mapping: 2dX (0..420) -> vrX (-2..2), 2dY (0..640) -> vrZ (-1.4..1.4)
-                      const vrX = (pos.x / 420) * 4 - 2;
-                      const vrZ = (pos.y / 640) * 2.8 - 1.4;
-                      const isInjured = p.isInjured;
-                      const color = isInjured ? "#E21B4D" : "#00f3ff";
-                      return (
-                        <a-entity
-                          key={`token-${p.id}`}
-                          position={`${vrX} 0.05 ${vrZ}`}
-                          player-drag={`playerId: ${p.id}`}
-                          class="draggable"
-                        >
-                          <a-cylinder
-                            radius="0.08"
-                            height="0.02"
-                            color={color}
-                            material={`emissive: ${color}; emissiveIntensity: 0.5`}
-                          ></a-cylinder>
-                          <a-text
-                            value={p.name ? p.name.substring(0, 10) : "?"}
-                            align="center"
-                            position="0 0.1 0"
-                            rotation="-45 0 0"
-                            color="#ffffff"
-                            font="exo2bold"
-                            width="1.2"
-                          ></a-text>
-                          <a-text
-                            value={p.position}
-                            align="center"
-                            position="0 0.04 0"
-                            rotation="-90 0 0"
-                            color="#000"
-                            font="exo2bold"
-                            width="0.8"
-                          ></a-text>
-                        </a-entity>
-                      );
-                    })}
-
-                    {/* Opponents in VR */}
-                    {isActive &&
-                      Object.entries(opponentPositions).map(([id, pos]) => {
-                        const vrX = (pos.x / 420) * 4 - 2;
-                        const vrZ = (pos.y / 640) * 2.8 - 1.4;
-                        return (
-                          <a-entity key={id} position={`${vrX} 0.05 ${vrZ}`}>
-                            <a-cylinder
-                              radius="0.07"
-                              height="0.02"
-                              color="#600"
-                              material="emissive: #E21B4D; emissiveIntensity: 0.3"
-                            ></a-cylinder>
-                            <a-text
-                              value="X"
-                              align="center"
-                              position="0 0.04 0"
-                              rotation="-90 0 0"
-                              color="#E21B4D"
-                              font="exo2bold"
-                              width="1"
-                            ></a-text>
-                          </a-entity>
-                        );
-                      })}
-
-                    {/* Predictive Reactions in VR */}
-                    {opponentReactions.map((r, i) => {
-                      const v1 = {
-                        x: (r.from.x / 420) * 4 - 2,
-                        z: (r.from.y / 640) * 2.8 - 1.4,
-                      };
-                      const v2 = {
-                        x: (r.to.x / 420) * 4 - 2,
-                        z: (r.to.y / 640) * 2.8 - 1.4,
-                      };
-                      return (
-                        <a-entity
-                          key={`vr-react-${i}`}
-                          line={`start: ${v1.x} 0.051 ${v1.z}; end: ${v2.x} 0.051 ${v2.z}; color: #E21B4D; opacity: 1`}
-                        ></a-entity>
-                      );
-                    })}
-
-                    {/* Drawings in VR (Vektorgrafik) */}
-                    {drawingPaths.map((path, idx) => (
-                      <a-entity key={`vr-path-${idx}`}>
-                        {path.points.map((p, i) => {
-                          if (i === 0) return null;
-                          const p1 = path.points[i - 1];
-                          const p2 = p;
-                          const v1 = {
-                            x: (p1.x / 420) * 4 - 2,
-                            z: (p1.y / 640) * 2.8 - 1.4,
-                          };
-                          const v2 = {
-                            x: (p2.x / 420) * 4 - 2,
-                            z: (p2.y / 640) * 2.8 - 1.4,
-                          };
-                          const color =
-                            path.mode === "run" ? "#ffffff" : "#00f3ff";
-                          return (
-                            <a-entity
-                              key={`seg-${i}`}
-                              line={`start: ${v1.x} 0.01 ${v1.z}; end: ${v2.x} 0.01 ${v2.z}; color: ${color}; opacity: 0.8`}
-                            ></a-entity>
-                          );
-                        })}
-                      </a-entity>
-                    ))}
-                  </a-entity>
-
-                  {/* ========== VIRTUAL GERD (AVATAR) ========== */}
-                  <a-entity
-                    id="gerd-avatar"
-                    position="-3 0 -2"
-                    rotation="0 45 0"
-                    class="clickable"
-                    onClick={() => {
-                      const readiness = players.reduce(
-                        (sum, p) => sum + (p.status === "injured" ? 0 : 1),
-                        0,
-                      );
-                      gerdSpeak(
-                        `Hallo in der VR Umgebung! Der Kader hat eine Bereitschaft von ${Math.round((readiness / players.length) * 100)} Prozent. Wir sind bereit für ${clubIdentity.name || "den Audit"}.`,
-                        "Trainer-Gerd",
-                      );
-                    }}
-                  >
-                    {/* Body */}
-                    <a-cylinder
-                      radius="0.25"
-                      height="1.6"
-                      color="#001a33"
-                      position="0 0.8 0"
-                    ></a-cylinder>
-                    {/* Head */}
-                    <a-sphere
-                      radius="0.2"
-                      position="0 1.8 0"
-                      color="#ffdbac"
-                    ></a-sphere>
-                    {/* Glow Ring */}
-                    <a-ring
-                      radius-inner="0.3"
-                      radius-outer="0.4"
-                      rotation="-90 0 0"
-                      position="0 0.01 0"
-                      color="#00f3ff"
-                      animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dur: 2000; loop: true; dir: alternate"
-                    ></a-ring>
-                    <a-text
-                      value="TRAINER GERD"
-                      align="center"
-                      position="0 2.2 0"
-                      color="#00f3ff"
-                      font="exo2bold"
-                      width="4"
-                    ></a-text>
-                    <a-text
-                      value="CLICK FOR BRIEFING"
-                      align="center"
-                      position="0 2.0 0"
-                      color="#fff"
-                      width="2"
-                      opacity="0.6"
-                    ></a-text>
-                  </a-entity>
-
-                  {/* ========== FRONT (0 2 -8): VIDEO HUB & TELESTRATOR ========== */}
-                  <a-entity
-                    position="0 2 -8"
-                    rotation="0 0 0"
-                    scale="2.2 2.2 2.2"
-                  >
-                    <a-plane
-                      width="6"
-                      height="3.5"
-                      color="#000"
-                      opacity="0.2"
-                      material="transparent: true; metalness: 0.8; roughness: 0.1"
-                    >
-                      <a-plane
-                        width="6.1"
-                        height="3.6"
-                        position="0 0 -0.01"
-                        color="#00f3ff"
-                        opacity="0.3"
-                      ></a-plane>
-                      <a-text
-                        value="◈ VIDEO HUB & TELESTRATOR"
-                        align="center"
-                        position="0 1.9 0.01"
-                        color="#00f3ff"
-                        font="exo2bold"
-                        width="8"
-                      ></a-text>
-                      <a-plane
-                        width="5.5"
-                        height="2.8"
-                        position="0 0 0.01"
-                        src="#telestrator-texture"
-                        material="shader: flat; transparent: true"
-                      ></a-plane>
-                      <a-plane
-                        width="2.5"
-                        height="0.4"
-                        position="0 -2.1 0.01"
-                        color="#00f3ff"
-                        opacity="0.6"
-                        class="clickable"
-                        panel-link="tab: video"
-                      >
-                        <a-text
-                          value="OPEN 2D ANALYSIS"
-                          align="center"
-                          position="0 0 0.01"
-                          color="#000"
-                          font="exo2bold"
-                          width="4"
-                        ></a-text>
-                      </a-plane>
-                    </a-plane>
-                  </a-entity>
-
-                  {/* ========== HALBRECHTS (6 2 -6): GERD AI STATUS ========== */}
-                  <a-entity position="6 2 -6" rotation="0 -45 0" scale="2 2 2">
-                    <a-plane
-                      width="4"
-                      height="2.5"
-                      color="#000"
-                      opacity="0.3"
-                      material="transparent: true"
-                    >
-                      <a-plane
-                        width="4.1"
-                        height="2.6"
-                        position="0 0 -0.01"
-                        color="#00f3ff"
-                        opacity="0.2"
-                      ></a-plane>
-                      <a-text
-                        value="◈ GERD AI STATUS FEED"
-                        align="center"
-                        position="0 1.4 0.01"
-                        color="#00f3ff"
-                        font="exo2bold"
-                        width="6"
-                      ></a-text>
-                      <a-entity position="0 0.2 0.02">
-                        {aiLogs.slice(0, 5).map((log, i) => (
-                          <a-text
-                            key={`vr-log-${log.id}`}
-                            value={`> ${log.text.substring(0, 45)}`}
-                            position={`-1.8 ${0.6 - i * 0.3} 0`}
-                            color="#fff"
-                            width="4"
-                            font="monoid"
-                          ></a-text>
-                        ))}
-                      </a-entity>
-                      <a-text
-                        value="STATUS: OPTIMIZING NEURAL PATHS..."
-                        align="center"
-                        position="0 -1.0 0.01"
-                        color="#00f3ff"
-                        width="4"
-                        opacity="0.6"
-                      ></a-text>
-                    </a-plane>
-                  </a-entity>
-
-                  {/* ========== HALBLINKS (-6 2 -6): MEDICAL LAB & SQUAD ========== */}
-                  <a-entity position="-6 2 -6" rotation="0 45 0" scale="2 2 2">
-                    <a-plane
-                      width="5"
-                      height="3.5"
-                      color="#000"
-                      opacity="0.2"
-                      material="transparent: true"
-                    >
-                      <a-plane
-                        width="5.1"
-                        height="3.6"
-                        position="0 0 -0.01"
-                        color="#E21B4D"
-                        opacity="0.3"
-                      ></a-plane>
-                      <a-text
-                        value="◈ MEDICAL LAB OVERVIEW"
-                        align="center"
-                        position="0 1.9 0.01"
-                        color="#E21B4D"
-                        font="exo2bold"
-                        width="8"
-                      ></a-text>
-                      <a-entity
-                        position="0 0 0.02"
-                        layout="type: column; margin: 0.3"
-                      >
-                        <a-text
-                          value={`INJURED PLAYERS: ${players.filter((p) => p.status === "injured").length}`}
-                          align="center"
-                          position="0 0.5 0"
-                          color="#E21B4D"
-                          width="6"
-                        ></a-text>
-                        <a-text
-                          value="BIOMETRIC FEED: ACTIVE"
-                          align="center"
-                          position="0 0"
-                          color="#00ff88"
-                          width="5"
-                        ></a-text>
-                      </a-entity>
-                      <a-plane
-                        width="2.5"
-                        height="0.4"
-                        position="0 -2.1 0.01"
-                        color="#E21B4D"
-                        opacity="0.6"
-                        class="clickable"
-                        panel-link="tab: medical"
-                      >
-                        <a-text
-                          value="VITAL CORE"
-                          align="center"
-                          position="0 0 0.01"
-                          color="#fff"
-                          font="exo2bold"
-                          width="4"
-                        ></a-text>
-                      </a-plane>
-                    </a-plane>
-                  </a-entity>
-
-                  {/* ========== RECHTS AUSSEN (8 2 0): CFO BOARD & SUITCASE ========== */}
-                  <a-entity position="8 2 0" rotation="0 -90 0" scale="2 2 2">
-                    <a-plane
-                      width="5"
-                      height="4.5"
-                      color="#000"
-                      opacity="0.2"
-                      material="transparent: true"
-                    >
-                      <a-plane
-                        width="5.1"
-                        height="4.6"
-                        position="0 0 -0.01"
-                        color="#d4af37"
-                        opacity="0.3"
-                      ></a-plane>
-                      <a-text
-                        value="◈ CFO MANAGEMENT DASHBOARD"
-                        align="center"
-                        position="0 2.4 0.01"
-                        color="#d4af37"
-                        font="exo2bold"
-                        width="8"
-                      ></a-text>
-
-                      <a-entity position="0 1.2 0.02">
-                        <a-text
-                          value={`BUDGET: € ${(budget / 1000000).toFixed(2)}M`}
-                          align="center"
-                          position="0 0.5 0"
-                          color="#d4af37"
-                          font="exo2bold"
-                          width="7"
-                        ></a-text>
-                        <a-plane
-                          width="3"
-                          height="0.4"
-                          position="0 -0.2 0"
-                          color="#d4af3720"
-                          opacity="0.8"
-                          class="clickable"
-                          vr-editable={`field: budget; value: ${(budget / 1000000).toFixed(2)}`}
-                        >
-                          <a-text
-                            value="✎ EDIT BUDGET"
-                            align="center"
-                            position="0 0 0.01"
-                            color="#d4af37"
-                            width="4"
-                          ></a-text>
-                        </a-plane>
-                      </a-entity>
-
-                      {/* AI COMMUNICATION STATUS IN VR */}
-                      <a-entity position="0 -0.5 0.02">
-                        <a-plane
-                          width="4.5"
-                          height="1.8"
-                          color="#111"
-                          opacity="0.8"
-                          material="transparent: true"
-                        >
-                          <a-text
-                            value="◈ KI COMMUNICATION HUB"
-                            align="center"
-                            position="0 0.7 0.01"
-                            color="#redbull"
-                            font="exo2bold"
-                            width="5"
-                          ></a-text>
-
-                          {commLoading ? (
-                            <a-text
-                              value="GERD IS FORMULATING..."
-                              align="center"
-                              position="0 0.1 0.01"
-                              color="#fff"
-                              width="4"
-                              font="monoid"
-                              opacity="0.8"
-                            >
-                              <a-animation
-                                attribute="opacity"
-                                from="0.3"
-                                to="1"
-                                dur="1000"
-                                repeat="indefinite"
-                              ></a-animation>
-                            </a-text>
-                          ) : (
-                            <a-entity>
-                              <a-text
-                                value={`SCENARIO: ${commScenario.toUpperCase()}`}
-                                align="center"
-                                position="0 0.2 0.01"
-                                color="#fff"
-                                width="3.5"
-                                font="monoid"
-                                opacity="0.6"
-                              ></a-text>
-                              <a-text
-                                value={
-                                  commEmail ? "BLUEPRINT READY" : "SYSTEM IDLE"
-                                }
-                                align="center"
-                                position="0 -0.2 0.01"
-                                color={commEmail ? "#00ff88" : "#fff"}
-                                width="4"
-                                font="exo2bold"
-                              ></a-text>
-                            </a-entity>
-                          )}
-                        </a-plane>
-                      </a-entity>
-
-                      <a-plane
-                        width="2.5"
-                        height="0.4"
-                        position="0 -2.6 0.01"
-                        color="#d4af37"
-                        opacity="0.6"
-                        class="clickable"
-                        panel-link="tab: cfo"
-                      >
-                        <a-text
-                          value="FINANCIAL HUB"
-                          align="center"
-                          position="0 0 0.01"
-                          color="#000"
-                          font="exo2bold"
-                          width="4"
-                        ></a-text>
-                      </a-plane>
-                    </a-plane>
-                  </a-entity>
-
-                  {/* ========== BACK (0 2 8): PERFORMANCE JOURNAL & NLZ ========== */}
-                  <a-entity
-                    position="0 2 8"
-                    rotation="0 180 0"
-                    scale="2.2 2.2 2.2"
-                  >
-                    <a-plane
-                      width="6"
-                      height="4"
-                      color="#000"
-                      opacity="0.2"
-                      material="transparent: true"
-                    >
-                      <a-plane
-                        width="6.1"
-                        height="4.1"
-                        position="0 0 -0.01"
-                        color="#fff"
-                        opacity="0.3"
-                      ></a-plane>
-                      <a-text
-                        value="◈ PERFORMANCE JOURNAL & NLZ"
-                        align="center"
-                        position="0 2.2 0.01"
-                        color="#fff"
-                        font="exo2bold"
-                        width="8"
-                      ></a-text>
-                      <a-entity position="0 0.2 0.02">
-                        <a-text
-                          value={journal ? journal.title : "NO ACTIVE JOURNAL"}
-                          align="center"
-                          position="0 0.5 0"
-                          color="#redbull"
-                          font="exo2bold"
-                          width="5"
-                        ></a-text>
-                        {youthPlayers.slice(0, 5).map((yp, i) => (
-                          <a-text
-                            key={`nlz-vr-${yp.id}`}
-                            value={`TALENT: ${yp.name ? yp.name.substring(0, 12) : ""} | OVR:${Math.round(((yp.pac || 60) + (yp.sho || 60)) / 2)}`}
-                            align="center"
-                            position={`0 ${-0.1 - i * 0.3} 0`}
-                            color="#ffffff"
-                            width="4"
-                            opacity="0.8"
-                          ></a-text>
-                        ))}
-                      </a-entity>
-                      <a-plane
-                        width="2.5"
-                        height="0.4"
-                        position="0 -2.3 0.01"
-                        color="#fff"
-                        opacity="0.6"
-                        class="clickable"
-                        panel-link="tab: journal"
-                      >
-                        <a-text
-                          value="OPEN MAGAZINE"
-                          align="center"
-                          position="0 0 0.01"
-                          color="#000"
-                          font="exo2bold"
-                          width="4"
-                        ></a-text>
-                      </a-plane>
-                    </a-plane>
-                  </a-entity>
-
-                  {/* ========== NAVIGATION RIG ========== */}
-                  <a-entity
-                    id="vr-rig"
-                    position="0 0 2"
-                    movement-controls="controls: keyboard, gamepad; speed: 0.2; fly: false; acceleration: 20"
-                  >
-                    <a-entity
-                      camera
-                      position="0 1.6 0"
-                      look-controls="pointerLockEnabled: false"
-                    >
-                      <a-cursor
-                        color="#00f3ff"
-                        fuse="false"
-                        raycaster="objects: .clickable, .draggable, .teleport-floor"
-                      ></a-cursor>
-                    </a-entity>
-
-                    <a-entity
-                      laser-controls="hand: left"
-                      raycaster="objects: .clickable, .draggable, .teleport-floor; far: 20"
-                      line="color: #00f3ff; opacity: 0.7"
-                    ></a-entity>
-                    <a-entity
-                      laser-controls="hand: right"
-                      raycaster="objects: .clickable, .draggable, .teleport-floor; far: 20"
-                      line="color: #E21B4D; opacity: 0.7"
-                    ></a-entity>
-                  </a-entity>
-
-                  {/* VIRTUAL KEYBOARD */}
-                  <a-entity
-                    id="vr-keyboard"
-                    position="0 1.5 -1.5"
-                    rotation="-15 0 0"
-                    visible="false"
-                  >
-                    {/* Glass Backboard with Glowing Border */}
-                    <a-plane
-                      width="2.4"
-                      height="1.6"
-                      color="#000d1a"
-                      opacity="0.85"
-                      material="transparent: true; metalness: 0.6; roughness: 0.1"
-                    >
-                      <a-entity line="start: -1.2 0.8 0.01; end: 1.2 0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
-                      <a-entity line="start: -1.2 -0.8 0.01; end: 1.2 -0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
-                      <a-entity line="start: -1.2 0.8 0.01; end: -1.2 -0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
-                      <a-entity line="start: 1.2 0.8 0.01; end: 1.2 -0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
-
-                      <a-text
-                        value="◈ NEURAL INTERFACE | STARK INPUT"
-                        align="center"
-                        position="0 0.72 0.02"
-                        color="#00f3ff"
-                        width="3.5"
-                        font="exo2bold"
-                      ></a-text>
-
-                      {/* DISPLAY BAR: Shows current typed text */}
-                      <a-plane
-                        width="2.0"
-                        height="0.22"
-                        position="0 0.52 0.01"
-                        color="#000"
-                        opacity="0.6"
-                        material="transparent: true"
-                      >
-                        <a-text
-                          value={kbValue || "TYPE SOMETHING..."}
-                          align="left"
-                          position="-0.95 0 0.02"
-                          color={kbValue ? "#ffffff" : "#00f3ff40"}
-                          width="2.8"
-                          font="monoid"
-                        ></a-text>
-                        <a-plane
-                          width="0.01"
-                          height="0.14"
-                          position={kbValue.length * 0.045 - 0.92 || -0.92}
-                          color="#00f3ff"
-                          animation="property: opacity; from: 1; to: 0; dur: 500; loop: true"
-                        ></a-plane>
-                      </a-plane>
-                    </a-plane>
-
-                    {/* KEY DEFINITIONS */}
-                    {(() => {
-                      let rows = [];
-                      if (isSymbols) {
-                        rows = [
-                          ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-                          ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"],
-                          ["-", "_", "=", "+", "[", "]", "{", "}", ";", ":"],
-                          ['"', "'", ",", ".", "/", "?", "|", "\\", "<", ">"],
-                          ["SYM", "SPACE", "BACK", "CLOSE"],
-                        ];
-                      } else {
-                        rows = isShift
-                          ? [
-                            "1234567890".split(""),
-                            "QWERTYUIOP".split(""),
-                            "ASDFGHJKL".split(""),
-                            "ZXCVBNM".split(""),
-                            ["SHIFT", "SYM", "SPACE", "BACK", "CLOSE"],
-                          ]
-                          : [
-                            "1234567890".split(""),
-                            "qwertyuiop".split(""),
-                            "asdfghjkl".split(""),
-                            "zxcvbnm".split(""),
-                            ["SHIFT", "SYM", "SPACE", "BACK", "CLOSE"],
-                          ];
-                      }
-
-                      return rows.map((row, rowIdx) => {
-                        const yPos = 0.25 - rowIdx * 0.22;
-                        return row.map((char, charIdx) => {
-                          const totalChars = row.length;
-                          const xPos = (charIdx - (totalChars - 1) / 2) * 0.22;
-
-                          // Special handling for width of control keys
-                          let width = 0.2;
-                          let actualChar = char;
-                          let displayChar = char;
-                          let color = "#1a2a4a";
-                          let textColor = "#00f3ff";
-
-                          if (char === "SPACE") {
-                            width = 0.6;
-                            actualChar = "SPACE";
-                            displayChar = "[ SPACE ]";
-                          }
-                          if (char === "BACK") {
-                            width = 0.3;
-                            actualChar = "BACKSPACE";
-                            displayChar = "DEL";
-                            color = "#3c1a1a";
-                          }
-                          if (char === "SHIFT") {
-                            width = 0.3;
-                            actualChar = "SHIFT";
-                            displayChar = isShift ? "abc" : "ABC";
-                            color = isShift ? "#00f3ff" : "#1a2a4a";
-                            textColor = isShift ? "#000" : "#00f3ff";
-                          }
-                          if (char === "SYM") {
-                            width = 0.3;
-                            actualChar = "SYM";
-                            displayChar = isSymbols ? "abc" : "SYM";
-                            color = isSymbols ? "#00f3ff" : "#1a2a4a";
-                            textColor = isSymbols ? "#000" : "#00f3ff";
-                          }
-                          if (char === "CLOSE") {
-                            width = 0.3;
-                            actualChar = "CLOSE";
-                            displayChar = "DONE";
-                            color = "#103c10";
-                            textColor = "#00ff88";
-                          }
-
-                          return (
-                            <a-entity
-                              key={`row-${rowIdx}-char-${charIdx}`}
-                              position={`${xPos} ${yPos} 0.05`}
-                            >
-                              <a-box
-                                width={width}
-                                height="0.18"
-                                depth="0.04"
-                                color={color}
-                                class="clickable"
-                                vr-key-handler={`char: ${actualChar}`}
-                                animation__mousedown="property: position; to: 0 0 -0.02; dur: 50; startEvents: mousedown"
-                                animation__mouseup="property: position; to: 0 0 0; dur: 50; startEvents: mouseup"
-                                animation__mouseenter="property: scale; to: 1.05 1.05 1.05; dur: 100"
-                                animation__mouseleave="property: scale; to: 1 1 1; dur: 100"
-                                material="emissive: #00f3ff; emissiveIntensity: 0.1"
-                              >
-                                <a-text
-                                  value={displayChar}
-                                  align="center"
-                                  position="0 0 0.03"
-                                  color={textColor}
-                                  width={width * 7}
-                                  font="monoid"
-                                ></a-text>
-                              </a-box>
-                            </a-entity>
-                          );
-                        });
-                      });
-                    })()}
-                  </a-entity>
-                </a-scene>
-              </div>
-              );
-          }
-
-          const syncYouTube = async () => {
-            if (!ytPlaylistId.trim()) return;
-              setIsSyncing(true);
-              try {
-              const res = await fetch(
-              `http://localhost:3001/api/youtube/playlist?playlistId=${ytPlaylistId}`,
-              );
-              const data = await res.json();
-              if (data.ok) {
-                const newPlaylist = data.items.map((item) => ({
-                title: item.title,
-              url: item.url,
-              isYouTube: true,
-              isLocal: false,
-              analysis: item.analysis,
-                }));
-                setPlaylist((prev) =>
-                  [...newPlaylist, ...prev.filter((c) => !c.isYouTube)].slice(
-              0,
-              15,
-              ),
-              );
-              setIsSyncModalOpen(false);
-              gerdSpeak(
-              "YouTube-Playliste erfolgreich synchronisiert. Die Analysen liegen bereit.",
-              "Manager-Gerd",
-              );
-              } else {
-                alert("Fehler: " + data.error);
-              }
-            } catch (e) {
-                alert("Verbindung zum Proxy fehlgeschlagen.");
-            } finally {
-                setIsSyncing(false);
-            }
-          };
-
-              // 2D DASHBOARD RENDER
-              return (
-              <div className="app-root w-full h-full relative">
-                <div
-                  className={`min-h-screen flex flex-col md:flex-row bg-[#000000] relative transition-all duration-700 ${gerdThinking ? "ai-pulse-active" : ""}`}
-                >
-                  <NeuralBackground />
-                  {/* SetupWizard Overlay */}
-                  {!hasOnboarded && (
-                    <SetupWizard
-                      onComplete={(data) => {
-                        setClubIdentity(data);
-                        setHasOnboarded(true);
-                        setSimulationMode(false);
-                        localStorage.setItem(
-                          "gerd_clubIdentity",
-                          JSON.stringify(data),
-                        );
-                        localStorage.setItem("gerd_hasOnboarded", "true");
-                        localStorage.setItem("gerd_simulationMode", "false");
-                        if (data.primaryColor)
-                          document.documentElement.style.setProperty(
-                            "--color-neon",
-                            data.primaryColor,
-                          );
-                        if (data.secondaryColor)
-                          document.documentElement.style.setProperty(
-                            "--color-redbull",
-                            data.secondaryColor,
-                          );
-                        gerdSpeak(
-                          `System initialisiert für ${data.name}. Willkommen im Stark Elite Hub.`,
-                          "System",
-                        );
-                      }}
-                      askAI={askAI}
-                      addAiLog={addAiLog}
-                      gerdSpeak={gerdSpeak}
-                    />
-                  )}
-                  {/* OFFLINE BANNER */}
-                  {isOffline && (
-                    <div className="fixed top-0 left-0 w-full bg-redbull text-white text-[10px] font-black uppercase tracking-[0.2em] py-2 z-[500] text-center animate-pulse border-b border-white/20">
-                      ⚠ System-Warnung: Prüfe Internetverbindung... (Offline-Modus
-                      aktiv)
-                    </div>
-                  )}
-                  {/* SIDEBAR (Desktop Only) */}
-                  <div className="hidden md:flex md:w-80 border-r border-white/5 flex-col h-screen overflow-hidden shrink-0 bg-[#050a14] shadow-[10px_0_30px_rgba(0,0,0,0.8)] z-20">
-                    {/* Logo / Header */}
-                    <div className="p-8 border-b border-white/5 relative">
-                      <div className="w-16 h-1 bg-redbull mb-4"></div>
-                      <h1 className="text-3xl font-black italic tracking-tighter flex flex-col uppercase">
-                        GERD 2.0
-                        <span className="text-redbull text-base tracking-widest font-sans mt-1 flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-redbull animate-pulse"></div>{" "}
-                          STARK ELITE
-                        </span>
-                      </h1>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
-                      {[
-                        {
-                          id: "home",
-                          label: "Zentrale",
-                          icon: "home",
-                          color: "neon",
-                        },
-                        {
-                          id: "tactical",
-                          label: "Tactical Hub",
-                          icon: "shield",
-                          color: "neon",
-                        },
-                        {
-                          id: "medical",
-                          label: "Medical Lab",
-                          icon: "activity",
-                          color: "redbull",
-                        },
-                        {
-                          id: "video",
-                          label: "Video Hub",
-                          icon: "monitor-play",
-                          color: "white",
-                        },
-                        {
-                          id: "cfo",
-                          label: "CFO Board",
-                          icon: "pie-chart",
-                          color: "gold",
-                        },
-                        {
-                          id: "nlz",
-                          label: "NLZ Funino",
-                          icon: "layout-grid",
-                          color: "neon",
-                        },
-                        {
-                          id: "journal",
-                          label: "Performance Journal",
-                          icon: "newspaper",
-                          color: "white",
-                        },
-                      ].map((item) => {
-                        const isActive = activeTab === item.id;
-                        let bgClass = "hover:bg-white/5";
-                        let textClass = "text-white/50";
-                        if (isActive) {
-                          if (item.color === "neon") {
-                            bgClass =
-                              "bg-navy border-l-4 border-neon shadow-[intset_0_0_10px_rgba(0,243,255,0.2)]";
-                            textClass = "text-white";
-                          }
-                          if (item.color === "redbull") {
-                            bgClass = "bg-redbull/10 border-l-4 border-redbull";
-                            textClass = "text-white";
-                          }
-                          if (item.color === "gold") {
-                            bgClass = "bg-[#d4af3710] border-l-4 border-gold";
-                            textClass = "text-white";
-                          }
-                          if (item.color === "white") {
-                            bgClass = "bg-white/10 border-l-4 border-white";
-                            textClass = "text-white";
-                          }
-                        }
-
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center gap-4 px-5 py-4 font-bold uppercase tracking-widest text-xs transition-all text-left ${bgClass} ${textClass}`}
-                          >
-                            <Icon
-                              name={item.icon}
-                              size={20}
-                              className={isActive ? `text-${item.color}` : ""}
-                            />{" "}
-                            {item.label}
-                          </button>
-                        );
-                      })}
-
-                      {/* VR HUB — separate launcher button */}
-                      <div className="pt-2 pb-1 px-2 border-b border-white/5 mb-2">
-                        <button
-                          onClick={() => setView("vr")}
-                          className="w-full flex items-center gap-4 px-5 py-4 font-black uppercase tracking-widest text-xs transition-all text-left rounded border border-neon/30 bg-neon/5 text-neon hover:bg-neon hover:text-navy shadow-[0_0_12px_rgba(0,243,255,0.2)] hover:shadow-[0_0_20px_rgba(0,243,255,0.5)]"
-                        >
-                          <Icon name="glasses" size={20} className="text-neon" />
-                          <span className="flex-1">VR Hub</span>
-                          <span className="text-[9px] border border-neon/40 px-1.5 py-0.5 rounded font-mono">
-                            LAUNCH
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setIsSettingsOpen(true)}
-                          className="w-full flex items-center gap-4 px-5 py-4 mt-2 font-black uppercase tracking-widest text-xs transition-all text-left rounded bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
-                        >
-                          <Icon
-                            name="settings"
-                            size={20}
-                            className="text-white/50"
-                          />
-                          <span className="flex-1">System Settings</span>
-                        </button>
-                      </div>
-
-                      {/* Neural Insight Feed */}
-                      <NeuralInsightFeed logs={aiLogs} />
-
-                      {/* System Status / Quota */}
-                      <div className="mt-auto p-4 border-t border-white/5">
-                        <div className="p-4 bg-black/40 border border-white/5 rounded-xl">
-                          <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3 flex items-center gap-2">
-                            <Icon name="activity" size={12} /> System Status
-                          </h4>
-                          <QuotaWidget />
-                          <p className="text-[9px] text-white/30 mt-4 italic">
-                            Automatische Limitierung auf 15 RPM zum Schutz des
-                            Freikontingents.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* SETTINGS BUTTON (Bottom of nav) */}
-                      <div className="p-4 border-t border-white/5 mt-auto">
-                        <button
-                          onClick={() => setIsSettingsOpen(true)}
-                          className="w-full flex items-center gap-4 px-5 py-3 font-bold uppercase tracking-widest text-[10px] text-white/30 hover:text-white hover:bg-white/5 rounded transition-all transition-all"
-                        >
-                          <Icon name="settings" size={16} /> System-Einstellungen
-                        </button>
-                      </div>
-                    </nav>
-
-                    {/* AI Personas Chat */}
-                    <div className="h-64 flex flex-col border-t border-white/10 bg-[#000]">
-                      <div className="px-4 py-2 font-mono text-xs font-bold text-neon border-b border-white/5 flex items-center justify-between">
-                        AI PERSONAS LINK{" "}
-                        <Icon name="radio" size={14} className="animate-pulse" />
-                      </div>
-                      <div className="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-[11px] leading-relaxed">
-                        {chatMessages.map((msg, i) => {
-                          const isUser = msg.sender === "User";
-                          let color = "text-white/80";
-                          let labelColor = "text-white/40";
-                          if (msg.sender === "Trainer-Gerd")
-                            labelColor = "text-neon";
-                          if (msg.sender === "Arzt-Gerd")
-                            labelColor = "text-redbull";
-                          if (msg.sender === "Manager-Gerd")
-                            labelColor = "text-gold";
-                          if (msg.sender === "Presse-Gerd")
-                            labelColor = "text-gray-400";
-
-                          return (
-                            <div
-                              key={i}
-                              className={`flex flex-col ${isUser ? "items-end" : "items-start"} animate-fade-in`}
-                            >
-                              <span
-                                className={`${labelColor} uppercase font-bold mb-1 tracking-widest`}
-                              >
-                                {msg.sender}
-                              </span>
-                              <div
-                                className={`p-2 rounded max-w-[90%] border ${isUser ? "bg-white/5 border-white/10" : "bg-navy/30 border-neon/30 text-neon"}`}
-                              >
-                                {msg.text}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <form
-                        onSubmit={handleAIRequest}
-                        className="p-3 bg-[#0a0f1a] flex gap-2 border-t border-white/5"
-                      >
-                        <input
-                          type="text"
-                          placeholder="Frage an Gerd..."
-                          value={aiInput}
-                          onChange={(e) => setAiInput(e.target.value)}
-                          className="flex-1 bg-black border border-white/20 rounded p-2 text-xs text-white font-mono focus:outline-none focus:border-neon transition-colors"
-                        />
-                        <button
-                          type="submit"
-                          className="bg-neon/20 text-neon p-2 rounded hover:bg-neon hover:text-black transition-colors cursor-pointer"
-                        >
-                          <Icon name="send" size={16} />
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                  {/* MAIN CONTENT AREA */}
-                  <div className="flex-1 h-screen overflow-y-auto relative p-6 md:p-12 main-content-mobile">
-                    {showBriefing && (
-                      <IntelligenceBriefing
-                        onClose={() => setShowBriefing(false)}
-                      />
-                    )}
-                    {/* VR Launch Button (Top Right Absolute) */}
-                    <div className="absolute top-8 right-8 z-50 flex gap-4">
-                      <button
-                        onClick={() => setShowBriefing(true)}
-                        className="bg-black/60 border-2 border-white/20 text-white hover:border-white transition-all px-6 py-2 pb-1.5 rounded-sm font-black uppercase tracking-widest text-xs flex items-center gap-3 cursor-pointer"
-                      >
-                        <Icon name="file-text" size={18} className="mb-0.5" />{" "}
-                        Intelligence Briefing
-                      </button>
-                      <button
-                        onClick={() => setView("vr")}
-                        className="bg-transparent border-2 border-neon text-neon hover:bg-neon hover:text-black transition-all px-6 py-2 pb-1.5 rounded-sm font-black uppercase tracking-widest text-xs flex items-center gap-3 cursor-pointer shadow-[0_0_15px_rgba(0,243,255,0.4)]"
-                      >
-                        <Icon name="headset" size={18} className="mb-0.5" /> Launch
-                        VR Hub
-                      </button>
-                    </div>
-                    {/* Content Container */}
-                    <div className="max-w-7xl mx-auto pt-6 pb-20 relative z-10 min-h-[80vh]">
-                      {/* Header confirm for NLZ if active */}
-                      {activeTab === "nlz" && (
-                        <div className="mb-8 mobile-only">
-                          <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter border-l-4 border-neon pl-4">
-                            FUCHS NLZ - PERFORMANCE HUB
-                          </h2>
-                        </div>
-                      )}
-
-                      {activeTab === "home" && renderExecutiveZentrale()}
-                      {activeTab === "tactical" && renderTactical()}
-                      {activeTab === "medical" && renderMedical()}
-                      {activeTab === "video" && renderVideo()}
-                      {activeTab === "cfo" && renderCFO()}
-                      {activeTab === "nlz" && (
-                        <div className="animate-fade-in min-h-screen bg-[#000000] relative z-20">
-                          <FuchsNLZ
-                            youthPlayers={youthPlayers}
-                            setYouthPlayers={setYouthPlayers}
-                            nlzTab={nlzTab}
-                            setNlzTab={setNlzTab}
-                            scoutModal={scoutModal}
-                            setScoutModal={setScoutModal}
-                            dnaModules={dnaModules}
-                            setDnaModules={setDnaModules}
-                            askAI={askAI}
-                            gerdSpeak={gerdSpeak}
-                            updateYouthPlayer={updateYouthPlayer}
-                            addYouthPlayer={addYouthPlayer}
-                            deleteYouthPlayer={deleteYouthPlayer}
-                            promoteToProSquad={promoteToProSquad}
-                            openScoutModal={openScoutModal}
-                          />
-                        </div>
-                      )}
-                      {activeTab === "journal" && renderJournal()}
-                    </div>
-                    {/* === GLOBAL SETTINGS MODAL === */}
-                    {isSettingsOpen && (
-                      <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-navy/90 backdrop-blur-xl">
-                        <div className="glass-panel p-10 rounded-3xl max-w-lg w-full border border-white/20 animate-scale-in">
-                          <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-                            <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase flex items-center gap-3">
-                              <Icon name="settings" className="text-neon" /> System
-                              Core Settings
-                            </h2>
                             <button
-                              onClick={() => setIsSettingsOpen(false)}
-                              className="text-white/40 hover:text-white"
+                              onClick={generateSeasonBook}
+                              disabled={isGeneratingBook}
+                              className="mt-6 md:mt-0 bg-gold text-navy px-8 py-4 rounded-xl font-black uppercase text-sm shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:bg-white transition-all transform hover:scale-105"
                             >
-                              <Icon name="x" />
+                              {isGeneratingBook
+                                ? "KI Generiert..."
+                                : "Fachbuch Erstellen"}
                             </button>
                           </div>
 
-                          <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                            {/* Club Identity Section */}
-                            <div className="bg-navy/40 p-6 rounded-2xl border border-neon/50 shadow-[0_0_15px_rgba(0,243,255,0.1)] relative overflow-hidden">
-                              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                                <Icon name="shield" size={100} />
-                              </div>
-                              <h3 className="text-neon font-black uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
-                                <Icon
-                                  name="building"
-                                  size={14}
-                                  className="text-neon"
-                                />{" "}
-                                Club Identity & Research
-                              </h3>
-                              <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
-                                <div>
-                                  <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
-                                    Vereinsname
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-black uppercase text-xs outline-none focus:border-neon transition-all"
-                                    placeholder="z.B. Bayern München"
-                                    value={clubIdentity.name}
-                                    onChange={(e) =>
-                                      setClubIdentity({
-                                        ...clubIdentity,
-                                        name: e.target.value,
-                                      })
-                                    }
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
-                                    Liga / Klasse
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-black uppercase text-xs outline-none focus:border-neon transition-all"
-                                    placeholder="z.B. Bundesliga"
-                                    value={clubIdentity.league}
-                                    onChange={(e) =>
-                                      setClubIdentity({
-                                        ...clubIdentity,
-                                        league: e.target.value,
-                                      })
-                                    }
-                                  />
-                                </div>
-                              </div>
-
-                              {clubIdentity.researchData && (
-                                <div className="mb-4 bg-black/60 p-3 rounded-lg border border-white/5 text-[10px] font-mono leading-relaxed text-white/70 h-24 overflow-y-auto custom-scrollbar relative z-10">
-                                  <div className="text-neon font-bold mb-1 border-b border-white/10 pb-1 flex justify-between">
-                                    <span>Scouting Report: Active</span>
-                                    <Icon name="check-circle" size={12} />
+                          {seasonBookData && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
+                              {seasonBookData.map((report, idx) => (
+                                <div
+                                  key={idx}
+                                  className="bg-[#f0f0f0] text-navy p-8 rounded-sm shadow-2xl relative"
+                                >
+                                  <div className="absolute top-0 right-0 bg-redbull text-white px-3 py-1 text-[8px] font-black uppercase tracking-widest">
+                                    CONFIDENTIAL
                                   </div>
-                                  {clubIdentity.researchData}
+                                  <div className="w-16 h-16 bg-navy/10 rounded-full mb-6 flex items-center justify-center">
+                                    <img
+                                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${report.name}`}
+                                      className="w-16 h-16 rounded-full opacity-60 grayscale"
+                                      loading="lazy"
+                                      alt="Avatar"
+                                    />
+                                  </div>
+                                  <h4 className="text-2xl font-black tracking-tighter uppercase mb-4">
+                                    {report.name}
+                                  </h4>
+                                  <div className="h-[3px] w-12 bg-redbull mb-6"></div>
+                                  <p className="font-serif text-sm leading-relaxed text-black/80">
+                                    {report.report}
+                                  </p>
                                 </div>
-                              )}
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
-                              <button
-                                onClick={async () => {
-                                  if (!clubIdentity.name || !clubIdentity.league) {
-                                    gerdSpeak(
-                                      "Bitte Vereinsname und Liga eingeben.",
-                                      "System",
-                                    );
-                                    return;
-                                  }
-                                  setIsSyncingClub(true);
-                                  addAiLog(
-                                    `Initiating deep web research for ${clubIdentity.name}...`,
-                                    "process",
-                                  );
-                                  try {
-                                    const response = await askAI(
-                                      `Analysiere den Verein ${clubIdentity.name} in der Liga ${clubIdentity.league}. Gib mir in 3 kurzen Stichpunkten: 1. Aktuellen sportlichen Stand. 2. Die letzten 3 bekannten Ergebnisse oder Formkurve. 3. 3-4 absolute Schlüsselspieler. Sei präzise und knapp. Das Ergebnis wird als Global Context für Manager und Trainer genutzt.`,
-                                      "strategy",
-                                      true,
-                                    );
-                                    const nextClub = {
-                                      ...clubIdentity,
-                                      researchData: response,
-                                    };
-                                    setClubIdentity(nextClub);
-                                    localStorage.setItem(
-                                      "gerd_clubIdentity",
-                                      JSON.stringify(nextClub),
-                                    );
-                                    gerdSpeak(
-                                      `Vereinsdaten für ${clubIdentity.name} erfolgreich synchronisiert.`,
-                                      "System",
-                                    );
-                                    addAiLog(
-                                      `Club Identity established: ${clubIdentity.name} (${clubIdentity.league})`,
-                                      "success",
-                                    );
-                                  } catch (e) {
-                                    addAiLog(
-                                      `Research failed: ${e.message}`,
-                                      "error",
-                                    );
-                                  } finally {
-                                    setIsSyncingClub(false);
-                                  }
-                                }}
-                                disabled={isSyncingClub}
-                                className="w-full bg-white/5 text-white font-black py-3 rounded-xl uppercase tracking-widest text-xs border border-white/10 hover:border-neon hover:text-neon transition-all flex items-center justify-center gap-2 relative z-10"
-                              >
-                                {isSyncingClub ? (
-                                  <Icon
-                                    name="loader"
-                                    size={14}
-                                    className="animate-spin"
-                                  />
-                                ) : (
-                                  <Icon name="globe" size={14} />
-                                )}
-                                {isSyncingClub
-                                  ? "Syncing Data..."
-                                  : "Vereinsdaten synchronisieren"}
-                              </button>
-
-                              {/* AUDIT & SIMULATION ACTIONS */}
-                              <div className="flex gap-2 mt-4 relative z-10">
-                                <button
-                                  onClick={() => {
-                                    const heenes = {
-                                      name: "SG Heenes/Kalkobes",
-                                      league: "Kreisoberliga Nordhessen",
-                                      researchData:
-                                        "Die SG Heenes/Kalkobes spielt in der Kreisoberliga Nordhessen. Aktueller Fokus liegt auf kompaktem Defensivverhalten und schnellem Umschaltspiel. Schlüsselspieler sind oft im zentralen Mittelfeld und Angriff zu finden. Das nächste Heimspiel/Derby steht an.",
-                                    };
-                                    setClubIdentity(heenes);
-                                    localStorage.setItem(
-                                      "gerd_clubIdentity",
-                                      JSON.stringify(heenes),
-                                    );
-                                    gerdSpeak(
-                                      "System Audit: SG Heenes Kalkobes geladen.",
-                                      "System",
-                                    );
-                                  }}
-                                  className="flex-1 bg-redbull/20 text-redbull font-black py-2 rounded-lg uppercase tracking-widest text-[10px] border border-redbull/50 hover:bg-redbull hover:text-white transition-all flex items-center justify-center gap-1"
-                                >
-                                  <Icon name="zap" size={12} /> Audit: Heenes
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setClubIdentity({
-                                      name: "",
-                                      league: "",
-                                      researchData: "",
-                                    });
-                                    localStorage.removeItem("gerd_clubIdentity");
-                                    gerdSpeak(
-                                      "System Reset. Neutrale Daten.",
-                                      "System",
-                                    );
-                                  }}
-                                  className="flex-1 bg-white/5 text-white/50 font-black py-2 rounded-lg uppercase tracking-widest text-[10px] border border-white/10 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-1"
-                                >
-                                  <Icon name="refresh-cw" size={12} /> Reset
-                                </button>
+                      {/* Academy Showcase */}
+                      <div className="glass-panel p-8 rounded-3xl border border-gold/20 bg-gold/5">
+                        <h3 className="text-gold font-black uppercase text-sm tracking-widest mb-4 flex items-center gap-3">
+                          <Icon name="star" size={20} /> Stark Elite Tutorials
+                        </h3>
+                        <p className="text-white/40 text-[10px] uppercase font-black mb-6">
+                          Offizielle Referenz-Videos der Akademie
+                        </p>
+                        <div className="space-y-4">
+                          {[
+                            "Dribbling Masterclass",
+                            "Ballkontrolle U12",
+                            "Funino Prinzipien",
+                          ].map((t, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-white/5 hover:border-gold/50 cursor-pointer transition-all"
+                            >
+                              <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
+                                <Icon name="play" size={20} className="text-gold" />
                               </div>
-                              <div className="mt-2 relative z-10">
-                                <button
-                                  onClick={async () => {
-                                    gerdSpeak(
-                                      "Generiere Match-Vorschau für SG Heenes/Kalkobes...",
-                                      "Trainer-Gerd",
-                                    );
-                                    const previewText = await askAI(
-                                      "Erstelle eine extrem kurze taktische Analyse des nächsten Gegners der SG Heenes/Kalkobes (Kreisoberliga Nordhessen). Empfehle ein 4-4-2 System und gib ein kurzes Trainer-Briefing für das Derby. Max 3 Sätze.",
-                                      "Trainer-Gerd",
-                                      true,
-                                    );
-                                    const matchPreviewEntry = {
-                                      id: Date.now(),
-                                      name: "Match Preview: Derby",
-                                      timestamp: new Date().toISOString(),
-                                      mode: "match",
-                                      summary:
-                                        previewText ||
-                                        "4-4-2 Derby Fokus. Kompakte Defensive gegen den Ball, schnelles Umschalten über die Flügel.",
-                                      playerPositions: {
-                                        1: { x: 210, y: 550 }, // TW
-                                        2: { x: 100, y: 450 },
-                                        3: { x: 170, y: 480 },
-                                        4: { x: 250, y: 480 },
-                                        5: { x: 320, y: 450 }, // ABW
-                                        6: { x: 100, y: 350 },
-                                        7: { x: 170, y: 380 },
-                                        8: { x: 250, y: 380 },
-                                        9: { x: 320, y: 350 }, // MIT
-                                        10: { x: 170, y: 250 },
-                                        11: { x: 250, y: 250 }, // ANG
-                                      },
-                                      opponentPositions: {},
-                                      drawingPaths: [],
-                                      assessmentRatings: {},
-                                    };
-                                    const nextArchive = {
-                                      ...clubArchive,
-                                      proMatchbook: [
-                                        matchPreviewEntry,
-                                        ...(clubArchive.proMatchbook || []),
-                                      ],
-                                    };
-                                    setClubArchive(nextArchive);
-                                    localStorage.setItem(
-                                      "gerd_clubArchive",
-                                      JSON.stringify(nextArchive),
-                                    );
-                                    gerdSpeak(
-                                      "Match-Vorschau im Archiv gespeichert.",
-                                      "System",
-                                    );
-                                  }}
-                                  className="w-full bg-neon/10 text-neon font-black py-2 rounded-lg uppercase tracking-widest text-[10px] border border-neon/30 hover:bg-neon hover:text-black transition-all flex items-center justify-center gap-2"
-                                >
-                                  <Icon name="file-text" size={12} /> Generate Match
-                                  Preview
-                                </button>
-                              </div>
-                              <div className="flex gap-2 mt-2 relative z-10">
-                                <button
-                                  onClick={() => {
-                                    const newVal = budget + 5000;
-                                    setBudget(newVal);
-                                    localStorage.setItem(
-                                      "stark_elite_budget",
-                                      newVal,
-                                    );
-                                    gerdSpeak(
-                                      "Sponsoring Eingang registriert: 5000 Euro.",
-                                      "Manager-Gerd",
-                                    );
-                                  }}
-                                  className="flex-1 bg-gold/10 text-gold font-black py-2 rounded-lg uppercase tracking-widest text-[9px] border border-gold/30 hover:bg-gold hover:text-black transition-all flex items-center justify-center gap-1"
-                                >
-                                  <Icon name="dollar-sign" size={12} /> CFO Audit
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setActiveTab("video");
-                                    setYtPlaylistId("jNQXAC9IVRw");
-                                    setIsSettingsOpen(false);
-                                    gerdSpeak(
-                                      "Video Validierung gestartet. Wechsle ins Video Hub.",
-                                      "System",
-                                    );
-                                  }}
-                                  className="flex-1 bg-white/5 text-white font-black py-2 rounded-lg uppercase tracking-widest text-[9px] border border-white/20 hover:bg-white hover:text-black transition-all flex items-center justify-center gap-1"
-                                >
-                                  <Icon name="video" size={12} /> Vid Audit
-                                </button>
-                                <button
-                                  onClick={async () => {
-                                    gerdSpeak(
-                                      "Generiere NLZ Wochenplan...",
-                                      "Trainer-Gerd",
-                                    );
-                                    await new Promise((r) => setTimeout(r, 2000));
-                                    gerdSpeak(
-                                      "Psycho-Tracking für 15 Talente generiert.",
-                                      "System",
-                                    );
-                                  }}
-                                  className="flex-1 bg-neon/10 text-cyan-400 font-black py-2 rounded-lg uppercase tracking-widest text-[9px] border border-cyan-400/30 hover:bg-cyan-400 hover:text-black transition-all flex items-center justify-center gap-1"
-                                >
-                                  <Icon name="users" size={12} /> NLZ Audit
-                                </button>
+                              <div className="text-[10px] font-black text-white uppercase tracking-widest">
+                                {t}
                               </div>
                             </div>
-                            {/* Quota Monitoring Widget */}
-                            <div className="bg-navy/40 p-6 rounded-2xl border border-neon/30">
-                              <h3 className="text-white font-black uppercase text-xs tracking-widest mb-4 flex items-center justify-between">
-                                <span className="flex items-center gap-2">
-                                  <Icon
-                                    name="gauge"
-                                    size={14}
-                                    className="text-neon"
-                                  />{" "}
-                                  Gemini Quota (Free Tier)
-                                </span>
-                                <span className="text-[10px] bg-neon/10 text-neon px-2 py-0.5 rounded border border-neon/20">
-                                  LIVE
-                                </span>
-                              </h3>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  );
+            };
+
+            // 6. Performance Journal
+            const renderJournal = () => {
+              return (
+                  <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-20 text-white font-sans">
+                    {/* MAGAZINE HEADER */}
+                    <div className="flex flex-col md:flex-row justify-between items-end border-b-8 border-redbull pb-6 gap-6">
+                      <div className="flex items-center gap-6">
+                        <div className="bg-redbull p-4 text-white shadow-[0_0_30px_rgba(226,27,77,0.4)]">
+                          <Icon name="newspaper" size={56} />
+                        </div>
+                        <div>
+                          <h2
+                            className={`text-7xl font-black italic tracking-tighter uppercase leading-none ${journal.magazineName === "HEENES-KURIER" ? "text-neon" : "text-white"}`}
+                          >
+                            {journal.magazineName === "HEENES-KURIER"
+                              ? "HEENES"
+                              : "STARK"}
+                          </h2>
+                          <h3 className="text-4xl font-light tracking-[0.2em] text-white/60 uppercase leading-none mt-1">
+                            {journal.magazineName === "HEENES-KURIER"
+                              ? "KURIER"
+                              : "PERFORMANCE"}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-3 p-1 px-3 bg-white/5 w-fit rounded border border-white/10">
+                            <span className="font-mono text-redbull tracking-widest text-[10px] font-black uppercase">
+                              EPISODE {new Date().toLocaleDateString("de-DE")}
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                            <span className="font-mono text-white/40 tracking-widest text-[10px] uppercase">
+                              CONFIDENTIAL
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-4">
+                        <button
+                          onClick={generateJournalContent}
+                          disabled={isJournalLoading}
+                          className={`group bg-white text-navy px-8 py-4 rounded-sm font-black uppercase tracking-widest text-xs hover:bg-neon transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-95 ${isJournalLoading ? "opacity-50 cursor-wait" : ""}`}
+                        >
+                          <Icon
+                            name="refresh-cw"
+                            className={
+                              isJournalLoading
+                                ? "animate-spin"
+                                : "group-hover:rotate-180 transition-all duration-700"
+                            }
+                            size={18}
+                          />
+                          JOURNAL GENERIEREN
+                        </button>
+                      </div>
+                    </div>
+
+                    {!journal ? (
+                      <div
+                        className="h-[60vh] flex flex-col items-center justify-center border-4 border-dashed border-white/5 rounded-3xl bg-white/2 cursor-pointer group hover:bg-white/5 transition-all"
+                        onClick={generateJournalContent}
+                      >
+                        <div className="relative">
+                          <Icon
+                            name="newspaper"
+                            size={120}
+                            className="text-white/5 group-hover:text-redbull/20 transition-all duration-700"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Icon
+                              name="plus"
+                              size={40}
+                              className="text-redbull animate-pulse"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-white/40 font-black uppercase tracking-[0.3em] text-sm mt-8">
+                          System wartet auf Redaktions-Input
+                        </p>
+                        <p className="text-white/20 text-xs mt-2 uppercase">
+                          Initialisiere Presse-Gerd Kern für Erstausgabe
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12">
+                        {/* LEFT COLUMN: COVER & EDITORIAL (7 cols) */}
+                        <div className="lg:col-span-8 space-y-12">
+                          <div className="relative overflow-hidden group">
+                            <div className="absolute top-0 left-0 w-2 h-20 bg-redbull"></div>
+                            <h3 className="text-8xl font-black text-white italic tracking-tighter uppercase mb-2 leading-[0.85] transition-all duration-700 group-hover:text-redbull">
+                              {journal.title}
+                            </h3>
+                            <div className="bg-white/10 h-[1px] w-full my-8"></div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                              <div className="space-y-6">
+                                <div className="flex items-center gap-3 text-redbull font-black uppercase text-xs tracking-[0.2em]">
+                                  <span className="w-8 h-[2px] bg-redbull"></span>{" "}
+                                  EDITORIAL
+                                </div>
+                                <p className="text-2xl font-light text-white/90 leading-tight italic border-l-2 border-white/10 pl-6">
+                                  "{journal.editorial}"
+                                </p>
+                              </div>
+                              <div className="bg-navy/40 p-8 border border-white/5 rounded-sm relative">
+                                <Icon
+                                  name="quote"
+                                  className="absolute -top-4 -left-4 text-redbull opacity-40"
+                                  size={40}
+                                />
+                                <h4 className="text-neon font-black uppercase text-[10px] tracking-widest mb-4">
+                                  TRAINER-GERD INTERVIEW
+                                </h4>
+                                <blockquote className="text-lg font-serif italic text-white/80 leading-relaxed">
+                                  {journal.interview}
+                                </blockquote>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-10 bg-black/40 border-t border-b border-white/10">
+                            <div className="flex items-center gap-4 mb-6">
+                              <Icon name="zap" size={24} className="text-gold" />
+                              <h4 className="text-gold font-black uppercase text-sm tracking-[0.3em]">
+                                TAKTISCHES UPDATE
+                              </h4>
+                            </div>
+                            <p className="text-xl font-mono text-white/60 leading-relaxed uppercase">
+                              {journal.tactics}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* RIGHT COLUMN: SIDEBAR (4 cols) */}
+                        <div className="lg:col-span-4 space-y-8">
+                          {/* MEDICAL UPDATE BOX */}
+                        </div>
+
+                        {/* SPONSOR CORNER */}
+                        {journal.sponsor && (
+                          <div className="bg-navy p-8 border border-gold/30 shadow-[0_10px_40px_rgba(212,175,55,0.15)] relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                              <Icon name="award" size={80} className="text-gold" />
+                            </div>
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="bg-gold p-2 rounded-full">
+                                <Icon name="star" size={16} className="text-navy" />
+                              </div>
+                              <h4 className="text-gold font-black uppercase text-xs tracking-widest">
+                                Sponsoren-Ecke
+                              </h4>
+                            </div>
+                            <p className="text-white/80 font-serif italic text-lg leading-relaxed border-l-2 border-gold/20 pl-6">
+                              {journal.sponsor}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* SCAN QR / DIGITAL TWIN */}
+                        <div className="glass-panel p-8 border border-white/5 flex flex-col items-center text-center gap-4">
+                          <div className="w-32 h-32 bg-white p-2">
+                            <img
+                              src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=STARK-ELITE-JOURNAL"
+                              alt="QR Code"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div>
+                            <h5 className="font-black text-[10px] uppercase tracking-widest text-white/40">
+                              DIGITAL EDITION
+                            </h5>
+                            <p className="text-[9px] font-mono text-neon mt-1">
+                              SCAN FOR MOBILE DEEP DIVE
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* ADS / PARTNERS */}
+                        <div className="p-6 border border-white/5 bg-white/2 flex justify-between items-center opacity-40 hover:opacity-100 transition-opacity">
+                          <span className="text-[8px] font-black uppercase tracking-[0.5em]">
+                            PARTNER: RED BULL ALPHA
+                          </span>
+                          <Icon name="shield-check" size={16} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  );
+            };
+
+            // --- A-FRAME VR INTEGRATION ---
+            useEffect(() => {
+              if (typeof AFRAME === "undefined") return;
+
+                  // Register component only once
+                  if (!AFRAME.components["video-telestrator"]) {
+                    AFRAME.registerComponent("video-telestrator", {
+                      init: function () {
+                        this.el.addEventListener("mousedown", (e) => {
+                          if (activeVideoTool === "none") return;
+                          const intersect = e.detail.intersection.uv;
+                          const canvasPos = {
+                            clientX:
+                              intersect.x * canvasRef.current.offsetWidth +
+                              canvasRef.current.getBoundingClientRect().left,
+                            clientY:
+                              (1 - intersect.y) * canvasRef.current.offsetHeight +
+                              canvasRef.current.getBoundingClientRect().top,
+                          };
+                          handleMouseDown(canvasPos);
+                        });
+                        this.el.addEventListener("mousemove", (e) => {
+                          if (!isDrawing || activeVideoTool === "none") return;
+                          const intersect = e.detail.intersection.uv;
+                          const canvasPos = {
+                            clientX:
+                              intersect.x * canvasRef.current.offsetWidth +
+                              canvasRef.current.getBoundingClientRect().left,
+                            clientY:
+                              (1 - intersect.y) * canvasRef.current.offsetHeight +
+                              canvasRef.current.getBoundingClientRect().top,
+                          };
+                          handleMouseMove(canvasPos);
+                        });
+                        this.el.addEventListener("mouseup", (e) => {
+                          if (!isDrawing || activeVideoTool === "none") return;
+                          const intersect = e.detail.intersection.uv;
+                          const canvasPos = {
+                            clientX:
+                              intersect.x * canvasRef.current.offsetWidth +
+                              canvasRef.current.getBoundingClientRect().left,
+                            clientY:
+                              (1 - intersect.y) * canvasRef.current.offsetHeight +
+                              canvasRef.current.getBoundingClientRect().top,
+                          };
+                          handleMouseUp(canvasPos);
+                        });
+                      },
+                    });
+              }
+            }, [activeVideoTool, isDrawing]);
+
+                  // VR ↔ React State Bridge
+                  const vrEditRef = React.useRef({field: "", value: "", playerId: -1 });
+            useEffect(() => {
+              const handlePlayerMoved = (e) => {
+                const {id, vrX, vrZ} = e.detail;
+                // Update vrX/vrZ on the player
+                setPlayers((prev) =>
+                  prev.map((p) => (p.id === id ? {...p, vrX, vrZ} : p)),
+                  );
+                  // Also write back into playerPositions (3D table → 2D field coordinate mapping)
+                  // VR table: x [-2.2, 2.2], z [-1.5, 1.5] → field px: x [0,420], y [0,640]
+                  const fieldX = ((vrX + 2.2) / 4.4) * 420;
+                  const fieldY = ((vrZ + 1.5) / 3.0) * 640;
+                setPlayerPositions((prev) => {
+                  const next = {
+                    ...prev,
+                    [id]: {x: Math.round(fieldX), y: Math.round(fieldY) },
+                  };
+                  localStorage.setItem(
+                  "gerd_playerPositions",
+                  JSON.stringify(next),
+                  );
+                  return next;
+                });
+              };
+              const handleOpenTab = (e) => {
+                const {tab} = e.detail;
+
+                  // If in VR, don't exit! Just teleport to the relevant panel area
+                  if (view === "vr") {
+                  const rig = document.getElementById("vr-rig");
+                  if (!rig) return;
+
+                  // Define teleport targets based on panel positions
+                  const targets = {
+                    video: "-6 0 6",
+                  medical: "-3.5 0 -7",
+                  cfo: "0 0 -8",
+                  nlz: "7 0 0",
+                  tactical: "4 0 4",
+                  };
+
+                  if (targets[tab]) {
+                    rig.setAttribute("position", targets[tab]);
+
+                  // Vocal Triggers for VR Proximity
+                  if (tab === "medical")
+                  gerdSpeak(
+                  "Medizinisches Labor aktiv. Scanne Spieler-Vitalwerte...",
+                  "Arzt-Gerd",
+                  );
+                  else if (tab === "video")
+                  gerdSpeak(
+                  "Video-Analyse-Hub bereit. Lade taktisches Material.",
+                  "Gerd Analyst",
+                  );
+                  else if (tab === "cfo")
+                  gerdSpeak(
+                  "Finanz-Dashboard geladen. Wir müssen wirtschaftlich effizient bleiben.",
+                  "Manager-Gerd",
+                  );
+                  else if (tab === "nlz")
+                  gerdSpeak(
+                  "NLZ Bereich betreten. Fokus auf die Talent-Schmiede.",
+                  "Trainer-Gerd",
+                  );
+                  }
+                  return;
+                }
+
+                  // Otherwise, switch to dashboard
+                  setView("dashboard");
+                  setActiveTab(tab); // Direct switch is cleaner
+              };
+              // VR keyboard: which field is currently being edited
+              const handleEditField = (e) => {
+                    vrEditRef.current = e.detail;
+                  vrEditRef.current.value = e.detail.value || "";
+                  setKbValue(e.detail.value || "");
+              };
+              // VR key press → build string, commit on CLOSE
+              const handleKeyPress = (e) => {
+                const {char} = e.detail;
+                  const ref = vrEditRef.current;
+                  if (char === "CLOSE") {
+                  // Hide keyboard
+                  const kb = document.getElementById("vr-keyboard");
+                  if (kb) kb.setAttribute("visible", "false");
+                  // Commit value to React state
+                  const val = ref.value;
+                  if (ref.field === "budget") {
+                    const num = parseFloat(val);
+                  if (!isNaN(num)) setBudget(num * 1000000);
+                  } else if (ref.field === "name" && ref.playerId >= 0) {
+                    setPlayers((prev) =>
+                      prev.map((p) =>
+                        p.id === ref.playerId ? { ...p, name: val } : p,
+                      ),
+                    );
+                  }
+                  vrEditRef.current = {field: "", value: "", playerId: -1 };
+                  setKbValue("");
+                } else if (char === "BACKSPACE") {
+                    ref.value = ref.value.slice(0, -1);
+                  setKbValue(ref.value);
+                } else if (char === "SPACE") {
+                    ref.value += " ";
+                  setKbValue(ref.value);
+                } else {
+                    ref.value += char;
+                  setKbValue(ref.value);
+                }
+              };
+              const handleKeyShift = () => {
+                    setIsShift((prev) => !prev);
+              };
+              const handleKeySym = () => {
+                    setIsSymbols((prev) => !prev);
+              };
+                  window.addEventListener("vr-player-moved", handlePlayerMoved);
+                  window.addEventListener("vr-open-tab", handleOpenTab);
+                  window.addEventListener("vr-edit-field", handleEditField);
+                  window.addEventListener("vr-key-press", handleKeyPress);
+                  window.addEventListener("vr-key-shift", handleKeyShift);
+                  window.addEventListener("vr-key-sym", handleKeySym);
+              return () => {
+                    window.removeEventListener("vr-player-moved", handlePlayerMoved);
+                  window.removeEventListener("vr-open-tab", handleOpenTab);
+                  window.removeEventListener("vr-edit-field", handleEditField);
+                  window.removeEventListener("vr-key-press", handleKeyPress);
+                  window.removeEventListener("vr-key-shift", handleKeyShift);
+                  window.removeEventListener("vr-key-sym", handleKeySym);
+              };
+            }, []);
+
+                  if (view === "vr") {
+              // Register A-Frame custom components (idempotent)
+              if (typeof AFRAME !== "undefined") {
+                // --- STARK GRABBABLE: grab & move any element with laser ---
+                if (!AFRAME.components["stark-grabbable"]) {
+                    AFRAME.registerComponent("stark-grabbable", {
+                      init() {
+                        this.grabbed = false;
+                        this.grabOffset = new THREE.Vector3();
+                        this.el.classList.add("grabbable");
+                        this.el.addEventListener("mousedown", (e) => {
+                          this.grabbed = true;
+                          this.el.setAttribute("material", "emissive", "#00f3ff");
+                          this.el.setAttribute(
+                            "material",
+                            "emissiveIntensity",
+                            "0.3",
+                          );
+                          this.lastIntersect = e.detail.intersection;
+                        });
+                        window.addEventListener("mouseup", () => {
+                          if (this.grabbed) {
+                            this.grabbed = false;
+                            this.el.setAttribute("material", "emissive", "#000000");
+                            this.el.setAttribute(
+                              "material",
+                              "emissiveIntensity",
+                              "0",
+                            );
+                          }
+                        });
+                        this.el.addEventListener("mousemove", (e) => {
+                          if (!this.grabbed || !e.detail.intersection) return;
+                          const pos = e.detail.intersection.point;
+                          this.el.setAttribute(
+                            "position",
+                            `${pos.x.toFixed(2)} ${(parseFloat(this.el.getAttribute("position").y) || 1.5).toFixed(2)} ${pos.z.toFixed(2)}`,
+                          );
+                        });
+                      },
+                    });
+                }
+                  // --- PLAYER TOKEN DRAG: move players on the tactic table & sync to React ---
+                  if (!AFRAME.components["player-drag"]) {
+                    AFRAME.registerComponent("player-drag", {
+                      schema: { playerId: { type: "number", default: 0 } },
+                      init() {
+                        this.grabbed = false;
+                        this.el.classList.add("draggable");
+                        this.el.addEventListener("mousedown", () => {
+                          this.grabbed = true;
+                        });
+                        window.addEventListener("mouseup", () => {
+                          this.grabbed = false;
+                        });
+                        this.el.addEventListener("mousemove", (e) => {
+                          if (!this.grabbed || !e.detail.intersection) return;
+                          const pt = e.detail.intersection.point;
+                          // Clamp to table bounds
+                          const x = Math.max(-2.2, Math.min(2.2, pt.x));
+                          const z = Math.max(-1.5, Math.min(1.5, pt.z));
+                          this.el.setAttribute(
+                            "position",
+                            `${x.toFixed(2)} 0.82 ${z.toFixed(2)}`,
+                          );
+                          // Sync back to React via custom event
+                          window.dispatchEvent(
+                            new CustomEvent("vr-player-moved", {
+                              detail: {
+                                id: this.data.playerId,
+                                vrX: parseFloat(x.toFixed(2)),
+                                vrZ: parseFloat(z.toFixed(2)),
+                              },
+                            }),
+                          );
+                        });
+                      },
+                    });
+                }
+                  // --- VR TELEPORT: click floor to move ---
+                  if (!AFRAME.components["vr-teleport"]) {
+                    AFRAME.registerComponent("vr-teleport", {
+                      init() {
+                        this.el.addEventListener("click", (e) => {
+                          if (!e.detail.intersection) return;
+                          const pt = e.detail.intersection.point;
+                          const rig = document.getElementById("vr-rig");
+                          if (rig)
+                            rig.setAttribute(
+                              "position",
+                              `${pt.x.toFixed(2)} 0 ${pt.z.toFixed(2)}`,
+                            );
+                        });
+                      },
+                    });
+                }
+                  // --- VR PANEL CLICK → open 2D Dashboard tab ---
+                  if (!AFRAME.components["panel-link"]) {
+                    AFRAME.registerComponent("panel-link", {
+                      schema: { tab: { type: "string", default: "" } },
+                      init() {
+                        this.el.addEventListener("click", () => {
+                          window.dispatchEvent(
+                            new CustomEvent("vr-open-tab", {
+                              detail: { tab: this.data.tab },
+                            }),
+                          );
+                        });
+                      },
+                    });
+                }
+                  // --- VR EDITABLE FIELD: click to open keyboard and edit a value ---
+                  if (!AFRAME.components["vr-editable"]) {
+                    AFRAME.registerComponent("vr-editable", {
+                      schema: {
+                        field: { type: "string", default: "" },
+                        value: { type: "string", default: "" },
+                        playerId: { type: "number", default: -1 },
+                      },
+                      init() {
+                        this.el.classList.add("clickable");
+                        this.el.addEventListener("click", (e) => {
+                          // Stop propagation so parent panel-link doesn't fire!
+                          if (e.detail && e.detail.cursorEl) {
+                            // Common in A-Frame to stop bubbling on custom events
+                          }
+                          e.stopPropagation();
+
+                          const kb = document.getElementById("vr-keyboard");
+                          const rig = document.getElementById("vr-rig");
+                          const camera = document.querySelector("a-camera");
+
+                          if (kb && rig && camera) {
+                            // Get camera's world position and direction
+                            const worldPos = new THREE.Vector3();
+                            camera.object3D.getWorldPosition(worldPos);
+
+                            const direction = new THREE.Vector3(0, 0, -1);
+                            direction.applyQuaternion(
+                              camera.object3D.getWorldQuaternion(
+                                new THREE.Quaternion(),
+                              ),
+                            );
+
+                            // Position keyboard 1.2m in front of camera
+                            const kbPos = worldPos
+                              .clone()
+                              .add(direction.multiplyScalar(1.2));
+
+                            kb.setAttribute(
+                              "position",
+                              `${kbPos.x} ${kbPos.y} ${kbPos.z}`,
+                            );
+
+                            // Rotate keyboard to face camera (y-axis only)
+                            const camRot = camera.getAttribute("rotation") || {
+                              y: 0,
+                            };
+                            kb.setAttribute("rotation", `0 ${camRot.y} 0`);
+                            kb.setAttribute("visible", "true");
+                          }
+
+                          window.dispatchEvent(
+                            new CustomEvent("vr-edit-field", {
+                              detail: {
+                                field: this.data.field,
+                                value: this.data.value,
+                                playerId: this.data.playerId,
+                              },
+                            }),
+                          );
+                        });
+                      },
+                    });
+                }
+                  // --- VR KEYBOARD CONTROLLER: distribute key clicks to edit state ---
+                  if (!AFRAME.components["vr-key-handler"]) {
+                    AFRAME.registerComponent("vr-key-handler", {
+                      schema: { char: { type: "string", default: "" } },
+                      init() {
+                        this.el.classList.add("clickable");
+                        this.el.addEventListener("click", () => {
+                          if (this.data.char === "SHIFT") {
+                            window.dispatchEvent(new CustomEvent("vr-key-shift"));
+                          } else if (this.data.char === "SYM") {
+                            window.dispatchEvent(new CustomEvent("vr-key-sym"));
+                          } else {
+                            window.dispatchEvent(
+                              new CustomEvent("vr-key-press", {
+                                detail: { char: this.data.char },
+                              }),
+                            );
+                          }
+                        });
+                      },
+                    });
+                }
+
+                  // --- BOUNDARY CHECK: Keep user within a specific radius ---
+                  if (!AFRAME.components["boundary-check"]) {
+                    AFRAME.registerComponent("boundary-check", {
+                      schema: { radius: { type: "number", default: 15 } },
+                      tick() {
+                        const rig = this.el.parentNode; // The vr-rig
+                        if (!rig) return;
+                        const pos = rig.getAttribute("position");
+                        if (!pos) return;
+
+                        const dist = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+                        if (dist > this.data.radius) {
+                          // Calculate direction vector to center
+                          const factor = this.data.radius / dist;
+                          rig.setAttribute("position", {
+                            x: pos.x * factor,
+                            y: pos.y,
+                            z: pos.z * factor,
+                          });
+                        }
+                      },
+                    });
+                }
+              }
+
+                  return (
+                  <div className="w-screen h-screen relative bg-black">
+                    <button
+                      onClick={() => setView("dashboard")}
+                      className="absolute top-6 left-6 z-[100] bg-redbull border-2 border-transparent hover:border-white px-8 py-3 rounded font-black uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(226,27,77,0.7)] transition-all flex items-center gap-2 cursor-pointer"
+                    >
+                      <Icon name="log-out" /> Dash-Log
+                    </button>
+
+                    <a-scene
+                      xr-mode-ui="enabled: true"
+                      renderer="antialias: true; colorManagement: true"
+                      shadow="type: pcfsoft"
+                    >
+                      <a-assets>
+                        <canvas
+                          id="telestrator-texture"
+                          width="1280"
+                          height="720"
+                        ></canvas>
+                      </a-assets>
+
+                      {/* ========== STADIUM ATMOSPHERE: EXTREME HIGH-TECH STADIUM ========== */}
+                      <a-sky color="#050a1b"></a-sky>
+
+                      {/* Stadium Floodlights (4 corners) */}
+                      <a-entity position="-15 15 -15">
+                        <a-light
+                          type="spot"
+                          color="#fff"
+                          intensity="1.5"
+                          angle="45"
+                          target="#vr-pitch"
+                        ></a-light>
+                        <a-cylinder
+                          radius="0.2"
+                          height="15"
+                          color="#333"
+                        ></a-cylinder>
+                        <a-box
+                          width="2"
+                          height="1"
+                          depth="0.5"
+                          position="0 7.5 0"
+                          color="#111"
+                        >
+                          <a-sphere
+                            radius="0.1"
+                            position="-0.5 0 0.3"
+                            color="#fff"
+                            material="emissive: #fff; emissiveIntensity: 2"
+                          ></a-sphere>
+                          <a-sphere
+                            radius="0.1"
+                            position="0 0 0.3"
+                            color="#fff"
+                            material="emissive: #fff; emissiveIntensity: 2"
+                          ></a-sphere>
+                          <a-sphere
+                            radius="0.1"
+                            position="0.5 0 0.3"
+                            color="#fff"
+                            material="emissive: #fff; emissiveIntensity: 2"
+                          ></a-sphere>
+                        </a-box>
+                      </a-entity>
+                      <a-entity position="15 15 -15">
+                        <a-light
+                          type="spot"
+                          color="#fff"
+                          intensity="1.5"
+                          angle="45"
+                          target="#vr-pitch"
+                        ></a-light>
+                        <a-cylinder
+                          radius="0.2"
+                          height="15"
+                          color="#333"
+                        ></a-cylinder>
+                        <a-box
+                          width="2"
+                          height="1"
+                          depth="0.5"
+                          position="0 7.5 0"
+                          color="#111"
+                        >
+                          <a-sphere
+                            radius="0.1"
+                            position="-0.5 0 0.3"
+                            color="#fff"
+                            material="emissive: #fff; emissiveIntensity: 2"
+                          ></a-sphere>
+                          <a-sphere
+                            radius="0.1"
+                            position="0 0 0.3"
+                            color="#fff"
+                            material="emissive: #fff; emissiveIntensity: 2"
+                          ></a-sphere>
+                          <a-sphere
+                            radius="0.1"
+                            position="0.5 0 0.3"
+                            color="#fff"
+                            material="emissive: #fff; emissiveIntensity: 2"
+                          ></a-sphere>
+                        </a-box>
+                      </a-entity>
+
+                      {/* Distant Stadium Stands (Silhouettes) */}
+                      <a-entity position="0 0 -20">
+                        <a-box
+                          width="40"
+                          height="10"
+                          depth="1"
+                          color="#111"
+                          opacity="0.8"
+                        ></a-box>
+                        <a-text
+                          value="STARK ELITE ARENA"
+                          align="center"
+                          position="0 6 0.6"
+                          color="#00f3ff"
+                          width="30"
+                          font="exo2bold"
+                          opacity="0.3"
+                        ></a-text>
+                      </a-entity>
+
+                      {/* ========== NEON-CYAN FLOOR GRID ========== */}
+                      <a-entity position="0 0 0" rotation="-90 0 0">
+                        <a-grid
+                          width="100"
+                          height="100"
+                          color="#00f3ff"
+                          opacity="0.05"
+                          cell-size="2"
+                        ></a-grid>
+                      </a-entity>
+                      <a-plane
+                        position="0 0.01 0"
+                        rotation="-90 0 0"
+                        width="100"
+                        height="100"
+                        opacity="0.01"
+                        class="teleport-floor"
+                        vr-teleport
+                      ></a-plane>
+
+                      {/* ========== AMBIENT + ACCENT LIGHTING ========== */}
+                      <a-light
+                        type="ambient"
+                        color="#1a202c"
+                        intensity="1.2"
+                      ></a-light>
+                      <a-light
+                        type="point"
+                        position="0 8 0"
+                        color="#00f3ff"
+                        intensity="1.2"
+                        distance="30"
+                      ></a-light>
+
+                      {/* ========== CENTRAL TACTICAL PITCH (0 0 0) ========== */}
+                      <a-entity position="0 0.8 0">
+                        {/* Table Base & Glowing Rim */}
+                        <a-cylinder
+                          radius="2.3"
+                          height="0.1"
+                          color="#111"
+                          metalness="0.5"
+                          roughness="0.5"
+                        >
+                          <a-ring
+                            radius-inner="2.2"
+                            radius-outer="2.25"
+                            position="0 0.051 0"
+                            rotation="-90 0 0"
+                            color="#00f3ff"
+                            material="emissive: #00f3ff; emissiveIntensity: 2; opacity: 0.5"
+                          ></a-ring>
+                        </a-cylinder>
+                        {isOptimizing && (
+                          <a-text
+                            value="KI-OPTIMIERUNG LÄUFT..."
+                            align="center"
+                            position="0 1.2 0"
+                            color="#00f3ff"
+                            font="exo2bold"
+                            width="3"
+                            animation="property: opacity; from: 0.3; to: 1; dur: 500; loop: true"
+                          ></a-text>
+                        )}
+                        {isOptimizing && (
+                          <a-ring
+                            radius-inner="2.3"
+                            radius-outer="2.4"
+                            rotation="-90 0 0"
+                            position="0 0.06 0"
+                            color="#00f3ff"
+                            animation="property: opacity; from: 0.1; to: 0.8; dur: 500; loop: true"
+                          ></a-ring>
+                        )}
+
+                        {/* The High-Fidelity Pitch */}
+                        <a-plane
+                          width="4"
+                          height="2.8"
+                          rotation="-90 0 0"
+                          position="0 0.051 0"
+                          color="#0d2b1d"
+                        >
+                          {/* Boundary White Lines */}
+                          <a-plane
+                            width="3.8"
+                            height="0.02"
+                            position="0 1.35 0.01"
+                            color="#fff"
+                            opacity="0.8"
+                          ></a-plane>{" "}
+                          {/* Top */}
+                          <a-plane
+                            width="3.8"
+                            height="0.02"
+                            position="0 -1.35 0.01"
+                            color="#fff"
+                            opacity="0.8"
+                          ></a-plane>{" "}
+                          {/* Bottom */}
+                          <a-plane
+                            width="0.02"
+                            height="2.72"
+                            position="1.9 0 0.01"
+                            color="#fff"
+                            opacity="0.8"
+                          ></a-plane>{" "}
+                          {/* Right Goal Line */}
+                          <a-plane
+                            width="0.02"
+                            height="2.72"
+                            position="-1.9 0 0.01"
+                            color="#fff"
+                            opacity="0.8"
+                          ></a-plane>{" "}
+                          {/* Left Goal Line */}
+                          {/* Midfield & Center Circle */}
+                          <a-plane
+                            width="0.02"
+                            height="2.72"
+                            position="0 0 0.01"
+                            color="#fff"
+                            opacity="0.6"
+                          ></a-plane>
+                          <a-ring
+                            radius-inner="0.39"
+                            radius-outer="0.41"
+                            position="0 0 0.01"
+                            color="#fff"
+                            opacity="0.6"
+                          ></a-ring>
+                          <a-circle
+                            radius="0.03"
+                            position="0 0 0.02"
+                            color="#fff"
+                          ></a-circle>
+                          {/* Penalty Area (Left) - 16m Box */}
+                          <a-plane
+                            width="0.6"
+                            height="0.02"
+                            position="-1.6 0.7 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.6"
+                            height="0.02"
+                            position="-1.6 -0.7 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.02"
+                            height="1.42"
+                            position="-1.3 0 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          {/* Goal Area (Left) - 5m Box */}
+                          <a-plane
+                            width="0.2"
+                            height="0.02"
+                            position="-1.8 0.35 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.2"
+                            height="0.02"
+                            position="-1.8 -0.35 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.02"
+                            height="0.72"
+                            position="-1.7 0 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          {/* Penalty Area (Right) - 16m Box */}
+                          <a-plane
+                            width="0.6"
+                            height="0.02"
+                            position="1.6 0.7 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.6"
+                            height="0.02"
+                            position="1.6 -0.7 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.02"
+                            height="1.42"
+                            position="1.3 0 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          {/* Goal Area (Right) - 5m Box */}
+                          <a-plane
+                            width="0.2"
+                            height="0.02"
+                            position="1.8 0.35 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.2"
+                            height="0.02"
+                            position="1.8 -0.35 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          <a-plane
+                            width="0.02"
+                            height="0.72"
+                            position="1.7 0 0.01"
+                            color="#fff"
+                          ></a-plane>
+                          {/* Penalty Arcs */}
+                          <a-ring
+                            radius-inner="0.39"
+                            radius-outer="0.41"
+                            theta-start="-70"
+                            theta-length="140"
+                            position="-1.3 0 0.01"
+                            color="#fff"
+                            opacity="0.4"
+                          ></a-ring>
+                          <a-ring
+                            radius-inner="0.39"
+                            radius-outer="0.41"
+                            theta-start="110"
+                            theta-length="140"
+                            position="1.3 0 0.01"
+                            color="#fff"
+                            opacity="0.4"
+                          ></a-ring>
+                        </a-plane>
+
+                        {/* Miniature 3D Goals */}
+                        <a-entity position="-1.9 0.06 0">
+                          <a-box
+                            width="0.02"
+                            height="0.15"
+                            depth="0.5"
+                            position="0 0.075 0"
+                            color="#fff"
+                            material="wireframe: true; opacity: 0.5"
+                          ></a-box>
+                          <a-plane
+                            width="0.5"
+                            height="0.15"
+                            position="0.01 0.075 0"
+                            rotation="0 90 0"
+                            color="#fff"
+                            material="wireframe: true; opacity: 0.3"
+                          ></a-plane>
+                        </a-entity>
+                        <a-entity position="1.9 0.06 0">
+                          <a-box
+                            width="0.02"
+                            height="0.15"
+                            depth="0.5"
+                            position="0 0.075 0"
+                            color="#fff"
+                            material="wireframe: true; opacity: 0.5"
+                          ></a-box>
+                          <a-plane
+                            width="0.5"
+                            height="0.15"
+                            position="-0.01 0.075 0"
+                            rotation="0 -90 0"
+                            color="#fff"
+                            material="wireframe: true; opacity: 0.3"
+                          ></a-plane>
+                        </a-entity>
+
+                        {Object.entries(playerPositions).map(([id, pos]) => {
+                          const p = players.find(
+                            (player) => player.id === parseInt(id),
+                          );
+                          if (!p) return null;
+                          // Mapping: 2dX (0..420) -> vrX (-2..2), 2dY (0..640) -> vrZ (-1.4..1.4)
+                          const vrX = (pos.x / 420) * 4 - 2;
+                          const vrZ = (pos.y / 640) * 2.8 - 1.4;
+                          const isInjured = p.isInjured;
+                          const color = isInjured ? "#E21B4D" : "#00f3ff";
+                          return (
+                            <a-entity
+                              key={`token-${p.id}`}
+                              position={`${vrX} 0.05 ${vrZ}`}
+                              player-drag={`playerId: ${p.id}`}
+                              class="draggable"
+                            >
+                              <a-cylinder
+                                radius="0.08"
+                                height="0.02"
+                                color={color}
+                                material={`emissive: ${color}; emissiveIntensity: 0.5`}
+                              ></a-cylinder>
+                              <a-text
+                                value={p.name ? p.name.substring(0, 10) : "?"}
+                                align="center"
+                                position="0 0.1 0"
+                                rotation="-45 0 0"
+                                color="#ffffff"
+                                font="exo2bold"
+                                width="1.2"
+                              ></a-text>
+                              <a-text
+                                value={p.position}
+                                align="center"
+                                position="0 0.04 0"
+                                rotation="-90 0 0"
+                                color="#000"
+                                font="exo2bold"
+                                width="0.8"
+                              ></a-text>
+                            </a-entity>
+                          );
+                        })}
+
+                        {/* Opponents in VR */}
+                        {isActive &&
+                          Object.entries(opponentPositions).map(([id, pos]) => {
+                            const vrX = (pos.x / 420) * 4 - 2;
+                            const vrZ = (pos.y / 640) * 2.8 - 1.4;
+                            return (
+                              <a-entity key={id} position={`${vrX} 0.05 ${vrZ}`}>
+                                <a-cylinder
+                                  radius="0.07"
+                                  height="0.02"
+                                  color="#600"
+                                  material="emissive: #E21B4D; emissiveIntensity: 0.3"
+                                ></a-cylinder>
+                                <a-text
+                                  value="X"
+                                  align="center"
+                                  position="0 0.04 0"
+                                  rotation="-90 0 0"
+                                  color="#E21B4D"
+                                  font="exo2bold"
+                                  width="1"
+                                ></a-text>
+                              </a-entity>
+                            );
+                          })}
+
+                        {/* Predictive Reactions in VR */}
+                        {opponentReactions.map((r, i) => {
+                          const v1 = {
+                            x: (r.from.x / 420) * 4 - 2,
+                            z: (r.from.y / 640) * 2.8 - 1.4,
+                          };
+                          const v2 = {
+                            x: (r.to.x / 420) * 4 - 2,
+                            z: (r.to.y / 640) * 2.8 - 1.4,
+                          };
+                          return (
+                            <a-entity
+                              key={`vr-react-${i}`}
+                              line={`start: ${v1.x} 0.051 ${v1.z}; end: ${v2.x} 0.051 ${v2.z}; color: #E21B4D; opacity: 1`}
+                            ></a-entity>
+                          );
+                        })}
+
+                        {/* Drawings in VR (Vektorgrafik) */}
+                        {drawingPaths.map((path, idx) => (
+                          <a-entity key={`vr-path-${idx}`}>
+                            {path.points.map((p, i) => {
+                              if (i === 0) return null;
+                              const p1 = path.points[i - 1];
+                              const p2 = p;
+                              const v1 = {
+                                x: (p1.x / 420) * 4 - 2,
+                                z: (p1.y / 640) * 2.8 - 1.4,
+                              };
+                              const v2 = {
+                                x: (p2.x / 420) * 4 - 2,
+                                z: (p2.y / 640) * 2.8 - 1.4,
+                              };
+                              const color =
+                                path.mode === "run" ? "#ffffff" : "#00f3ff";
+                              return (
+                                <a-entity
+                                  key={`seg-${i}`}
+                                  line={`start: ${v1.x} 0.01 ${v1.z}; end: ${v2.x} 0.01 ${v2.z}; color: ${color}; opacity: 0.8`}
+                                ></a-entity>
+                              );
+                            })}
+                          </a-entity>
+                        ))}
+                      </a-entity>
+
+                      {/* ========== VIRTUAL GERD (AVATAR) ========== */}
+                      <a-entity
+                        id="gerd-avatar"
+                        position="-3 0 -2"
+                        rotation="0 45 0"
+                        class="clickable"
+                        onClick={() => {
+                          const readiness = players.reduce(
+                            (sum, p) => sum + (p.status === "injured" ? 0 : 1),
+                            0,
+                          );
+                          gerdSpeak(
+                            `Hallo in der VR Umgebung! Der Kader hat eine Bereitschaft von ${Math.round((readiness / players.length) * 100)} Prozent. Wir sind bereit für ${clubIdentity.name || "den Audit"}.`,
+                            "Trainer-Gerd",
+                          );
+                        }}
+                      >
+                        {/* Body */}
+                        <a-cylinder
+                          radius="0.25"
+                          height="1.6"
+                          color="#001a33"
+                          position="0 0.8 0"
+                        ></a-cylinder>
+                        {/* Head */}
+                        <a-sphere
+                          radius="0.2"
+                          position="0 1.8 0"
+                          color="#ffdbac"
+                        ></a-sphere>
+                        {/* Glow Ring */}
+                        <a-ring
+                          radius-inner="0.3"
+                          radius-outer="0.4"
+                          rotation="-90 0 0"
+                          position="0 0.01 0"
+                          color="#00f3ff"
+                          animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dur: 2000; loop: true; dir: alternate"
+                        ></a-ring>
+                        <a-text
+                          value="TRAINER GERD"
+                          align="center"
+                          position="0 2.2 0"
+                          color="#00f3ff"
+                          font="exo2bold"
+                          width="4"
+                        ></a-text>
+                        <a-text
+                          value="CLICK FOR BRIEFING"
+                          align="center"
+                          position="0 2.0 0"
+                          color="#fff"
+                          width="2"
+                          opacity="0.6"
+                        ></a-text>
+                      </a-entity>
+
+                      {/* ========== FRONT (0 2 -8): VIDEO HUB & TELESTRATOR ========== */}
+                      <a-entity
+                        position="0 2 -8"
+                        rotation="0 0 0"
+                        scale="2.2 2.2 2.2"
+                      >
+                        <a-plane
+                          width="6"
+                          height="3.5"
+                          color="#000"
+                          opacity="0.2"
+                          material="transparent: true; metalness: 0.8; roughness: 0.1"
+                        >
+                          <a-plane
+                            width="6.1"
+                            height="3.6"
+                            position="0 0 -0.01"
+                            color="#00f3ff"
+                            opacity="0.3"
+                          ></a-plane>
+                          <a-text
+                            value="◈ VIDEO HUB & TELESTRATOR"
+                            align="center"
+                            position="0 1.9 0.01"
+                            color="#00f3ff"
+                            font="exo2bold"
+                            width="8"
+                          ></a-text>
+                          <a-plane
+                            width="5.5"
+                            height="2.8"
+                            position="0 0 0.01"
+                            src="#telestrator-texture"
+                            material="shader: flat; transparent: true"
+                          ></a-plane>
+                          <a-plane
+                            width="2.5"
+                            height="0.4"
+                            position="0 -2.1 0.01"
+                            color="#00f3ff"
+                            opacity="0.6"
+                            class="clickable"
+                            panel-link="tab: video"
+                          >
+                            <a-text
+                              value="OPEN 2D ANALYSIS"
+                              align="center"
+                              position="0 0 0.01"
+                              color="#000"
+                              font="exo2bold"
+                              width="4"
+                            ></a-text>
+                          </a-plane>
+                        </a-plane>
+                      </a-entity>
+
+                      {/* ========== HALBRECHTS (6 2 -6): GERD AI STATUS ========== */}
+                      <a-entity position="6 2 -6" rotation="0 -45 0" scale="2 2 2">
+                        <a-plane
+                          width="4"
+                          height="2.5"
+                          color="#000"
+                          opacity="0.3"
+                          material="transparent: true"
+                        >
+                          <a-plane
+                            width="4.1"
+                            height="2.6"
+                            position="0 0 -0.01"
+                            color="#00f3ff"
+                            opacity="0.2"
+                          ></a-plane>
+                          <a-text
+                            value="◈ GERD AI STATUS FEED"
+                            align="center"
+                            position="0 1.4 0.01"
+                            color="#00f3ff"
+                            font="exo2bold"
+                            width="6"
+                          ></a-text>
+                          <a-entity position="0 0.2 0.02">
+                            {aiLogs.slice(0, 5).map((log, i) => (
+                              <a-text
+                                key={`vr-log-${log.id}`}
+                                value={`> ${log.text.substring(0, 45)}`}
+                                position={`-1.8 ${0.6 - i * 0.3} 0`}
+                                color="#fff"
+                                width="4"
+                                font="monoid"
+                              ></a-text>
+                            ))}
+                          </a-entity>
+                          <a-text
+                            value="STATUS: OPTIMIZING NEURAL PATHS..."
+                            align="center"
+                            position="0 -1.0 0.01"
+                            color="#00f3ff"
+                            width="4"
+                            opacity="0.6"
+                          ></a-text>
+                        </a-plane>
+                      </a-entity>
+
+                      {/* ========== HALBLINKS (-6 2 -6): MEDICAL LAB & SQUAD ========== */}
+                      <a-entity position="-6 2 -6" rotation="0 45 0" scale="2 2 2">
+                        <a-plane
+                          width="5"
+                          height="3.5"
+                          color="#000"
+                          opacity="0.2"
+                          material="transparent: true"
+                        >
+                          <a-plane
+                            width="5.1"
+                            height="3.6"
+                            position="0 0 -0.01"
+                            color="#E21B4D"
+                            opacity="0.3"
+                          ></a-plane>
+                          <a-text
+                            value="◈ MEDICAL LAB OVERVIEW"
+                            align="center"
+                            position="0 1.9 0.01"
+                            color="#E21B4D"
+                            font="exo2bold"
+                            width="8"
+                          ></a-text>
+                          <a-entity
+                            position="0 0 0.02"
+                            layout="type: column; margin: 0.3"
+                          >
+                            <a-text
+                              value={`INJURED PLAYERS: ${players.filter((p) => p.status === "injured").length}`}
+                              align="center"
+                              position="0 0.5 0"
+                              color="#E21B4D"
+                              width="6"
+                            ></a-text>
+                            <a-text
+                              value="BIOMETRIC FEED: ACTIVE"
+                              align="center"
+                              position="0 0"
+                              color="#00ff88"
+                              width="5"
+                            ></a-text>
+                          </a-entity>
+                          <a-plane
+                            width="2.5"
+                            height="0.4"
+                            position="0 -2.1 0.01"
+                            color="#E21B4D"
+                            opacity="0.6"
+                            class="clickable"
+                            panel-link="tab: medical"
+                          >
+                            <a-text
+                              value="VITAL CORE"
+                              align="center"
+                              position="0 0 0.01"
+                              color="#fff"
+                              font="exo2bold"
+                              width="4"
+                            ></a-text>
+                          </a-plane>
+                        </a-plane>
+                      </a-entity>
+
+                      {/* ========== RECHTS AUSSEN (8 2 0): CFO BOARD & SUITCASE ========== */}
+                      <a-entity position="8 2 0" rotation="0 -90 0" scale="2 2 2">
+                        <a-plane
+                          width="5"
+                          height="4.5"
+                          color="#000"
+                          opacity="0.2"
+                          material="transparent: true"
+                        >
+                          <a-plane
+                            width="5.1"
+                            height="4.6"
+                            position="0 0 -0.01"
+                            color="#d4af37"
+                            opacity="0.3"
+                          ></a-plane>
+                          <a-text
+                            value="◈ CFO MANAGEMENT DASHBOARD"
+                            align="center"
+                            position="0 2.4 0.01"
+                            color="#d4af37"
+                            font="exo2bold"
+                            width="8"
+                          ></a-text>
+
+                          <a-entity position="0 1.2 0.02">
+                            <a-text
+                              value={`BUDGET: € ${(budget / 1000000).toFixed(2)}M`}
+                              align="center"
+                              position="0 0.5 0"
+                              color="#d4af37"
+                              font="exo2bold"
+                              width="7"
+                            ></a-text>
+                            <a-plane
+                              width="3"
+                              height="0.4"
+                              position="0 -0.2 0"
+                              color="#d4af3720"
+                              opacity="0.8"
+                              class="clickable"
+                              vr-editable={`field: budget; value: ${(budget / 1000000).toFixed(2)}`}
+                            >
+                              <a-text
+                                value="✎ EDIT BUDGET"
+                                align="center"
+                                position="0 0 0.01"
+                                color="#d4af37"
+                                width="4"
+                              ></a-text>
+                            </a-plane>
+                          </a-entity>
+
+                          {/* AI COMMUNICATION STATUS IN VR */}
+                          <a-entity position="0 -0.5 0.02">
+                            <a-plane
+                              width="4.5"
+                              height="1.8"
+                              color="#111"
+                              opacity="0.8"
+                              material="transparent: true"
+                            >
+                              <a-text
+                                value="◈ KI COMMUNICATION HUB"
+                                align="center"
+                                position="0 0.7 0.01"
+                                color="#redbull"
+                                font="exo2bold"
+                                width="5"
+                              ></a-text>
+
+                              {commLoading ? (
+                                <a-text
+                                  value="GERD IS FORMULATING..."
+                                  align="center"
+                                  position="0 0.1 0.01"
+                                  color="#fff"
+                                  width="4"
+                                  font="monoid"
+                                  opacity="0.8"
+                                >
+                                  <a-animation
+                                    attribute="opacity"
+                                    from="0.3"
+                                    to="1"
+                                    dur="1000"
+                                    repeat="indefinite"
+                                  ></a-animation>
+                                </a-text>
+                              ) : (
+                                <a-entity>
+                                  <a-text
+                                    value={`SCENARIO: ${commScenario.toUpperCase()}`}
+                                    align="center"
+                                    position="0 0.2 0.01"
+                                    color="#fff"
+                                    width="3.5"
+                                    font="monoid"
+                                    opacity="0.6"
+                                  ></a-text>
+                                  <a-text
+                                    value={
+                                      commEmail ? "BLUEPRINT READY" : "SYSTEM IDLE"
+                                    }
+                                    align="center"
+                                    position="0 -0.2 0.01"
+                                    color={commEmail ? "#00ff88" : "#fff"}
+                                    width="4"
+                                    font="exo2bold"
+                                  ></a-text>
+                                </a-entity>
+                              )}
+                            </a-plane>
+                          </a-entity>
+
+                          <a-plane
+                            width="2.5"
+                            height="0.4"
+                            position="0 -2.6 0.01"
+                            color="#d4af37"
+                            opacity="0.6"
+                            class="clickable"
+                            panel-link="tab: cfo"
+                          >
+                            <a-text
+                              value="FINANCIAL HUB"
+                              align="center"
+                              position="0 0 0.01"
+                              color="#000"
+                              font="exo2bold"
+                              width="4"
+                            ></a-text>
+                          </a-plane>
+                        </a-plane>
+                      </a-entity>
+
+                      {/* ========== BACK (0 2 8): PERFORMANCE JOURNAL & NLZ ========== */}
+                      <a-entity
+                        position="0 2 8"
+                        rotation="0 180 0"
+                        scale="2.2 2.2 2.2"
+                      >
+                        <a-plane
+                          width="6"
+                          height="4"
+                          color="#000"
+                          opacity="0.2"
+                          material="transparent: true"
+                        >
+                          <a-plane
+                            width="6.1"
+                            height="4.1"
+                            position="0 0 -0.01"
+                            color="#fff"
+                            opacity="0.3"
+                          ></a-plane>
+                          <a-text
+                            value="◈ PERFORMANCE JOURNAL & NLZ"
+                            align="center"
+                            position="0 2.2 0.01"
+                            color="#fff"
+                            font="exo2bold"
+                            width="8"
+                          ></a-text>
+                          <a-entity position="0 0.2 0.02">
+                            <a-text
+                              value={journal ? journal.title : "NO ACTIVE JOURNAL"}
+                              align="center"
+                              position="0 0.5 0"
+                              color="#redbull"
+                              font="exo2bold"
+                              width="5"
+                            ></a-text>
+                            {youthPlayers.slice(0, 5).map((yp, i) => (
+                              <a-text
+                                key={`nlz-vr-${yp.id}`}
+                                value={`TALENT: ${yp.name ? yp.name.substring(0, 12) : ""} | OVR:${Math.round(((yp.pac || 60) + (yp.sho || 60)) / 2)}`}
+                                align="center"
+                                position={`0 ${-0.1 - i * 0.3} 0`}
+                                color="#ffffff"
+                                width="4"
+                                opacity="0.8"
+                              ></a-text>
+                            ))}
+                          </a-entity>
+                          <a-plane
+                            width="2.5"
+                            height="0.4"
+                            position="0 -2.3 0.01"
+                            color="#fff"
+                            opacity="0.6"
+                            class="clickable"
+                            panel-link="tab: journal"
+                          >
+                            <a-text
+                              value="OPEN MAGAZINE"
+                              align="center"
+                              position="0 0 0.01"
+                              color="#000"
+                              font="exo2bold"
+                              width="4"
+                            ></a-text>
+                          </a-plane>
+                        </a-plane>
+                      </a-entity>
+
+                      {/* ========== NAVIGATION RIG ========== */}
+                      <a-entity
+                        id="vr-rig"
+                        position="0 0 2"
+                        movement-controls="controls: keyboard, gamepad; speed: 0.2; fly: false; acceleration: 20"
+                      >
+                        <a-entity
+                          camera
+                          position="0 1.6 0"
+                          look-controls="pointerLockEnabled: false"
+                        >
+                          <a-cursor
+                            color="#00f3ff"
+                            fuse="false"
+                            raycaster="objects: .clickable, .draggable, .teleport-floor"
+                          ></a-cursor>
+                        </a-entity>
+
+                        <a-entity
+                          laser-controls="hand: left"
+                          raycaster="objects: .clickable, .draggable, .teleport-floor; far: 20"
+                          line="color: #00f3ff; opacity: 0.7"
+                        ></a-entity>
+                        <a-entity
+                          laser-controls="hand: right"
+                          raycaster="objects: .clickable, .draggable, .teleport-floor; far: 20"
+                          line="color: #E21B4D; opacity: 0.7"
+                        ></a-entity>
+                      </a-entity>
+
+                      {/* VIRTUAL KEYBOARD */}
+                      <a-entity
+                        id="vr-keyboard"
+                        position="0 1.5 -1.5"
+                        rotation="-15 0 0"
+                        visible="false"
+                      >
+                        {/* Glass Backboard with Glowing Border */}
+                        <a-plane
+                          width="2.4"
+                          height="1.6"
+                          color="#000d1a"
+                          opacity="0.85"
+                          material="transparent: true; metalness: 0.6; roughness: 0.1"
+                        >
+                          <a-entity line="start: -1.2 0.8 0.01; end: 1.2 0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
+                          <a-entity line="start: -1.2 -0.8 0.01; end: 1.2 -0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
+                          <a-entity line="start: -1.2 0.8 0.01; end: -1.2 -0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
+                          <a-entity line="start: 1.2 0.8 0.01; end: 1.2 -0.8 0.01; color: #00f3ff; opacity: 0.5"></a-entity>
+
+                          <a-text
+                            value="◈ NEURAL INTERFACE | STARK INPUT"
+                            align="center"
+                            position="0 0.72 0.02"
+                            color="#00f3ff"
+                            width="3.5"
+                            font="exo2bold"
+                          ></a-text>
+
+                          {/* DISPLAY BAR: Shows current typed text */}
+                          <a-plane
+                            width="2.0"
+                            height="0.22"
+                            position="0 0.52 0.01"
+                            color="#000"
+                            opacity="0.6"
+                            material="transparent: true"
+                          >
+                            <a-text
+                              value={kbValue || "TYPE SOMETHING..."}
+                              align="left"
+                              position="-0.95 0 0.02"
+                              color={kbValue ? "#ffffff" : "#00f3ff40"}
+                              width="2.8"
+                              font="monoid"
+                            ></a-text>
+                            <a-plane
+                              width="0.01"
+                              height="0.14"
+                              position={kbValue.length * 0.045 - 0.92 || -0.92}
+                              color="#00f3ff"
+                              animation="property: opacity; from: 1; to: 0; dur: 500; loop: true"
+                            ></a-plane>
+                          </a-plane>
+                        </a-plane>
+
+                        {/* KEY DEFINITIONS */}
+                        {(() => {
+                          let rows = [];
+                          if (isSymbols) {
+                            rows = [
+                              ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+                              ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"],
+                              ["-", "_", "=", "+", "[", "]", "{", "}", ";", ":"],
+                              ['"', "'", ",", ".", "/", "?", "|", "\\", "<", ">"],
+                              ["SYM", "SPACE", "BACK", "CLOSE"],
+                            ];
+                          } else {
+                            rows = isShift
+                              ? [
+                                "1234567890".split(""),
+                                "QWERTYUIOP".split(""),
+                                "ASDFGHJKL".split(""),
+                                "ZXCVBNM".split(""),
+                                ["SHIFT", "SYM", "SPACE", "BACK", "CLOSE"],
+                              ]
+                              : [
+                                "1234567890".split(""),
+                                "qwertyuiop".split(""),
+                                "asdfghjkl".split(""),
+                                "zxcvbnm".split(""),
+                                ["SHIFT", "SYM", "SPACE", "BACK", "CLOSE"],
+                              ];
+                          }
+
+                          return rows.map((row, rowIdx) => {
+                            const yPos = 0.25 - rowIdx * 0.22;
+                            return row.map((char, charIdx) => {
+                              const totalChars = row.length;
+                              const xPos = (charIdx - (totalChars - 1) / 2) * 0.22;
+
+                              // Special handling for width of control keys
+                              let width = 0.2;
+                              let actualChar = char;
+                              let displayChar = char;
+                              let color = "#1a2a4a";
+                              let textColor = "#00f3ff";
+
+                              if (char === "SPACE") {
+                                width = 0.6;
+                                actualChar = "SPACE";
+                                displayChar = "[ SPACE ]";
+                              }
+                              if (char === "BACK") {
+                                width = 0.3;
+                                actualChar = "BACKSPACE";
+                                displayChar = "DEL";
+                                color = "#3c1a1a";
+                              }
+                              if (char === "SHIFT") {
+                                width = 0.3;
+                                actualChar = "SHIFT";
+                                displayChar = isShift ? "abc" : "ABC";
+                                color = isShift ? "#00f3ff" : "#1a2a4a";
+                                textColor = isShift ? "#000" : "#00f3ff";
+                              }
+                              if (char === "SYM") {
+                                width = 0.3;
+                                actualChar = "SYM";
+                                displayChar = isSymbols ? "abc" : "SYM";
+                                color = isSymbols ? "#00f3ff" : "#1a2a4a";
+                                textColor = isSymbols ? "#000" : "#00f3ff";
+                              }
+                              if (char === "CLOSE") {
+                                width = 0.3;
+                                actualChar = "CLOSE";
+                                displayChar = "DONE";
+                                color = "#103c10";
+                                textColor = "#00ff88";
+                              }
+
+                              return (
+                                <a-entity
+                                  key={`row-${rowIdx}-char-${charIdx}`}
+                                  position={`${xPos} ${yPos} 0.05`}
+                                >
+                                  <a-box
+                                    width={width}
+                                    height="0.18"
+                                    depth="0.04"
+                                    color={color}
+                                    class="clickable"
+                                    vr-key-handler={`char: ${actualChar}`}
+                                    animation__mousedown="property: position; to: 0 0 -0.02; dur: 50; startEvents: mousedown"
+                                    animation__mouseup="property: position; to: 0 0 0; dur: 50; startEvents: mouseup"
+                                    animation__mouseenter="property: scale; to: 1.05 1.05 1.05; dur: 100"
+                                    animation__mouseleave="property: scale; to: 1 1 1; dur: 100"
+                                    material="emissive: #00f3ff; emissiveIntensity: 0.1"
+                                  >
+                                    <a-text
+                                      value={displayChar}
+                                      align="center"
+                                      position="0 0 0.03"
+                                      color={textColor}
+                                      width={width * 7}
+                                      font="monoid"
+                                    ></a-text>
+                                  </a-box>
+                                </a-entity>
+                              );
+                            });
+                          });
+                        })()}
+                      </a-entity>
+                    </a-scene>
+                  </div>
+                  );
+            }
+
+            const syncYouTube = async () => {
+              if (!ytPlaylistId.trim()) return;
+                  setIsSyncing(true);
+                  try {
+                const res = await fetch(
+                  `http://localhost:3001/api/youtube/playlist?playlistId=${ytPlaylistId}`,
+                  );
+                  const data = await res.json();
+                  if (data.ok) {
+                  const newPlaylist = data.items.map((item) => ({
+                    title: item.title,
+                  url: item.url,
+                  isYouTube: true,
+                  isLocal: false,
+                  analysis: item.analysis,
+                  }));
+                  setPlaylist((prev) =>
+                    [...newPlaylist, ...prev.filter((c) => !c.isYouTube)].slice(
+                  0,
+                  15,
+                  ),
+                  );
+                  setIsSyncModalOpen(false);
+                  gerdSpeak(
+                  "YouTube-Playliste erfolgreich synchronisiert. Die Analysen liegen bereit.",
+                  "Manager-Gerd",
+                  );
+                } else {
+                    alert("Fehler: " + data.error);
+                }
+              } catch (e) {
+                    alert("Verbindung zum Proxy fehlgeschlagen.");
+              } finally {
+                    setIsSyncing(false);
+              }
+            };
+
+                  // 2D DASHBOARD RENDER
+                  return (
+                  <div className="app-root w-full h-full relative">
+                    <div
+                      className={`min-h-screen flex flex-col md:flex-row bg-[#000000] relative transition-all duration-700 ${gerdThinking ? "ai-pulse-active" : ""}`}
+                    >
+                      <NeuralBackground />
+                      {/* SetupWizard Overlay */}
+                      {!hasOnboarded && (
+                        <SetupWizard
+                          onComplete={(data) => {
+                            setClubIdentity(data);
+                            setHasOnboarded(true);
+                            setSimulationMode(false);
+                            localStorage.setItem(
+                              "gerd_clubIdentity",
+                              JSON.stringify(data),
+                            );
+                            localStorage.setItem("gerd_hasOnboarded", "true");
+                            localStorage.setItem("gerd_simulationMode", "false");
+                            if (data.primaryColor)
+                              document.documentElement.style.setProperty(
+                                "--color-neon",
+                                data.primaryColor,
+                              );
+                            if (data.secondaryColor)
+                              document.documentElement.style.setProperty(
+                                "--color-redbull",
+                                data.secondaryColor,
+                              );
+                            gerdSpeak(
+                              `System initialisiert für ${data.name}. Willkommen im Stark Elite Hub.`,
+                              "System",
+                            );
+                          }}
+                          askAI={askAI}
+                          addAiLog={addAiLog}
+                          gerdSpeak={gerdSpeak}
+                        />
+                      )}
+                      {/* OFFLINE BANNER */}
+                      {isOffline && (
+                        <div className="fixed top-0 left-0 w-full bg-redbull text-white text-[10px] font-black uppercase tracking-[0.2em] py-2 z-[500] text-center animate-pulse border-b border-white/20">
+                          ⚠ System-Warnung: Prüfe Internetverbindung... (Offline-Modus
+                          aktiv)
+                        </div>
+                      )}
+                      {/* SIDEBAR (Desktop Only) */}
+                      <div className="hidden md:flex md:w-80 border-r border-white/5 flex-col h-screen overflow-hidden shrink-0 bg-[#050a14] shadow-[10px_0_30px_rgba(0,0,0,0.8)] z-20">
+                        {/* Logo / Header */}
+                        <div className="p-8 border-b border-white/5 relative">
+                          <div className="w-16 h-1 bg-redbull mb-4"></div>
+                          <h1 className="text-3xl font-black italic tracking-tighter flex flex-col uppercase">
+                            GERD 2.0
+                            <span className="text-redbull text-base tracking-widest font-sans mt-1 flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-redbull animate-pulse"></div>{" "}
+                              STARK ELITE
+                            </span>
+                          </h1>
+                        </div>
+
+                        {/* Navigation */}
+                        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
+                          {[
+                            {
+                              id: "home",
+                              label: "Zentrale",
+                              icon: "home",
+                              color: "neon",
+                            },
+                            {
+                              id: "tactical",
+                              label: "Tactical Hub",
+                              icon: "shield",
+                              color: "neon",
+                            },
+                            {
+                              id: "medical",
+                              label: "Medical Lab",
+                              icon: "activity",
+                              color: "redbull",
+                            },
+                            {
+                              id: "video",
+                              label: "Video Hub",
+                              icon: "monitor-play",
+                              color: "white",
+                            },
+                            {
+                              id: "cfo",
+                              label: "CFO Board",
+                              icon: "pie-chart",
+                              color: "gold",
+                            },
+                            {
+                              id: "nlz",
+                              label: "NLZ Funino",
+                              icon: "layout-grid",
+                              color: "neon",
+                            },
+                            {
+                              id: "journal",
+                              label: "Performance Journal",
+                              icon: "newspaper",
+                              color: "white",
+                            },
+                          ].map((item) => {
+                            const isActive = activeTab === item.id;
+                            let bgClass = "hover:bg-white/5";
+                            let textClass = "text-white/50";
+                            if (isActive) {
+                              if (item.color === "neon") {
+                                bgClass =
+                                  "bg-navy border-l-4 border-neon shadow-[intset_0_0_10px_rgba(0,243,255,0.2)]";
+                                textClass = "text-white";
+                              }
+                              if (item.color === "redbull") {
+                                bgClass = "bg-redbull/10 border-l-4 border-redbull";
+                                textClass = "text-white";
+                              }
+                              if (item.color === "gold") {
+                                bgClass = "bg-[#d4af3710] border-l-4 border-gold";
+                                textClass = "text-white";
+                              }
+                              if (item.color === "white") {
+                                bgClass = "bg-white/10 border-l-4 border-white";
+                                textClass = "text-white";
+                              }
+                            }
+
+                            return (
+                              <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id)}
+                                className={`w-full flex items-center gap-4 px-5 py-4 font-bold uppercase tracking-widest text-xs transition-all text-left ${bgClass} ${textClass}`}
+                              >
+                                <Icon
+                                  name={item.icon}
+                                  size={20}
+                                  className={isActive ? `text-${item.color}` : ""}
+                                />{" "}
+                                {item.label}
+                              </button>
+                            );
+                          })}
+
+                          {/* VR HUB — separate launcher button */}
+                          <div className="pt-2 pb-1 px-2 border-b border-white/5 mb-2">
+                            <button
+                              onClick={() => setView("vr")}
+                              className="w-full flex items-center gap-4 px-5 py-4 font-black uppercase tracking-widest text-xs transition-all text-left rounded border border-neon/30 bg-neon/5 text-neon hover:bg-neon hover:text-navy shadow-[0_0_12px_rgba(0,243,255,0.2)] hover:shadow-[0_0_20px_rgba(0,243,255,0.5)]"
+                            >
+                              <Icon name="glasses" size={20} className="text-neon" />
+                              <span className="flex-1">VR Hub</span>
+                              <span className="text-[9px] border border-neon/40 px-1.5 py-0.5 rounded font-mono">
+                                LAUNCH
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => setIsSettingsOpen(true)}
+                              className="w-full flex items-center gap-4 px-5 py-4 mt-2 font-black uppercase tracking-widest text-xs transition-all text-left rounded bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
+                            >
+                              <Icon
+                                name="settings"
+                                size={20}
+                                className="text-white/50"
+                              />
+                              <span className="flex-1">System Settings</span>
+                            </button>
+                          </div>
+
+                          {/* Neural Insight Feed */}
+                          <NeuralInsightFeed logs={aiLogs} />
+
+                          {/* System Status / Quota */}
+                          <div className="mt-auto p-4 border-t border-white/5">
+                            <div className="p-4 bg-black/40 border border-white/5 rounded-xl">
+                              <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3 flex items-center gap-2">
+                                <Icon name="activity" size={12} /> System Status
+                              </h4>
                               <QuotaWidget />
                               <p className="text-[9px] text-white/30 mt-4 italic">
                                 Automatische Limitierung auf 15 RPM zum Schutz des
                                 Freikontingents.
                               </p>
                             </div>
-
-                            {/* YouTube API Section */}
-                            <div className="bg-navy/40 p-6 rounded-2xl border border-white/5">
-                              <h3 className="text-white font-black uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
-                                <Icon
-                                  name="youtube"
-                                  size={14}
-                                  className="text-red-500"
-                                />{" "}
-                                YouTube Data API
-                              </h3>
-                              <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
-                                API Key (v3)
-                              </label>
-                              <input
-                                type="password"
-                                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-mono text-sm outline-none focus:border-neon transition-all"
-                                placeholder="AIzaSy..."
-                                value={apiConfig.youtubeKey}
-                                onChange={(e) =>
-                                  setApiConfig({
-                                    ...apiConfig,
-                                    youtubeKey: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-
-                            {/* Ollama / Local AI Section */}
-                            <div className="bg-navy/40 p-6 rounded-2xl border border-white/5">
-                              <h3 className="text-white font-black uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
-                                <Icon name="zap" size={14} className="text-gold" />{" "}
-                                Ollama (Local Node)
-                              </h3>
-                              <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
-                                Local URL
-                              </label>
-                              <input
-                                type="text"
-                                className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-mono text-sm outline-none focus:border-gold transition-all"
-                                placeholder="http://localhost:11434"
-                                value={apiConfig.ollamaUrl}
-                                onChange={(e) =>
-                                  setApiConfig({
-                                    ...apiConfig,
-                                    ollamaUrl: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-
-                            <button
-                              onClick={() => {
-                                localStorage.setItem(
-                                  "gerd_apiConfig",
-                                  JSON.stringify(apiConfig),
-                                );
-                                localStorage.setItem(
-                                  "gerd_clubIdentity",
-                                  JSON.stringify(clubIdentity),
-                                );
-                                setIsSettingsOpen(false);
-                                gerdSpeak(
-                                  "Systemkonfiguration und Club Identity aktualisiert.",
-                                  "System",
-                                );
-                              }}
-                              className="w-full bg-neon text-navy font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)] hover:bg-white transition-all transform hover:scale-[1.02]"
-                            ></button>
                           </div>
-                        </div>
-                      </div>
-                    )}
-                    {/* === YOUTUBE SYNC MODAL === */}
-                    {isSyncModalOpen && (
-                      <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-navy/90 backdrop-blur-xl animate-fade-in">
-                        <div className="w-full max-w-md bg-[#0a0f1d] border border-neon/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(0,243,255,0.2)]">
-                          <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase flex items-center gap-3">
-                              <Icon
-                                name="youtube"
-                                size={24}
-                                className="text-red-500"
-                              />{" "}
-                              YouTube Sync
-                            </h2>
+
+                          {/* SETTINGS BUTTON (Bottom of nav) */}
+                          <div className="p-4 border-t border-white/5 mt-auto">
                             <button
-                              onClick={() => setIsSyncModalOpen(false)}
-                              className="text-white/40 hover:text-white transition-colors"
+                              onClick={() => setIsSettingsOpen(true)}
+                              className="w-full flex items-center gap-4 px-5 py-3 font-bold uppercase tracking-widest text-[10px] text-white/30 hover:text-white hover:bg-white/5 rounded transition-all transition-all"
                             >
-                              <Icon name="x" size={24} />
+                              <Icon name="settings" size={16} /> System-Einstellungen
                             </button>
                           </div>
+                        </nav>
 
-                          <div className="space-y-6">
-                            <div className="bg-navy/40 p-4 rounded-xl border border-white/5 text-[11px] text-white/60 leading-relaxed">
-                              Gib die **YouTube Playlist ID** ein, um Sequenzen
-                              direkt in das System zu laden.
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] uppercase font-black text-white/40 mb-2 tracking-widest">
-                                Playlist ID
-                              </label>
-                              <input
-                                type="text"
-                                className="w-full bg-black/60 border border-white/10 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-neon transition-all"
-                                placeholder="PL..."
-                                value={ytPlaylistId}
-                                onChange={(e) => setYtPlaylistId(e.target.value)}
-                              />
-                            </div>
-
-                            <button
-                              onClick={syncYouTube}
-                              disabled={isSyncing || !ytPlaylistId}
-                              className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all ${isSyncing || !ytPlaylistId ? "bg-white/5 text-white/20 cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]"}`}
-                            >
-                              {isSyncing ? (
-                                <Icon
-                                  name="loader"
-                                  size={18}
-                                  className="animate-spin"
-                                />
-                              ) : (
-                                <Icon name="refresh-cw" size={18} />
-                              )}
-                              {isSyncing ? "Synchronisiere..." : "Playlist Laden"}
-                            </button>
+                        {/* AI Personas Chat */}
+                        <div className="h-64 flex flex-col border-t border-white/10 bg-[#000]">
+                          <div className="px-4 py-2 font-mono text-xs font-bold text-neon border-b border-white/5 flex items-center justify-between">
+                            AI PERSONAS LINK{" "}
+                            <Icon name="radio" size={14} className="animate-pulse" />
                           </div>
+                          <div className="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-[11px] leading-relaxed">
+                            {chatMessages.map((msg, i) => {
+                              const isUser = msg.sender === "User";
+                              let color = "text-white/80";
+                              let labelColor = "text-white/40";
+                              if (msg.sender === "Trainer-Gerd")
+                                labelColor = "text-neon";
+                              if (msg.sender === "Arzt-Gerd")
+                                labelColor = "text-redbull";
+                              if (msg.sender === "Manager-Gerd")
+                                labelColor = "text-gold";
+                              if (msg.sender === "Presse-Gerd")
+                                labelColor = "text-gray-400";
+
+                              return (
+                                <div
+                                  key={i}
+                                  className={`flex flex-col ${isUser ? "items-end" : "items-start"} animate-fade-in`}
+                                >
+                                  <span
+                                    className={`${labelColor} uppercase font-bold mb-1 tracking-widest`}
+                                  >
+                                    {msg.sender}
+                                  </span>
+                                  <div
+                                    className={`p-2 rounded max-w-[90%] border ${isUser ? "bg-white/5 border-white/10" : "bg-navy/30 border-neon/30 text-neon"}`}
+                                  >
+                                    {msg.text}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <form
+                            onSubmit={handleAIRequest}
+                            className="p-3 bg-[#0a0f1a] flex gap-2 border-t border-white/5"
+                          >
+                            <input
+                              type="text"
+                              placeholder="Frage an Gerd..."
+                              value={aiInput}
+                              onChange={(e) => setAiInput(e.target.value)}
+                              className="flex-1 bg-black border border-white/20 rounded p-2 text-xs text-white font-mono focus:outline-none focus:border-neon transition-colors"
+                            />
+                            <button
+                              type="submit"
+                              className="bg-neon/20 text-neon p-2 rounded hover:bg-neon hover:text-black transition-colors cursor-pointer"
+                            >
+                              <Icon name="send" size={16} />
+                            </button>
+                          </form>
                         </div>
                       </div>
-                    )}
-                    {/* MOBILE BOTTOM NAVIGATION */}
-                    <div className="md:hidden mobile-bottom-nav">
-                      {[
-                        { id: "home", label: "Home", icon: "home", color: "neon" },
-                        {
-                          id: "tactical",
-                          label: "Board",
-                          icon: "shield",
-                          color: "neon",
-                        },
-                        {
-                          id: "medical",
-                          label: "Kader",
-                          icon: "activity",
-                          color: "redbull",
-                        },
-                        {
-                          id: "nlz",
-                          label: "NLZ",
-                          icon: "layout-grid",
-                          color: "neon",
-                        },
-                        {
-                          id: "cfo",
-                          label: "Büro",
-                          icon: "pie-chart",
-                          color: "gold",
-                        },
-                        {
-                          id: "settings",
-                          label: "Core",
-                          icon: "settings",
-                          color: "white",
-                          isSettings: true,
-                        },
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          onClick={() =>
-                            item.isSettings
-                              ? setIsSettingsOpen(true)
-                              : setActiveTab(item.id)
-                          }
-                          className={`flex flex-col items-center justify-center p-2 text-[9px] font-black uppercase tracking-widest ${item.isSettings && isSettingsOpen ? "text-white" : activeTab === item.id ? "text-white" : "text-white/40"}`}
-                        >
-                          <Icon
-                            name={item.icon}
-                            size={24}
-                            className={
-                              activeTab === item.id && !item.isSettings
-                                ? `text-${item.color} drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]`
-                                : ""
-                            }
+                      {/* MAIN CONTENT AREA */}
+                      <div className="flex-1 h-screen overflow-y-auto relative p-6 md:p-12 main-content-mobile">
+                        {showBriefing && (
+                          <IntelligenceBriefing
+                            onClose={() => setShowBriefing(false)}
                           />
-                          <span className="mt-1">{item.label}</span>
-                        </button>
-                      ))}
-                    </div>{" "}
-                    {/* End main-content */}
-                  </div>{" "}
-                  {/* End flex-container */}
-                </div>{" "}
-                {/* End app-root */}
-              </div>
-              );
-        };
+                        )}
+                        {/* VR Launch Button (Top Right Absolute) */}
+                        <div className="absolute top-8 right-8 z-50 flex gap-4">
+                          <button
+                            onClick={() => setShowBriefing(true)}
+                            className="bg-black/60 border-2 border-white/20 text-white hover:border-white transition-all px-6 py-2 pb-1.5 rounded-sm font-black uppercase tracking-widest text-xs flex items-center gap-3 cursor-pointer"
+                          >
+                            <Icon name="file-text" size={18} className="mb-0.5" />{" "}
+                            Intelligence Briefing
+                          </button>
+                          <button
+                            onClick={() => setView("vr")}
+                            className="bg-transparent border-2 border-neon text-neon hover:bg-neon hover:text-black transition-all px-6 py-2 pb-1.5 rounded-sm font-black uppercase tracking-widest text-xs flex items-center gap-3 cursor-pointer shadow-[0_0_15px_rgba(0,243,255,0.4)]"
+                          >
+                            <Icon name="headset" size={18} className="mb-0.5" /> Launch
+                            VR Hub
+                          </button>
+                        </div>
+                        {/* Content Container */}
+                        <div className="max-w-7xl mx-auto pt-6 pb-20 relative z-10 min-h-[80vh]">
+                          {/* Header confirm for NLZ if active */}
+                          {activeTab === "nlz" && (
+                            <div className="mb-8 mobile-only">
+                              <h2 className="text-2xl font-black text-white italic uppercase tracking-tighter border-l-4 border-neon pl-4">
+                                FUCHS NLZ - PERFORMANCE HUB
+                              </h2>
+                            </div>
+                          )}
 
-              const root = ReactDOM.createRoot(document.getElementById("root"));
-              root.render(<App />);
+                          {activeTab === "home" && renderExecutiveZentrale()}
+                          {activeTab === "tactical" && renderTactical()}
+                          {activeTab === "medical" && renderMedical()}
+                          {activeTab === "video" && renderVideo()}
+                          {activeTab === "cfo" && renderCFO()}
+                          {activeTab === "nlz" && (
+                            <div className="animate-fade-in min-h-screen bg-[#000000] relative z-20">
+                              <FuchsNLZ
+                                youthPlayers={youthPlayers}
+                                setYouthPlayers={setYouthPlayers}
+                                nlzTab={nlzTab}
+                                setNlzTab={setNlzTab}
+                                scoutModal={scoutModal}
+                                setScoutModal={setScoutModal}
+                                dnaModules={dnaModules}
+                                setDnaModules={setDnaModules}
+                                askAI={askAI}
+                                gerdSpeak={gerdSpeak}
+                                updateYouthPlayer={updateYouthPlayer}
+                                addYouthPlayer={addYouthPlayer}
+                                deleteYouthPlayer={deleteYouthPlayer}
+                                promoteToProSquad={promoteToProSquad}
+                                openScoutModal={openScoutModal}
+                              />
+                            </div>
+                          )}
+                          {activeTab === "journal" && renderJournal()}
+                        </div>
+                        {/* === GLOBAL SETTINGS MODAL === */}
+                        {isSettingsOpen && (
+                          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-navy/90 backdrop-blur-xl">
+                            <div className="glass-panel p-10 rounded-3xl max-w-lg w-full border border-white/20 animate-scale-in">
+                              <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+                                <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase flex items-center gap-3">
+                                  <Icon name="settings" className="text-neon" /> System
+                                  Core Settings
+                                </h2>
+                                <button
+                                  onClick={() => setIsSettingsOpen(false)}
+                                  className="text-white/40 hover:text-white"
+                                >
+                                  <Icon name="x" />
+                                </button>
+                              </div>
+
+                              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                                {/* Club Identity Section */}
+                                <div className="bg-navy/40 p-6 rounded-2xl border border-neon/50 shadow-[0_0_15px_rgba(0,243,255,0.1)] relative overflow-hidden">
+                                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                    <Icon name="shield" size={100} />
+                                  </div>
+                                  <h3 className="text-neon font-black uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
+                                    <Icon
+                                      name="building"
+                                      size={14}
+                                      className="text-neon"
+                                    />{" "}
+                                    Club Identity & Research
+                                  </h3>
+                                  <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
+                                    <div>
+                                      <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
+                                        Vereinsname
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-black uppercase text-xs outline-none focus:border-neon transition-all"
+                                        placeholder="z.B. Bayern München"
+                                        value={clubIdentity.name}
+                                        onChange={(e) =>
+                                          setClubIdentity({
+                                            ...clubIdentity,
+                                            name: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
+                                        Liga / Klasse
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-black uppercase text-xs outline-none focus:border-neon transition-all"
+                                        placeholder="z.B. Bundesliga"
+                                        value={clubIdentity.league}
+                                        onChange={(e) =>
+                                          setClubIdentity({
+                                            ...clubIdentity,
+                                            league: e.target.value,
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {clubIdentity.researchData && (
+                                    <div className="mb-4 bg-black/60 p-3 rounded-lg border border-white/5 text-[10px] font-mono leading-relaxed text-white/70 h-24 overflow-y-auto custom-scrollbar relative z-10">
+                                      <div className="text-neon font-bold mb-1 border-b border-white/10 pb-1 flex justify-between">
+                                        <span>Scouting Report: Active</span>
+                                        <Icon name="check-circle" size={12} />
+                                      </div>
+                                      {clubIdentity.researchData}
+                                    </div>
+                                  )}
+
+                                  <button
+                                    onClick={async () => {
+                                      if (!clubIdentity.name || !clubIdentity.league) {
+                                        gerdSpeak(
+                                          "Bitte Vereinsname und Liga eingeben.",
+                                          "System",
+                                        );
+                                        return;
+                                      }
+                                      setIsSyncingClub(true);
+                                      addAiLog(
+                                        `Initiating deep web research for ${clubIdentity.name}...`,
+                                        "process",
+                                      );
+                                      try {
+                                        const response = await askAI(
+                                          `Analysiere den Verein ${clubIdentity.name} in der Liga ${clubIdentity.league}. Gib mir in 3 kurzen Stichpunkten: 1. Aktuellen sportlichen Stand. 2. Die letzten 3 bekannten Ergebnisse oder Formkurve. 3. 3-4 absolute Schlüsselspieler. Sei präzise und knapp. Das Ergebnis wird als Global Context für Manager und Trainer genutzt.`,
+                                          "strategy",
+                                          true,
+                                        );
+                                        const nextClub = {
+                                          ...clubIdentity,
+                                          researchData: response,
+                                        };
+                                        setClubIdentity(nextClub);
+                                        localStorage.setItem(
+                                          "gerd_clubIdentity",
+                                          JSON.stringify(nextClub),
+                                        );
+                                        gerdSpeak(
+                                          `Vereinsdaten für ${clubIdentity.name} erfolgreich synchronisiert.`,
+                                          "System",
+                                        );
+                                        addAiLog(
+                                          `Club Identity established: ${clubIdentity.name} (${clubIdentity.league})`,
+                                          "success",
+                                        );
+                                      } catch (e) {
+                                        addAiLog(
+                                          `Research failed: ${e.message}`,
+                                          "error",
+                                        );
+                                      } finally {
+                                        setIsSyncingClub(false);
+                                      }
+                                    }}
+                                    disabled={isSyncingClub}
+                                    className="w-full bg-white/5 text-white font-black py-3 rounded-xl uppercase tracking-widest text-xs border border-white/10 hover:border-neon hover:text-neon transition-all flex items-center justify-center gap-2 relative z-10"
+                                  >
+                                    {isSyncingClub ? (
+                                      <Icon
+                                        name="loader"
+                                        size={14}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      <Icon name="globe" size={14} />
+                                    )}
+                                    {isSyncingClub
+                                      ? "Syncing Data..."
+                                      : "Vereinsdaten synchronisieren"}
+                                  </button>
+
+                                  {/* AUDIT & SIMULATION ACTIONS */}
+                                  <div className="flex gap-2 mt-4 relative z-10">
+                                    <button
+                                      onClick={() => {
+                                        const heenes = {
+                                          name: "SG Heenes/Kalkobes",
+                                          league: "Kreisoberliga Nordhessen",
+                                          researchData:
+                                            "Die SG Heenes/Kalkobes spielt in der Kreisoberliga Nordhessen. Aktueller Fokus liegt auf kompaktem Defensivverhalten und schnellem Umschaltspiel. Schlüsselspieler sind oft im zentralen Mittelfeld und Angriff zu finden. Das nächste Heimspiel/Derby steht an.",
+                                        };
+                                        setClubIdentity(heenes);
+                                        localStorage.setItem(
+                                          "gerd_clubIdentity",
+                                          JSON.stringify(heenes),
+                                        );
+                                        gerdSpeak(
+                                          "System Audit: SG Heenes Kalkobes geladen.",
+                                          "System",
+                                        );
+                                      }}
+                                      className="flex-1 bg-redbull/20 text-redbull font-black py-2 rounded-lg uppercase tracking-widest text-[10px] border border-redbull/50 hover:bg-redbull hover:text-white transition-all flex items-center justify-center gap-1"
+                                    >
+                                      <Icon name="zap" size={12} /> Audit: Heenes
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setClubIdentity({
+                                          name: "",
+                                          league: "",
+                                          researchData: "",
+                                        });
+                                        localStorage.removeItem("gerd_clubIdentity");
+                                        gerdSpeak(
+                                          "System Reset. Neutrale Daten.",
+                                          "System",
+                                        );
+                                      }}
+                                      className="flex-1 bg-white/5 text-white/50 font-black py-2 rounded-lg uppercase tracking-widest text-[10px] border border-white/10 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-1"
+                                    >
+                                      <Icon name="refresh-cw" size={12} /> Reset
+                                    </button>
+                                  </div>
+                                  <div className="mt-2 relative z-10">
+                                    <button
+                                      onClick={async () => {
+                                        gerdSpeak(
+                                          "Generiere Match-Vorschau für SG Heenes/Kalkobes...",
+                                          "Trainer-Gerd",
+                                        );
+                                        const previewText = await askAI(
+                                          "Erstelle eine extrem kurze taktische Analyse des nächsten Gegners der SG Heenes/Kalkobes (Kreisoberliga Nordhessen). Empfehle ein 4-4-2 System und gib ein kurzes Trainer-Briefing für das Derby. Max 3 Sätze.",
+                                          "Trainer-Gerd",
+                                          true,
+                                        );
+                                        const matchPreviewEntry = {
+                                          id: Date.now(),
+                                          name: "Match Preview: Derby",
+                                          timestamp: new Date().toISOString(),
+                                          mode: "match",
+                                          summary:
+                                            previewText ||
+                                            "4-4-2 Derby Fokus. Kompakte Defensive gegen den Ball, schnelles Umschalten über die Flügel.",
+                                          playerPositions: {
+                                            1: { x: 210, y: 550 }, // TW
+                                            2: { x: 100, y: 450 },
+                                            3: { x: 170, y: 480 },
+                                            4: { x: 250, y: 480 },
+                                            5: { x: 320, y: 450 }, // ABW
+                                            6: { x: 100, y: 350 },
+                                            7: { x: 170, y: 380 },
+                                            8: { x: 250, y: 380 },
+                                            9: { x: 320, y: 350 }, // MIT
+                                            10: { x: 170, y: 250 },
+                                            11: { x: 250, y: 250 }, // ANG
+                                          },
+                                          opponentPositions: {},
+                                          drawingPaths: [],
+                                          assessmentRatings: {},
+                                        };
+                                        const nextArchive = {
+                                          ...clubArchive,
+                                          proMatchbook: [
+                                            matchPreviewEntry,
+                                            ...(clubArchive.proMatchbook || []),
+                                          ],
+                                        };
+                                        setClubArchive(nextArchive);
+                                        localStorage.setItem(
+                                          "gerd_clubArchive",
+                                          JSON.stringify(nextArchive),
+                                        );
+                                        gerdSpeak(
+                                          "Match-Vorschau im Archiv gespeichert.",
+                                          "System",
+                                        );
+                                      }}
+                                      className="w-full bg-neon/10 text-neon font-black py-2 rounded-lg uppercase tracking-widest text-[10px] border border-neon/30 hover:bg-neon hover:text-black transition-all flex items-center justify-center gap-2"
+                                    >
+                                      <Icon name="file-text" size={12} /> Generate Match
+                                      Preview
+                                    </button>
+                                  </div>
+                                  <div className="flex gap-2 mt-2 relative z-10">
+                                    <button
+                                      onClick={() => {
+                                        const newVal = budget + 5000;
+                                        setBudget(newVal);
+                                        localStorage.setItem(
+                                          "stark_elite_budget",
+                                          newVal,
+                                        );
+                                        gerdSpeak(
+                                          "Sponsoring Eingang registriert: 5000 Euro.",
+                                          "Manager-Gerd",
+                                        );
+                                      }}
+                                      className="flex-1 bg-gold/10 text-gold font-black py-2 rounded-lg uppercase tracking-widest text-[9px] border border-gold/30 hover:bg-gold hover:text-black transition-all flex items-center justify-center gap-1"
+                                    >
+                                      <Icon name="dollar-sign" size={12} /> CFO Audit
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setActiveTab("video");
+                                        setYtPlaylistId("jNQXAC9IVRw");
+                                        setIsSettingsOpen(false);
+                                        gerdSpeak(
+                                          "Video Validierung gestartet. Wechsle ins Video Hub.",
+                                          "System",
+                                        );
+                                      }}
+                                      className="flex-1 bg-white/5 text-white font-black py-2 rounded-lg uppercase tracking-widest text-[9px] border border-white/20 hover:bg-white hover:text-black transition-all flex items-center justify-center gap-1"
+                                    >
+                                      <Icon name="video" size={12} /> Vid Audit
+                                    </button>
+                                    <button
+                                      onClick={async () => {
+                                        gerdSpeak(
+                                          "Generiere NLZ Wochenplan...",
+                                          "Trainer-Gerd",
+                                        );
+                                        await new Promise((r) => setTimeout(r, 2000));
+                                        gerdSpeak(
+                                          "Psycho-Tracking für 15 Talente generiert.",
+                                          "System",
+                                        );
+                                      }}
+                                      className="flex-1 bg-neon/10 text-cyan-400 font-black py-2 rounded-lg uppercase tracking-widest text-[9px] border border-cyan-400/30 hover:bg-cyan-400 hover:text-black transition-all flex items-center justify-center gap-1"
+                                    >
+                                      <Icon name="users" size={12} /> NLZ Audit
+                                    </button>
+                                  </div>
+                                </div>
+                                {/* Quota Monitoring Widget */}
+                                <div className="bg-navy/40 p-6 rounded-2xl border border-neon/30">
+                                  <h3 className="text-white font-black uppercase text-xs tracking-widest mb-4 flex items-center justify-between">
+                                    <span className="flex items-center gap-2">
+                                      <Icon
+                                        name="gauge"
+                                        size={14}
+                                        className="text-neon"
+                                      />{" "}
+                                      Gemini Quota (Free Tier)
+                                    </span>
+                                    <span className="text-[10px] bg-neon/10 text-neon px-2 py-0.5 rounded border border-neon/20">
+                                      LIVE
+                                    </span>
+                                  </h3>
+                                  <QuotaWidget />
+                                  <p className="text-[9px] text-white/30 mt-4 italic">
+                                    Automatische Limitierung auf 15 RPM zum Schutz des
+                                    Freikontingents.
+                                  </p>
+                                </div>
+
+                                {/* YouTube API Section */}
+                                <div className="bg-navy/40 p-6 rounded-2xl border border-white/5">
+                                  <h3 className="text-white font-black uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
+                                    <Icon
+                                      name="youtube"
+                                      size={14}
+                                      className="text-red-500"
+                                    />{" "}
+                                    YouTube Data API
+                                  </h3>
+                                  <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
+                                    API Key (v3)
+                                  </label>
+                                  <input
+                                    type="password"
+                                    className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-mono text-sm outline-none focus:border-neon transition-all"
+                                    placeholder="AIzaSy..."
+                                    value={apiConfig.youtubeKey}
+                                    onChange={(e) =>
+                                      setApiConfig({
+                                        ...apiConfig,
+                                        youtubeKey: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+
+                                {/* Ollama / Local AI Section */}
+                                <div className="bg-navy/40 p-6 rounded-2xl border border-white/5">
+                                  <h3 className="text-white font-black uppercase text-xs tracking-widest mb-4 flex items-center gap-2">
+                                    <Icon name="zap" size={14} className="text-gold" />{" "}
+                                    Ollama (Local Node)
+                                  </h3>
+                                  <label className="block text-[10px] uppercase font-bold text-white/40 mb-2">
+                                    Local URL
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-white font-mono text-sm outline-none focus:border-gold transition-all"
+                                    placeholder="http://localhost:11434"
+                                    value={apiConfig.ollamaUrl}
+                                    onChange={(e) =>
+                                      setApiConfig({
+                                        ...apiConfig,
+                                        ollamaUrl: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </div>
+
+                                <button
+                                  onClick={() => {
+                                    localStorage.setItem(
+                                      "gerd_apiConfig",
+                                      JSON.stringify(apiConfig),
+                                    );
+                                    localStorage.setItem(
+                                      "gerd_clubIdentity",
+                                      JSON.stringify(clubIdentity),
+                                    );
+                                    setIsSettingsOpen(false);
+                                    gerdSpeak(
+                                      "Systemkonfiguration und Club Identity aktualisiert.",
+                                      "System",
+                                    );
+                                  }}
+                                  className="w-full bg-neon text-navy font-black py-4 rounded-xl uppercase tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)] hover:bg-white transition-all transform hover:scale-[1.02]"
+                                ></button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* === YOUTUBE SYNC MODAL === */}
+                        {isSyncModalOpen && (
+                          <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-navy/90 backdrop-blur-xl animate-fade-in">
+                            <div className="w-full max-w-md bg-[#0a0f1d] border border-neon/30 rounded-3xl p-8 shadow-[0_0_50px_rgba(0,243,255,0.2)]">
+                              <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase flex items-center gap-3">
+                                  <Icon
+                                    name="youtube"
+                                    size={24}
+                                    className="text-red-500"
+                                  />{" "}
+                                  YouTube Sync
+                                </h2>
+                                <button
+                                  onClick={() => setIsSyncModalOpen(false)}
+                                  className="text-white/40 hover:text-white transition-colors"
+                                >
+                                  <Icon name="x" size={24} />
+                                </button>
+                              </div>
+
+                              <div className="space-y-6">
+                                <div className="bg-navy/40 p-4 rounded-xl border border-white/5 text-[11px] text-white/60 leading-relaxed">
+                                  Gib die **YouTube Playlist ID** ein, um Sequenzen
+                                  direkt in das System zu laden.
+                                </div>
+
+                                <div>
+                                  <label className="block text-[10px] uppercase font-black text-white/40 mb-2 tracking-widest">
+                                    Playlist ID
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="w-full bg-black/60 border border-white/10 rounded-xl p-4 text-white font-mono text-sm outline-none focus:border-neon transition-all"
+                                    placeholder="PL..."
+                                    value={ytPlaylistId}
+                                    onChange={(e) => setYtPlaylistId(e.target.value)}
+                                  />
+                                </div>
+
+                                <button
+                                  onClick={syncYouTube}
+                                  disabled={isSyncing || !ytPlaylistId}
+                                  className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all ${isSyncing || !ytPlaylistId ? "bg-white/5 text-white/20 cursor-not-allowed" : "bg-red-600 text-white hover:bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]"}`}
+                                >
+                                  {isSyncing ? (
+                                    <Icon
+                                      name="loader"
+                                      size={18}
+                                      className="animate-spin"
+                                    />
+                                  ) : (
+                                    <Icon name="refresh-cw" size={18} />
+                                  )}
+                                  {isSyncing ? "Synchronisiere..." : "Playlist Laden"}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* MOBILE BOTTOM NAVIGATION */}
+                        <div className="md:hidden mobile-bottom-nav">
+                          {[
+                            { id: "home", label: "Home", icon: "home", color: "neon" },
+                            {
+                              id: "tactical",
+                              label: "Board",
+                              icon: "shield",
+                              color: "neon",
+                            },
+                            {
+                              id: "medical",
+                              label: "Kader",
+                              icon: "activity",
+                              color: "redbull",
+                            },
+                            {
+                              id: "nlz",
+                              label: "NLZ",
+                              icon: "layout-grid",
+                              color: "neon",
+                            },
+                            {
+                              id: "cfo",
+                              label: "Büro",
+                              icon: "pie-chart",
+                              color: "gold",
+                            },
+                            {
+                              id: "settings",
+                              label: "Core",
+                              icon: "settings",
+                              color: "white",
+                              isSettings: true,
+                            },
+                          ].map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() =>
+                                item.isSettings
+                                  ? setIsSettingsOpen(true)
+                                  : setActiveTab(item.id)
+                              }
+                              className={`flex flex-col items-center justify-center p-2 text-[9px] font-black uppercase tracking-widest ${item.isSettings && isSettingsOpen ? "text-white" : activeTab === item.id ? "text-white" : "text-white/40"}`}
+                            >
+                              <Icon
+                                name={item.icon}
+                                size={24}
+                                className={
+                                  activeTab === item.id && !item.isSettings
+                                    ? `text-${item.color} drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]`
+                                    : ""
+                                }
+                              />
+                              <span className="mt-1">{item.label}</span>
+                            </button>
+                          ))}
+                        </div>{" "}
+                        {/* End main-content */}
+                      </div>{" "}
+                      {/* End flex-container */}
+                    </div>{" "}
+                    {/* End app-root */}
+                  </div>
+                  );
+          };
+
+                  const root = ReactDOM.createRoot(document.getElementById("root"));
+                  root.render(<App />);
     </script>
   </body>
 </html>

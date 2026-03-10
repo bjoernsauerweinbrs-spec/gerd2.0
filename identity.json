@@ -1,0 +1,55 @@
+{
+    "project": {
+        "name": "GERD 2.0",
+        "version": "4.0",
+        "vision": "A high-end AI command center built on the legacy of Gerd Sauerwein."
+    },
+    "dedication": {
+        "name": "Gerd Sauerwein",
+        "date_of_death": "20.02.2026",
+        "text": "Gerd, du warst unser Zuhause, warm und klar. Schalke im Herzen, die Berge im Blick. Ein Opa mit Mut, ein Mensch mit Geduld. Dieses System ist dein Vermächtnis.",
+        "motto": "Ein Trainer lehrt Taktik, ein Vater lehrt Charakter.",
+        "footer_text": "Built on Legacy. Inspired by Gerd. © 2026."
+    },
+    "modules": [
+        {
+            "id": "executive",
+            "name": "Executive Zentrale",
+            "description": "Das Cockpit mit täglichem KI-Briefing (Morning Call).",
+            "icon": "layout-dashboard"
+        },
+        {
+            "id": "tactical",
+            "name": "Tactical Hub",
+            "description": "4-4-2 vs. 3-4-3 Simulation mit Echtzeit-Vektor-Analyse.",
+            "icon": "shield"
+        },
+        {
+            "id": "nlz",
+            "name": "Fuchs NLZ Hub",
+            "description": "Jugendförderung mit Biomechanik-Scanner und psychologischem Profiling.",
+            "icon": "users"
+        },
+        {
+            "id": "cfo",
+            "name": "CFO & Scouting",
+            "description": "KI-gestützte Finanzplanung und Shadow-Scouting (VDV-Integration).",
+            "icon": "pie-chart"
+        },
+        {
+            "id": "vr",
+            "name": "VR Command Center",
+            "description": "Taktikbesprechungen in einer immersiven 3D-Stadionumgebung.",
+            "icon": "glasses"
+        },
+        {
+            "id": "media",
+            "name": "Medien-Center",
+            "description": "Automatisierte Erstellung des 'Stadion-Kuriers'.",
+            "icon": "newspaper"
+        }
+    ],
+    "links": {
+        "gemini_studio": "https://aistudio.google.com/"
+    }
+}
