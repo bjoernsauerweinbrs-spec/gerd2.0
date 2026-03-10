@@ -1240,6 +1240,8 @@
 
       // CFO Board State
       const [cfoTab, setCfoTab] = useState("finance");
+      const [cfoScenario, setCfoScenario] = useState("Klassenerhalt"); // 'Aufstieg', 'Klassenerhalt', 'Abstieg'
+      const [cfoAiWarning, setCfoAiWarning] = useState("");
       const [scoutingPool, setScoutingPool] = useState([]);
       const [activeScoutPlayer, setActiveScoutPlayer] = useState(null);
       const [shadowScoutQuery, setShadowScoutQuery] = useState("");
@@ -5149,132 +5151,230 @@
             </div>
 
             {/* === EXECUTIVE DASHBOARD === */}
+            {/* === EXECUTIVE CFO COCKPIT (REDESIGN) === */}
             {cfoTab === "finance" && (
-              <div className="space-y-6">
-                {/* KPI Kacheln */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    {
-                      label: "Finanzielle Kraft",
-                      val: `€ ${(budget / 1000).toFixed(0)}k`,
-                      trend: "+4.2%",
-                      color: "gold",
-                      icon: "dollar-sign",
-                    },
-                    {
-                      label: "Sponsoring Pipeline",
-                      val: "€ 850k",
-                      trend: "+12.5%",
-                      color: "cyan",
-                      icon: "zap",
-                    },
-                    {
-                      label: "Infrastruktur Status",
-                      val: "Level 4",
-                      trend: "STABIL",
-                      color: "green",
-                      icon: "home",
-                    },
-                  ].map((kpi, i) => (
-                    <div
-                      key={i}
-                      className={`carbon-fiber border border-white/10 p-6 rounded-2xl relative overflow-hidden group hover:border-${kpi.color}/50 transition-all`}
-                    >
-                      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <Icon name={kpi.icon} size={60} />
-                      </div>
-                      <div className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">
-                        {kpi.label}
-                      </div>
-                      <div className="text-3xl font-black text-white mb-2">
-                        {kpi.val}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded ${kpi.trend.includes("+") ? "bg-green-500/20 text-green-400" : "bg-gold/20 text-gold"}`}
+              <div className="space-y-8">
+
+                {/* 1. SZENARIO SIMULATOR & AREA CHART */}
+                <div className="bg-navy/30 backdrop-blur-2xl border border-white/10 p-8 rounded-3xl relative overflow-hidden shadow-[0_0_50px_rgba(0,18,64,0.8)] group hover:border-neon/30 transition-all">
+                  <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-neon to-black opacity-50"></div>
+
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
+                    <div>
+                      <h3 className="text-2xl font-black text-white uppercase tracking-widest flex items-center gap-3">
+                        <Icon name="activity" size={24} className="text-neon" /> Szenario-Simulator
+                      </h3>
+                      <p className="text-white/40 font-mono text-[10px] mt-2 uppercase tracking-[0.2em]">
+                        Echtzeit-Budget-Projektion: TV-Gelder & Sponsoring
+                      </p>
+                    </div>
+
+                    {/* SCENARIO TOGGLES */}
+                    <div className="flex gap-2 bg-black/50 p-1.5 rounded-lg border border-white/5">
+                      {["Aufstieg", "Klassenerhalt", "Abstieg"].map((scen) => (
+                        <button
+                          key={scen}
+                          onClick={() => setCfoScenario(scen)}
+                          className={`px-4 py-2 rounded-md font-black uppercase text-[10px] tracking-widest transition-all ${cfoScenario === scen
+                              ? "bg-neon/20 text-neon shadow-[0_0_15px_rgba(0,243,255,0.3)] border border-neon/50"
+                              : "text-white/30 hover:text-white"
+                            }`}
                         >
-                          {kpi.trend}
-                        </span>
-                        <span className="text-[9px] text-white/20 font-mono tracking-tighter uppercase">
-                          vs. Vormonat
-                        </span>
-                      </div>
-                      {/* Trendy SVG Graph Simulation */}
-                      <div className="mt-4 h-12 w-full">
-                        <svg
-                          viewBox="0 0 100 30"
-                          className="w-full h-full overflow-visible"
-                        >
-                          <path
-                            d={`M0,25 Q10,${20 - i * 5} 20,22 T40,15 T60,20 T80,10 T100,18`}
-                            fill="none"
-                            stroke={
-                              kpi.color === "gold"
-                                ? "#D4AF37"
-                                : kpi.color === "cyan"
-                                  ? "#00f3ff"
-                                  : "#22c55e"
-                            }
-                            strokeWidth="2"
-                            className="drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]"
-                          />
-                        </svg>
+                          {scen}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* DYNAMIC SVG AREA CHART */}
+                  <div className="h-64 w-full relative border-b border-l border-white/10 pl-2 pb-2">
+                    {/* Chart Grid Lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 py-2">
+                      <div className="w-full h-px bg-white/20"></div>
+                      <div className="w-full h-px bg-white/20"></div>
+                      <div className="w-full h-px bg-white/20"></div>
+                    </div>
+
+                    <svg viewBox="0 0 1000 300" className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(0,243,255,0.4)] transition-all duration-700">
+                      {/* Dynamic Path based on state */}
+                      <path
+                        d={
+                          cfoScenario === "Aufstieg"
+                            ? "M0,280 C200,280 300,200 500,150 C700,100 850,50 1000,20 L1000,300 L0,300 Z"
+                            : cfoScenario === "Klassenerhalt"
+                              ? "M0,280 C200,260 400,240 600,220 C800,200 900,180 1000,170 L1000,300 L0,300 Z"
+                              : "M0,280 C200,290 400,300 600,310 C800,320 900,340 1000,350 L1000,300 L0,300 Z"
+                        }
+                        fill="url(#area-gradient)"
+                        opacity="0.6"
+                      />
+                      <path
+                        d={
+                          cfoScenario === "Aufstieg"
+                            ? "M0,280 C200,280 300,200 500,150 C700,100 850,50 1000,20"
+                            : cfoScenario === "Klassenerhalt"
+                              ? "M0,280 C200,260 400,240 600,220 C800,200 900,180 1000,170"
+                              : "M0,280 C200,290 400,300 600,310 C800,320 900,340 1000,350"
+                        }
+                        fill="none"
+                        stroke={cfoScenario === "Abstieg" ? "#e21b4d" : "#00f3ff"}
+                        strokeWidth="4"
+                      />
+                      <defs>
+                        <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor={cfoScenario === "Abstieg" ? "#e21b4d" : "#00f3ff"} stopOpacity="0.8" />
+                          <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+
+                    {/* Chart Labels (X-Axis Simulation) */}
+                    <div className="absolute -bottom-6 left-0 w-full flex justify-between px-2 text-[9px] font-mono text-white/40 uppercase">
+                      <span>Q1</span><span>Q2</span><span>Q3</span><span>Q4</span>
+                    </div>
+                  </div>
+
+                  {/* Scenario KPIs */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                    <div className="bg-black/40 p-4 border border-white/5 rounded-xl">
+                      <div className="text-[9px] uppercase tracking-widest text-white/40 font-black">Projiziertes TV-Geld</div>
+                      <div className={`text-xl font-black mt-1 ${cfoScenario === "Abstieg" ? "text-red-500" : "text-neon"}`}>
+                        {cfoScenario === "Aufstieg" ? "€ 18.5M" : cfoScenario === "Klassenerhalt" ? "€ 12.0M" : "€ 4.5M"}
                       </div>
                     </div>
-                  ))}
+                    <div className="bg-black/40 p-4 border border-white/5 rounded-xl">
+                      <div className="text-[9px] uppercase tracking-widest text-white/40 font-black">Sponsoring-Wert</div>
+                      <div className={`text-xl font-black mt-1 ${cfoScenario === "Abstieg" ? "text-red-500" : "text-neon"}`}>
+                        {cfoScenario === "Aufstieg" ? "€ 8.2M" : cfoScenario === "Klassenerhalt" ? "€ 5.5M" : "€ 2.1M"}
+                      </div>
+                    </div>
+                    <div className="bg-black/40 p-4 border border-white/5 rounded-xl">
+                      <div className="text-[9px] uppercase tracking-widest text-white/40 font-black">Zuschauer-Schnitt</div>
+                      <div className="text-xl text-white font-black mt-1">
+                        {cfoScenario === "Aufstieg" ? "58,000" : cfoScenario === "Klassenerhalt" ? "42,000" : "28,500"}
+                      </div>
+                    </div>
+                    <div className="bg-black/40 p-4 border border-white/5 rounded-xl">
+                      <div className="text-[9px] uppercase tracking-widest text-white/40 font-black">Squad Salary Cap</div>
+                      <div className="text-xl text-white font-black mt-1">
+                        {cfoScenario === "Aufstieg" ? "€ 35M" : cfoScenario === "Klassenerhalt" ? "€ 22M" : "€ 12M"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Investment Rechner */}
-                <div className="bg-[#0f0f0f] border border-gold/20 p-8 rounded-3xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-                    <Icon name="pie-chart" size={200} />
-                  </div>
-                  <h3 className="text-xl font-black text-gold uppercase tracking-widest mb-6 flex items-center gap-3">
-                    <Icon name="cpu" size={24} /> KI-Investment-Rechner
-                  </h3>
+                {/* BOTTOM HALF GRID: Gehalts-Pyramide & KI-Berater */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                  <div className="flex flex-col md:flex-row gap-8">
-                    <div className="w-full md:w-1/3 space-y-4">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-white/40 block">
-                        Geplantes Investment (€)
-                      </label>
-                      <input
-                        type="number"
-                        value={investmentSum}
-                        onChange={(e) =>
-                          setInvestmentSum(Number(e.target.value))
-                        }
-                        className="w-full bg-black/60 border border-gold/30 text-white font-mono text-3xl font-black p-4 rounded-xl focus:border-gold focus:outline-none"
-                      />
-                      <button
-                        onClick={handleInvestmentCalc}
-                        className="w-full bg-gold text-black font-black uppercase tracking-[0.2em] text-xs py-4 rounded-xl hover:bg-white transition-all shadow-xl"
-                      >
-                        Strategie Berechnen
-                      </button>
+                  {/* 2. GEHALTS-PYRAMIDE */}
+                  <div className="bg-navy/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl relative overflow-hidden shadow-[0_0_30px_rgba(0,18,64,0.8)]">
+                    <h3 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3 mb-6">
+                      <Icon name="bar-chart-2" size={20} className="text-cyan-400" /> Gehalts-Pyramide
+                    </h3>
+
+                    {/* Visual Pyramid (Stacked Bars) */}
+                    <div className="space-y-4 mb-8">
+                      {/* Top Verdiener */}
+                      <div>
+                        <div className="flex justify-between text-[10px] font-black uppercase text-white/60 mb-1">
+                          <span>Top-Verdiener (3 Spieler)</span>
+                          <span className="text-cyan-400">45%</span>
+                        </div>
+                        <div className="w-full h-8 bg-black border border-white/10 rounded-full overflow-hidden relative">
+                          <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-600 to-cyan-400 w-[45%] rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+                        </div>
+                      </div>
+
+                      {/* Stamm */}
+                      <div>
+                        <div className="flex justify-between text-[10px] font-black uppercase text-white/60 mb-1">
+                          <span>Stammspieler (14 Spieler)</span>
+                          <span className="text-gold">40%</span>
+                        </div>
+                        <div className="w-full h-8 bg-black border border-white/10 rounded-full overflow-hidden relative">
+                          <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-yellow-600 to-gold w-[40%] rounded-full"></div>
+                        </div>
+                      </div>
+
+                      {/* Talente */}
+                      <div>
+                        <div className="flex justify-between text-[10px] font-black uppercase text-white/60 mb-1">
+                          <span>Talente / Squad (10 Spieler)</span>
+                          <span className="text-green-400">15%</span>
+                        </div>
+                        <div className="w-full h-8 bg-black border border-white/10 rounded-full overflow-hidden relative">
+                          <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-600 to-green-400 w-[15%] rounded-full"></div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="flex-1 bg-black/40 border border-white/5 p-6 rounded-2xl">
-                      {investmentAI ? (
-                        <div className="prose prose-invert max-w-none">
-                          <div className="text-[10px] font-black uppercase tracking-widest text-gold mb-4 flex items-center gap-2">
-                            <Icon name="check-circle" size={14} />{" "}
-                            Strategische Empfehlung
-                          </div>
-                          <div className="font-mono text-xs whitespace-pre-wrap leading-relaxed text-white/80">
-                            {investmentAI}
-                          </div>
+                    {/* AI Risk Rating Panel */}
+                    <div className="bg-black/60 border border-white/5 p-4 rounded-xl flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase font-black tracking-widest text-white/40">Finanz-Risk-Rating</div>
+                        <div className="text-xs font-mono text-white/80 mt-1">Stabile Belastung. Top-Tier Quote hoch.</div>
+                      </div>
+                      <div className="w-12 h-12 rounded-full border-2 border-green-500 flex items-center justify-center bg-green-500/10 shadow-[0_0_15px_rgba(34,197,94,0.3)]">
+                        <span className="text-green-500 font-black">A-</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. KI-FINANZ-BERATER */}
+                  <div className="bg-navy/30 backdrop-blur-md border border-white/10 p-8 rounded-3xl relative flex flex-col shadow-[0_0_30px_rgba(0,18,64,0.8)]">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                      <Icon name="cpu" size={100} />
+                    </div>
+                    <h3 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3 mb-6">
+                      <Icon name="message-square" size={20} className="text-neon" /> KI-Finanz-Berater
+                    </h3>
+
+                    {/* Readout Area */}
+                    <div className="flex-1 bg-black/60 border border-white/5 rounded-2xl p-6 mb-4 overflow-y-auto custom-scrollbar font-mono text-xs text-white/80 leading-relaxed shadow-inner">
+                      {cfoAiWarning ? (
+                        <div className="animate-fade-in whitespace-pre-wrap">
+                          <span className="text-neon block mb-2">{">"} System-Response:</span>
+                          {cfoAiWarning}
                         </div>
                       ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
-                          <Icon name="activity" size={48} className="mb-4" />
-                          <div className="text-xs font-black uppercase tracking-widest">
-                            Warte auf Input zur Kapitalallokation
-                          </div>
+                        <div className="opacity-40 animate-pulse flex flex-col items-center justify-center h-full">
+                          <Icon name="shield-alert" size={32} className="mb-2" />
+                          <span>Berater aktiv. Warte auf Parameter-Analyse...</span>
+                          <span className="block mt-4 text-[9px] text-red-400 border border-red-400/30 bg-red-400/10 px-2 py-1 rounded">
+                            Proaktive Warnung: Liquiditätsengpass in Q3 möglich, falls Szenario 'Abstieg' eintritt.
+                          </span>
                         </div>
                       )}
                     </div>
+
+                    {/* Input Area */}
+                    <div className="flex gap-2 relative z-10">
+                      <input
+                        type="text"
+                        placeholder="Z.B. 'Simuliere Gehaltskosten bei Abgang Spieler X'"
+                        className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-neon transition-colors placeholder:text-white/20"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && e.target.value) {
+                            setCfoAiWarning("Analyziere Portfolio... \n\nEin Abgang von Spieler X würde €2.4M Budget freimachen, senkt aber die offensive Expected Goals (xG) Projektion um 12%. Re-Investition in Talent Sektor A empfohlen.");
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                      <button
+                        className="bg-neon text-black px-4 rounded-xl hover:bg-white transition-colors"
+                        onClick={(e) => {
+                          const input = e.target.previousElementSibling;
+                          if (input.value) {
+                            setCfoAiWarning("Analyziere Portfolio... \n\nEin Abgang von Spieler X würde €2.4M Budget freimachen, senkt aber die offensive Expected Goals (xG) Projektion um 12%. Re-Investition in Talent Sektor A empfohlen.");
+                            input.value = "";
+                          }
+                        }}
+                      >
+                        <Icon name="send" size={16} />
+                      </button>
+                    </div>
                   </div>
+
                 </div>
               </div>
             )}
