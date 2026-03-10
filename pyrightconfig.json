@@ -1,0 +1,8 @@
+{
+    "exclude": [
+        "/tmp",
+        "/private/tmp",
+        "**/tmp"
+    ],
+    "reportMissingModuleSource": "none"
+}
