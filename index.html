@@ -1079,88 +1079,148 @@
     // ============================================================
     // LEGACY & FOUNDATION — Dedicated memorial component for Gerd
     // ============================================================
+    // ============================================================
+    // LEGACY & FOUNDATION 2.0 — Gerd Sauerwein Memorial Command Center
+    // ============================================================
     const LegacyView = () => (
-      <div className="animate-fade-in min-h-full">
-        {/* HERO */}
-        <div className="relative w-full h-[60vh] min-h-[420px] flex items-center justify-center overflow-hidden rounded-3xl mb-16">
-          <video autoPlay muted loop playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-25 scale-105"
-            src="intro.mp4"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-[#004191]/20 to-black" />
-          <div className="relative z-10 text-center px-6">
-            <div className="mx-auto mb-8 w-40 h-40 rounded-full border-4 border-gold shadow-[0_0_60px_rgba(212,175,55,0.5)] overflow-hidden bg-[#0a0800] flex items-center justify-center">
-              <Icon name="user" size={72} className="text-gold/30" />
-            </div>
-            <p className="text-gold/70 font-mono text-[11px] uppercase tracking-[0.5em] mb-3">† 20.02.2026</p>
-            <h1 className="text-7xl md:text-9xl font-black italic tracking-tighter text-white uppercase"
-              style={{ textShadow: '0 0 80px rgba(212,175,55,0.35)' }}>
-              Gerd
+      <div className="animate-fade-in min-h-[100vh] relative bg-black font-sans text-white overflow-hidden pb-32">
+        {/* CYBERPUNK TACTICAL BACKGROUND: 4-4-2 vs 3-4-3 */}
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hexagons" width="50" height="43.4" patternUnits="userSpaceOnUse" patternTransform="scale(0.5)">
+                <path d="M25 0 L50 14.4 L50 43.3 L25 57.7 L0 43.3 L0 14.4 Z" fill="none" stroke="#00f3ff" strokeWidth="0.5" strokeOpacity="0.3"></path>
+              </pattern>
+              <linearGradient id="glow" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#00f3ff" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#001240" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hexagons)" />
+            <g stroke="#00f3ff" strokeWidth="1" strokeOpacity="0.4" fill="none">
+              {/* Tactical Lines (Abstract) */}
+              <path d="M 0,200 Q 400,300 800,200 T 1600,200" className="animate-pulse" />
+              <path d="M 0,500 Q 500,600 1000,500 T 2000,500" strokeDasharray="10 10" />
+              <path d="M 0,800 Q 600,900 1200,800 T 2400,800" />
+              {/* Nodes representing 4-4-2 vs 3-4-3 */}
+              <circle cx="20%" cy="30%" r="4" fill="#00f3ff" />
+              <circle cx="40%" cy="35%" r="4" fill="#00f3ff" />
+              <circle cx="60%" cy="35%" r="4" fill="#00f3ff" />
+              <circle cx="80%" cy="30%" r="4" fill="#00f3ff" />
+              <circle cx="30%" cy="60%" r="6" fill="#e21b4d" />
+              <circle cx="50%" cy="65%" r="6" fill="#e21b4d" />
+              <circle cx="70%" cy="60%" r="6" fill="#e21b4d" />
+            </g>
+          </svg>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black" />
+        </div>
+
+        {/* MAIN HUD CONTAINER */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto pt-16 px-6 lg:px-12 flex flex-col items-center">
+
+          {/* HEADER */}
+          <header className="w-full text-center border-b border-neon/20 pb-8 mb-16 relative">
+            <div className="absolute left-1/2 -top-4 -translate-x-1/2 w-48 h-1 bg-neon shadow-[0_0_20px_#00f3ff]"></div>
+            <h1 className="text-4xl md:text-6xl font-black italic tracking-tighter uppercase text-white drop-shadow-[0_0_15px_rgba(0,243,255,0.6)]">
+              Gerd 2.0 <span className="text-neon block md:inline md:ml-4 text-2xl md:text-5xl border-l-0 md:border-l-2 border-neon/50 pl-0 md:pl-4 mt-2 md:mt-0 font-mono tracking-widest">- The Legacy AI Command Center</span>
             </h1>
-            <p className="text-gold/50 font-mono text-[10px] uppercase tracking-[0.5em] mt-4">
-              Sauerwein &nbsp;·&nbsp; Leidenschaft &nbsp;·&nbsp; Vermächtnis
-            </p>
-          </div>
-        </div>
+          </header>
 
-        {/* DEDICATION TEXT */}
-        <div className="max-w-2xl mx-auto text-center mb-20 px-6">
-          <div className="w-12 h-px bg-gold/30 mx-auto mb-12" />
-          <div className="bg-[#004191]/5 border border-[#004191]/20 p-12 rounded-3xl shadow-[0_0_50px_rgba(0,65,145,0.1)]">
-            <blockquote className="text-xl md:text-2xl font-light leading-[1.9] text-white/70 italic"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
-              „Gerd, du warst unser Zuhause, warm und klar.<br />
-              Schalke im Herzen, die Berge im Blick.<br />
-              Ein Opa mit Mut, ein Mensch mit Geduld.<br />
-              <span className="text-gold font-normal not-italic">Dieses System ist dein Vermächtnis.</span>"
-            </blockquote>
-          </div>
-          <div className="w-12 h-px bg-gold/30 mx-auto mt-12" />
-        </div>
+          {/* 3-COLUMN GRID */}
+          <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
-        {/* MODULE MATRIX */}
-        <div className="max-w-5xl mx-auto mb-20 px-6">
-          <h2 className="text-center text-[10px] font-black uppercase tracking-[0.5em] text-gold/40 mb-10">
-            Die Vision — Modul-Matrix
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: 'layout-dashboard', title: 'Executive Zentrale', text: 'Das Cockpit mit täglichem KI-Briefing (Morning Call).' },
-              { icon: 'shield', title: 'Tactical Hub', text: '4-4-2 vs. 3-4-3 Simulation mit Echtzeit-Vektor-Analyse.' },
-              { icon: 'users', title: 'Fuchs NLZ Hub', text: 'Jugendförderung mit Biomechanik-Scanner und Profiling.' },
-              { icon: 'pie-chart', title: 'CFO & Scouting', text: 'Finanzplanung und Shadow-Scouting (VDV-Integration).' },
-              { icon: 'glasses', title: 'VR Center', text: 'Taktikbesprechungen in einer immersiven Stadionumgebung.' },
-              { icon: 'newspaper', title: 'Medien-Center', text: 'Automatisierte Erstellung des "Stadion-Kuriers".' },
-            ].map(v => (
-              <div key={v.title}
-                className="bg-black/60 border border-white/5 p-8 rounded-2xl text-left hover:border-[#004191]/50 transition-all group overflow-hidden relative">
-                <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                  <Icon name={v.icon} size={120} />
-                </div>
-                <div className="w-12 h-12 rounded bg-[#004191]/10 border border-[#004191]/20 flex items-center justify-center mb-6">
-                  <Icon name={v.icon} size={22} className="text-[#004191]" />
-                </div>
-                <h3 className="font-black uppercase tracking-widest text-xs text-white mb-2">{v.title}</h3>
-                <p className="text-white/30 text-[11px] leading-relaxed">{v.text}</p>
+            {/* LEFT COLUMN: WIDMUNG & PROJEKT */}
+            <div className="lg:col-span-4 space-y-8">
+              <div className="bg-navy/40 backdrop-blur-md border border-white/10 p-6 rounded-xl shadow-[0_0_30px_rgba(0,18,64,0.8)] relative overflow-hidden group hover:border-neon/50 transition-colors">
+                <div className="absolute top-0 left-0 w-1 h-full bg-neon"></div>
+                <h2 className="flex items-center gap-3 text-gold text-xl font-black uppercase tracking-widest mb-4">
+                  <Icon name="dove" size={20} className="text-gold" /> Widmung
+                </h2>
+                <div className="w-8 h-px bg-gold/50 mb-4"></div>
+                <p className="text-white/80 font-serif leading-relaxed italic text-sm md:text-base">
+                  Dieses Projekt ist in tiefer Dankbarkeit und ehrendem Gedenken meinem Vater Gerd Sauerwein († 20.02.2026) gewidmet. Seine Leidenschaft für den Fußball und sein Charakter sind der Antrieb hinter dieser Entwicklung. Gerd 2.0 ist mehr als eine Software – es ist ein digitales Vermächtnis.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* VIDEO PLAYER */}
-        <div className="max-w-3xl mx-auto mb-20 px-6">
-          <h2 className="text-center text-[10px] font-black uppercase tracking-[0.5em] text-gold/40 mb-8">Foundation Record</h2>
-          <div className="relative rounded-2xl overflow-hidden border border-white/5 shadow-[0_0_60px_rgba(0,0,0,0.5)]">
-            <video controls className="w-full" src="intro.mp4" />
-          </div>
-        </div>
+              <div className="bg-navy/40 backdrop-blur-md border border-white/10 p-6 rounded-xl shadow-[0_0_30px_rgba(0,18,64,0.8)] relative overflow-hidden group hover:border-neon/50 transition-colors">
+                <div className="absolute top-0 left-0 w-1 h-full bg-neon"></div>
+                <h2 className="flex items-center gap-3 text-neon text-xl font-black uppercase tracking-widest mb-4">
+                  <Icon name="rocket" size={20} className="text-neon" /> Über das Projekt
+                </h2>
+                <div className="w-8 h-px bg-neon/50 mb-4"></div>
+                <p className="text-white/80 font-serif leading-relaxed italic text-sm md:text-base">
+                  Gerd 2.0 ist ein hochprofessionelles KI-gesteuertes Management- und Taktik-System für Fußballvereine – vom ambitionierten Amateurverein bis zum Profi-Club. Es vereint modernste Technologie mit strategischer Exzellenz.
+                </p>
+              </div>
+            </div>
 
-        {/* LEGACY CLOSING */}
-        <div className="text-center pb-16 px-6">
-          <Icon name="heart" size={20} className="text-gold/30 mx-auto mb-4" />
-          <p className="text-white/15 font-mono text-[10px] uppercase tracking-widest">
-            Built on Legacy. Inspired by Gerd. © 2026.
-          </p>
+            {/* CENTER PORTRAIT (HOLOGRAM) */}
+            <div className="lg:col-span-4 flex justify-center relative">
+              <div className="relative w-72 h-96 sm:w-80 sm:h-[420px] rounded-2xl p-1 bg-gradient-to-b from-neon via-navy to-black shadow-[0_0_80px_rgba(0,243,255,0.4)] animate-pulse">
+                <div className="absolute inset-0 bg-neon/20 blur-xl rounded-2xl"></div>
+                <div className="w-full h-full bg-black rounded-2xl overflow-hidden relative border border-white/10 backdrop-blur-3xl flex items-center justify-center">
+                  <img src="image_0.png" alt="Gerd Sauerwein" className="w-full h-full object-cover object-center opacity-80 mix-blend-screen mix-blend-luminosity brightness-110 contrast-125 saturate-50 sepia-[.2] hue-rotate-180" />
+
+                  {/* Hologram scanlines/glitches */}
+                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] mix-blend-overlay"></div>
+                  <div className="absolute bottom-4 left-0 w-full text-center z-20">
+                    <span className="bg-black/80 text-neon font-mono text-[10px] uppercase tracking-[0.4em] px-4 py-1 border border-neon/30 rounded-full">Foundation Node Active</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: MODULE & INSTALLATION */}
+            <div className="lg:col-span-4 space-y-8">
+              <div className="bg-navy/40 backdrop-blur-md border border-white/10 p-6 rounded-xl shadow-[0_0_30px_rgba(0,18,64,0.8)] relative overflow-hidden group hover:border-redbull/50 transition-colors">
+                <div className="absolute top-0 right-0 w-1 h-full bg-redbull"></div>
+                <h2 className="flex items-center gap-3 text-redbull text-xl font-black uppercase tracking-widest mb-4">
+                  <Icon name="microscope" size={20} className="text-redbull" /> Kern-Module
+                </h2>
+                <div className="w-8 h-px bg-redbull/50 mb-4"></div>
+                <ul className="space-y-3 text-white/80 font-mono text-xs md:text-sm">
+                  <li className="flex items-start gap-2"><span className="text-redbull mt-0.5">▪</span> <strong>Executive Zentrale:</strong> Das Cockpit mit täglichem KI-Briefing (Morning Call).</li>
+                  <li className="flex items-start gap-2"><span className="text-redbull mt-0.5">▪</span> <strong>Tactical Board:</strong> 4-4-2 vs. 3-4-3 Simulation mit Echtzeit-Vektor-Analyse.</li>
+                  <li className="flex items-start gap-2"><span className="text-redbull mt-0.5">▪</span> <strong>Fuchs NLZ Hub:</strong> Jugendförderung mit Biomechanik-Scanner und psychologischem Profiling.</li>
+                  <li className="flex items-start gap-2"><span className="text-redbull mt-0.5">▪</span> <strong>CFO & Scouting:</strong> KI-gestützte Finanzplanung und Shadow-Scouting (VDV-Integration).</li>
+                  <li className="flex items-start gap-2"><span className="text-redbull mt-0.5">▪</span> <strong>VR Command Center:</strong> Taktikbesprechungen in einer immersiven 3D-Stadionumgebung.</li>
+                  <li className="flex items-start gap-2"><span className="text-redbull mt-0.5">▪</span> <strong>Medien-Center:</strong> Automatisierte Erstellung des "Stadion-Kuriers".</li>
+                </ul>
+              </div>
+
+              <div className="bg-navy/40 backdrop-blur-md border border-white/10 p-6 rounded-xl shadow-[0_0_30px_rgba(0,18,64,0.8)] relative overflow-hidden group hover:border-neon/50 transition-colors">
+                <div className="absolute top-0 right-0 w-1 h-full bg-neon"></div>
+                <h2 className="flex items-center gap-3 text-neon text-xl font-black uppercase tracking-widest mb-4">
+                  <Icon name="wrench" size={20} className="text-neon" /> Installation & Aktivierung
+                </h2>
+                <div className="w-8 h-px bg-neon/50 mb-4"></div>
+                <p className="text-white/80 font-mono text-xs mb-3">Gerd 2.0 folgt dem "Bring Your Own Key" Prinzip. Um die volle KI-Power zu nutzen, benötigst du einen eigenen Gemini API Key (kostenlos erhältlich im Google AI Studio).</p>
+                <ol className="list-decimal list-inside space-y-2 text-white/70 font-mono text-[10px] md:text-xs">
+                  <li>Repository klonen oder downloaden.</li>
+                  <li>Webseite öffnen (lokal oder via Vercel-Link).</li>
+                  <li>In den Settings deinen persönlichen API-Key hinterlegen.</li>
+                  <li><strong>Starten:</strong> Gerd 2.0 wird dich durch das Onboarding für deinen spezifischen Verein führen.</li>
+                </ol>
+              </div>
+            </div>
+
+          </div>
+
+          {/* FOOTER QUOTE */}
+          <footer className="w-full mt-24 text-center pb-8">
+            <div className="w-24 h-px bg-neon/40 mx-auto mb-8"></div>
+            <div className="inline-block relative">
+              <Icon name="heart" size={24} className="text-neon/50 absolute -top-8 left-1/2 -translate-x-1/2" />
+              <blockquote className="text-2xl md:text-3xl font-serif italic text-white drop-shadow-[0_0_10px_rgba(0,243,255,0.4)]">
+                „Ein Trainer lehrt Taktik, ein Vater lehrt Charakter.“
+              </blockquote>
+            </div>
+            <p className="text-white/40 font-mono text-xs uppercase tracking-[0.2em] mt-8 max-w-2xl mx-auto leading-relaxed">
+              Dieses Tool soll Trainern weltweit helfen, das Beste aus ihren Spielern und ihrem Verein herauszuholen – im Geiste von Gerd Sauerwein.
+            </p>
+          </footer>
+
         </div>
       </div>
     );
