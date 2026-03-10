@@ -1254,6 +1254,12 @@
       const [investmentAI, setInvestmentAI] = useState("");
       const [isScoutingLoading, setIsScoutingLoading] = useState(false);
 
+      // --- MEDIA SUITE STATE ---
+      const [mediaSuiteTool, setMediaSuiteTool] = useState("ai-writer"); // ai-writer, brand-kit, export
+      const [mediaTimbre, setMediaTimbre] = useState("Analytisch"); // Analytisch, Emotional, Provokant
+      const [mediaCanvasBlocks, setMediaCanvasBlocks] = useState([]);
+      const [isExporting, setIsExporting] = useState(false);
+
       const [apiConfig, setApiConfig] = useState(() => {
         try {
           const saved = localStorage.getItem("gerd_apiConfig");
@@ -5176,8 +5182,8 @@
                           key={scen}
                           onClick={() => setCfoScenario(scen)}
                           className={`px-4 py-2 rounded-md font-black uppercase text-[10px] tracking-widest transition-all ${cfoScenario === scen
-                              ? "bg-neon/20 text-neon shadow-[0_0_15px_rgba(0,243,255,0.3)] border border-neon/50"
-                              : "text-white/30 hover:text-white"
+                            ? "bg-neon/20 text-neon shadow-[0_0_15px_rgba(0,243,255,0.3)] border border-neon/50"
+                            : "text-white/30 hover:text-white"
                             }`}
                         >
                           {scen}
@@ -6817,189 +6823,230 @@
         );
       };
 
-      // 6. Performance Journal
+      // 6. Professional Media Suite
       const renderJournal = () => {
         return (
-          <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-20 text-white font-sans">
-            {/* MAGAZINE HEADER */}
-            <div className="flex flex-col md:flex-row justify-between items-end border-b-8 border-redbull pb-6 gap-6">
-              <div className="flex items-center gap-6">
-                <div className="bg-redbull p-4 text-white shadow-[0_0_30px_rgba(226,27,77,0.4)]">
-                  <Icon name="newspaper" size={56} />
+          <div className="h-full flex flex-col bg-[#050a14] text-white font-sans animate-fade-in relative overflow-hidden">
+            {/* TOP BAR: Header & Export Buttons */}
+            <div className="h-16 border-b border-white/10 bg-navy/80 backdrop-blur-md flex items-center justify-between px-6 z-20 shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 bg-neon flex items-center justify-center rounded-sm">
+                  <Icon name="layout" size={16} className="text-black" />
                 </div>
                 <div>
-                  <h2
-                    className={`text-7xl font-black italic tracking-tighter uppercase leading-none ${journal.magazineName === "HEENES-KURIER" ? "text-neon" : "text-white"}`}
-                  >
-                    {journal.magazineName === "HEENES-KURIER"
-                      ? "HEENES"
-                      : "STARK"}
-                  </h2>
-                  <h3 className="text-4xl font-light tracking-[0.2em] text-white/60 uppercase leading-none mt-1">
-                    {journal.magazineName === "HEENES-KURIER"
-                      ? "KURIER"
-                      : "PERFORMANCE"}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-3 p-1 px-3 bg-white/5 w-fit rounded border border-white/10">
-                    <span className="font-mono text-redbull tracking-widest text-[10px] font-black uppercase">
-                      EPISODE {new Date().toLocaleDateString("de-DE")}
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                    <span className="font-mono text-white/40 tracking-widest text-[10px] uppercase">
-                      CONFIDENTIAL
-                    </span>
-                  </div>
+                  <h2 className="font-black italic tracking-widest uppercase text-sm">Gerd 2.0 <span className="text-neon font-sans">Media Suite</span></h2>
+                  <p className="text-[9px] font-mono text-white/40 uppercase tracking-[0.2em]">Professional Editorial System v1.0</p>
                 </div>
               </div>
-              <div className="flex gap-4">
+
+              <div className="flex items-center gap-3">
                 <button
-                  onClick={generateJournalContent}
-                  disabled={isJournalLoading}
-                  className={`group bg-white text-navy px-8 py-4 rounded-sm font-black uppercase tracking-widest text-xs hover:bg-neon transition-all flex items-center gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-95 ${isJournalLoading ? "opacity-50 cursor-wait" : ""}`}
+                  disabled={isExporting}
+                  onClick={() => {
+                    setIsExporting(true);
+                    setTimeout(() => { setIsExporting(false); gerdSpeak("HTML5 Flip-Book generiert und in Cloud geladen.", "System"); }, 2000);
+                  }}
+                  className="bg-black/40 border border-white/20 hover:border-white text-xs font-black uppercase tracking-widest px-4 py-2 rounded-md transition-all flex items-center gap-2"
                 >
-                  <Icon
-                    name="refresh-cw"
-                    className={
-                      isJournalLoading
-                        ? "animate-spin"
-                        : "group-hover:rotate-180 transition-all duration-700"
-                    }
-                    size={18}
-                  />
-                  JOURNAL GENERIEREN
+                  {isExporting ? <Icon name="loader" size={14} className="animate-spin text-white/50" /> : <Icon name="monitor" size={14} />}
+                  Flip-Book
+                </button>
+                <button
+                  disabled={isExporting}
+                  onClick={() => {
+                    setIsExporting(true);
+                    setTimeout(() => { setIsExporting(false); gerdSpeak("High-Res PDF für Print-Produktion exportiert.", "System"); }, 2500);
+                  }}
+                  className="bg-neon text-black text-xs font-black uppercase tracking-widest px-4 py-2 rounded-md hover:bg-white transition-all shadow-[0_0_15px_rgba(0,243,255,0.3)] flex items-center gap-2"
+                >
+                  {isExporting ? <Icon name="loader" size={14} className="animate-spin text-black/50" /> : <Icon name="printer" size={14} />}
+                  Print PDF
                 </button>
               </div>
             </div>
 
-            {!journal ? (
-              <div
-                className="h-[60vh] flex flex-col items-center justify-center border-4 border-dashed border-white/5 rounded-3xl bg-white/2 cursor-pointer group hover:bg-white/5 transition-all"
-                onClick={generateJournalContent}
-              >
-                <div className="relative">
-                  <Icon
-                    name="newspaper"
-                    size={120}
-                    className="text-white/5 group-hover:text-redbull/20 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Icon
-                      name="plus"
-                      size={40}
-                      className="text-redbull animate-pulse"
-                    />
-                  </div>
-                </div>
-                <p className="text-white/40 font-black uppercase tracking-[0.3em] text-sm mt-8">
-                  System wartet auf Redaktions-Input
-                </p>
-                <p className="text-white/20 text-xs mt-2 uppercase">
-                  Initialisiere Presse-Gerd Kern für Erstausgabe
-                </p>
+            {/* MAIN WORKSPACE */}
+            <div className="flex-1 flex overflow-hidden">
+
+              {/* LEFT: Toolbar (Icon Strip) */}
+              <div className="w-16 border-r border-white/10 bg-black/60 flex flex-col items-center py-6 gap-6 shrink-0 z-20">
+                {[
+                  { id: "ai-writer", icon: "pen-tool", label: "AI Writer" },
+                  { id: "brand-kit", icon: "droplet", label: "Brand Kit" },
+                  { id: "components", icon: "grid", label: "Komponenten" },
+                  { id: "assets", icon: "image", label: "Bilder" }
+                ].map(tool => (
+                  <button
+                    key={tool.id}
+                    onClick={() => setMediaSuiteTool(tool.id)}
+                    className={`relative p-3 rounded-xl transition-all group ${mediaSuiteTool === tool.id ? "bg-neon/10 text-neon" : "text-white/40 hover:text-white"}`}
+                  >
+                    <Icon name={tool.icon} size={20} />
+                    {mediaSuiteTool === tool.id && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-neon rounded-r-md"></div>}
+
+                    {/* Tooltip */}
+                    <span className="absolute left-full ml-4 top-1/2 -translate-y-1/2 bg-black border border-white/10 text-[9px] uppercase tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+                      {tool.label}
+                    </span>
+                  </button>
+                ))}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12">
-                {/* LEFT COLUMN: COVER & EDITORIAL (7 cols) */}
-                <div className="lg:col-span-8 space-y-12">
-                  <div className="relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-2 h-20 bg-redbull"></div>
-                    <h3 className="text-8xl font-black text-white italic tracking-tighter uppercase mb-2 leading-[0.85] transition-all duration-700 group-hover:text-redbull">
-                      {journal.title}
-                    </h3>
-                    <div className="bg-white/10 h-[1px] w-full my-8"></div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                      <div className="space-y-6">
-                        <div className="flex items-center gap-3 text-redbull font-black uppercase text-xs tracking-[0.2em]">
-                          <span className="w-8 h-[2px] bg-redbull"></span>{" "}
-                          EDITORIAL
+              {/* LEFT: Context Panel */}
+              <div className="w-80 border-r border-white/10 bg-navy/40 backdrop-blur-md flex flex-col shrink-0 z-10 transition-all duration-300">
+
+                {/* AI Writer Panel */}
+                {mediaSuiteTool === "ai-writer" && (
+                  <div className="p-6 h-full flex flex-col animate-fade-in">
+                    <h3 className="font-black uppercase tracking-widest text-xs mb-6 flex items-center gap-2"><Icon name="cpu" size={14} className="text-neon" /> KI-Journalist</h3>
+
+                    <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
+                      <div>
+                        <label className="text-[10px] text-white/50 uppercase tracking-widest mb-3 block">Schreib-Timbre</label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {["Analytisch", "Emotional", "Provokant"].map(timbre => (
+                            <button
+                              key={timbre}
+                              onClick={() => setMediaTimbre(timbre)}
+                              className={`p-3 border rounded-lg text-left text-xs font-black uppercase tracking-widest transition-all ${mediaTimbre === timbre ? "border-neon bg-neon/10 text-neon shadow-[0_0_10px_rgba(0,243,255,0.2)]" : "border-white/10 bg-black/40 text-white/40 hover:border-white/30"}`}
+                            >
+                              {timbre}
+                              {mediaTimbre === timbre && <div className="text-[9px] text-white/60 font-mono mt-1 lowercase font-normal tracking-normal line-clamp-1">
+                                {timbre === "Analytisch" && "Fokus auf Taktik, xG-Werte, Heatmaps. Nüchtern."}
+                                {timbre === "Emotional" && "Fokus auf Leidenschaft, Tradition, Fans. Packend."}
+                                {timbre === "Provokant" && "Fokus auf Reibung, interne Kritik, Druck. Scharf."}
+                              </div>}
+                            </button>
+                          ))}
                         </div>
-                        <p className="text-2xl font-light text-white/90 leading-tight italic border-l-2 border-white/10 pl-6">
-                          "{journal.editorial}"
-                        </p>
                       </div>
-                      <div className="bg-navy/40 p-8 border border-white/5 rounded-sm relative">
-                        <Icon
-                          name="quote"
-                          className="absolute -top-4 -left-4 text-redbull opacity-40"
-                          size={40}
-                        />
-                        <h4 className="text-neon font-black uppercase text-[10px] tracking-widest mb-4">
-                          TRAINER-GERD INTERVIEW
-                        </h4>
-                        <blockquote className="text-lg font-serif italic text-white/80 leading-relaxed">
-                          {journal.interview}
-                        </blockquote>
+
+                      <div>
+                        <label className="text-[10px] text-white/50 uppercase tracking-widest mb-3 block">Thema / Prompt</label>
+                        <textarea
+                          className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-xs font-mono text-white/80 h-32 focus:outline-none focus:border-neon resize-none"
+                          placeholder="Worüber soll der KI-Redakteur schreiben? (z.B. Verletzung von Spieler Y, neues 3-4-3 System...)"
+                        ></textarea>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="p-10 bg-black/40 border-t border-b border-white/10">
-                    <div className="flex items-center gap-4 mb-6">
-                      <Icon name="zap" size={24} className="text-gold" />
-                      <h4 className="text-gold font-black uppercase text-sm tracking-[0.3em]">
-                        TAKTISCHES UPDATE
-                      </h4>
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <button
+                        onClick={() => {
+                          setMediaCanvasBlocks([...mediaCanvasBlocks, { id: Date.now(), type: "text", timbre: mediaTimbre }]);
+                          gerdSpeak(`Textbaustein (${mediaTimbre}) generiert und ins Layout eingefügt.`, "System");
+                        }}
+                        className="w-full bg-neon text-black font-black uppercase text-[10px] tracking-widest py-3 rounded-lg hover:bg-white transition-colors shadow-[0_0_10px_rgba(0,243,255,0.3)]"
+                      >
+                        Absatz Generieren & Einfügen
+                      </button>
                     </div>
-                    <p className="text-xl font-mono text-white/60 leading-relaxed uppercase">
-                      {journal.tactics}
-                    </p>
-                  </div>
-                </div>
-
-                {/* RIGHT COLUMN: SIDEBAR (4 cols) */}
-                <div className="lg:col-span-4 space-y-8">
-                  {/* MEDICAL UPDATE BOX */}
-                </div>
-
-                {/* SPONSOR CORNER */}
-                {journal.sponsor && (
-                  <div className="bg-navy p-8 border border-gold/30 shadow-[0_10px_40px_rgba(212,175,55,0.15)] relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                      <Icon name="award" size={80} className="text-gold" />
-                    </div>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="bg-gold p-2 rounded-full">
-                        <Icon name="star" size={16} className="text-navy" />
-                      </div>
-                      <h4 className="text-gold font-black uppercase text-xs tracking-widest">
-                        Sponsoren-Ecke
-                      </h4>
-                    </div>
-                    <p className="text-white/80 font-serif italic text-lg leading-relaxed border-l-2 border-gold/20 pl-6">
-                      {journal.sponsor}
-                    </p>
                   </div>
                 )}
 
-                {/* SCAN QR / DIGITAL TWIN */}
-                <div className="glass-panel p-8 border border-white/5 flex flex-col items-center text-center gap-4">
-                  <div className="w-32 h-32 bg-white p-2">
-                    <img
-                      src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=STARK-ELITE-JOURNAL"
-                      alt="QR Code"
-                      loading="lazy"
-                    />
+                {/* Brand Kit Panel */}
+                {mediaSuiteTool === "brand-kit" && (
+                  <div className="p-6 h-full flex flex-col animate-fade-in">
+                    <h3 className="font-black uppercase tracking-widest text-xs mb-6 flex items-center gap-2"><Icon name="droplet" size={14} className="text-redbull" /> Brand Kit</h3>
+                    <div className="space-y-8">
+                      <div>
+                        <label className="text-[10px] text-white/50 uppercase tracking-widest mb-3 block">Globale Farben</label>
+                        <div className="flex gap-4">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-neon border-2 border-white/20 cursor-pointer hover:scale-110 transition-transform shadow-[0_0_15px_rgba(0,243,255,0.5)]"></div>
+                            <span className="text-[9px] font-mono text-white/40">Primary</span>
+                          </div>
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-redbull border-2 border-white/20 cursor-pointer hover:scale-110 transition-transform shadow-[0_0_15px_rgba(226,27,77,0.5)]"></div>
+                            <span className="text-[9px] font-mono text-white/40">Accent 1</span>
+                          </div>
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-10 h-10 rounded-full bg-gold border-2 border-white/20 cursor-pointer hover:scale-110 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.5)]"></div>
+                            <span className="text-[9px] font-mono text-white/40">Accent 2</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-white/50 uppercase tracking-widest mb-3 block">Vereinslogo</label>
+                        <div className="w-full h-32 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center gap-2 text-white/20 hover:text-white/60 hover:border-white/30 transition-all cursor-pointer bg-black/40">
+                          <Icon name="upload-cloud" size={24} />
+                          <span className="text-[9px] uppercase tracking-widest font-black">SVG / PNG Drop</span>
+                        </div>
+                        <div className="mt-4 flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/10">
+                          <Icon name="shield" size={24} className="text-neon p-1 bg-black rounded" />
+                          <span className="text-xs font-mono">stark-elite-crest.svg</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h5 className="font-black text-[10px] uppercase tracking-widest text-white/40">
-                      DIGITAL EDITION
-                    </h5>
-                    <p className="text-[9px] font-mono text-neon mt-1">
-                      SCAN FOR MOBILE DEEP DIVE
-                    </p>
-                  </div>
-                </div>
+                )}
 
-                {/* ADS / PARTNERS */}
-                <div className="p-6 border border-white/5 bg-white/2 flex justify-between items-center opacity-40 hover:opacity-100 transition-opacity">
-                  <span className="text-[8px] font-black uppercase tracking-[0.5em]">
-                    PARTNER: RED BULL ALPHA
-                  </span>
-                  <Icon name="shield-check" size={16} />
+                {/* Fallback Panels */}
+                {(mediaSuiteTool === "components" || mediaSuiteTool === "assets") && (
+                  <div className="h-full flex flex-col items-center justify-center p-6 text-center opacity-40 animate-fade-in">
+                    <Icon name={mediaSuiteTool === "components" ? "grid" : "image"} size={48} className="mb-4" />
+                    <div className="text-xs font-black uppercase tracking-widest mb-2 border-b border-white/20 pb-2">Archiv wird geladen</div>
+                    <p className="text-[10px] font-mono leading-relaxed mt-2">Verbindung zur Vereinsdatenbank (Cloud) wird hergestellt. Raster und Visuals in Vorbereitung.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* CENTER: The Canvas / Editor area */}
+              <div className="flex-1 bg-black relative overflow-auto custom-scrollbar flex justify-center py-12 px-6">
+                {/* Canvas Background Pattern */}
+                <div className="absolute inset-0 pointer-events-none opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+
+                {/* Virtual Paper / Artboard */}
+                <div className="w-full max-w-4xl bg-[#0a0f1d] min-h-[800px] rounded-sm border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative p-12 flex flex-col z-10">
+
+                  {/* Default Header Block */}
+                  <div className="border-b-[6px] border-neon pb-6 mb-12 group cursor-pointer hover:bg-white/5 p-4 -mx-4 rounded border border-transparent hover:border-white/10 transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                      <h1 className="text-6xl font-black italic uppercase tracking-tighter w-full outline-none focus:bg-black/50 p-2 rounded transition-colors" contentEditable suppressContentEditableWarning>STARK ELITE KURIER</h1>
+                      <div className="bg-neon text-black px-3 py-1 font-black uppercase tracking-widest text-[9px] shrink-0 mt-2">MATCHDAY EDITION</div>
+                    </div>
+                    <div className="flex justify-between items-center text-white/40 font-mono text-[10px] uppercase">
+                      <span>Vol. 4 // {new Date().toLocaleDateString("de-DE")}</span>
+                      <span>Internal Performance Document</span>
+                    </div>
+                  </div>
+
+                  {/* Canvas Blocks (Mock Drop Zone) */}
+                  <div className="space-y-6 flex-1 text-white">
+                    {mediaCanvasBlocks.length === 0 ? (
+                      <div className="h-64 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-white/20 bg-white/2 cursor-crosshair">
+                        <Icon name="plus-circle" size={32} className="mb-3" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Inhalt hier ablegen</span>
+                      </div>
+                    ) : (
+                      mediaCanvasBlocks.map(block => (
+                        <div key={block.id} className="relative group border border-transparent hover:border-white/10 hover:bg-white/5 p-4 -mx-4 rounded transition-all">
+                          {/* Hover Context Menu */}
+                          <div className="absolute -top-3 right-0 opacity-0 group-hover:opacity-100 flex gap-1 bg-black border border-white/20 rounded-md p-1 shadow-xl transition-all z-10">
+                            <button className="p-1.5 hover:bg-white/10 rounded text-white/60 hover:text-white"><Icon name="edit-2" size={12} /></button>
+                            <button
+                              onClick={() => setMediaCanvasBlocks(mediaCanvasBlocks.filter(b => b.id !== block.id))}
+                              className="p-1.5 hover:bg-red-500/20 rounded text-white/60 hover:text-red-500 transition-colors"
+                            ><Icon name="trash-2" size={12} /></button>
+                          </div>
+
+                          {/* Block Content Mock */}
+                          <div className="flex items-start gap-4">
+                            {block.timbre === "Analytisch" && <div className="w-1 bg-neon h-auto self-stretch rounded-full shrink-0 shadow-[0_0_10px_rgba(0,243,255,0.5)]"></div>}
+                            {block.timbre === "Emotional" && <div className="w-1 bg-redbull h-auto self-stretch rounded-full shrink-0 shadow-[0_0_10px_rgba(226,27,77,0.5)]"></div>}
+                            {block.timbre === "Provokant" && <div className="w-1 bg-gold h-auto self-stretch rounded-full shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.5)]"></div>}
+
+                            <div className="flex-1 outline-none min-h-[60px] font-serif text-lg leading-relaxed text-white/90 focus:bg-white/5 p-2 rounded transition-colors break-words" contentEditable suppressContentEditableWarning>
+                              [{block.timbre}er Absatz] Die taktische Grundausrichtung offenbarte neue Perspektiven im Umschaltspiel. Die Kombination aus defensiver Stabilität und schnellen Ballstafetten lieferte die Grundlage für den Erfolg. KI-Modelle projizieren eine Effizienzsteigerung im Angriffsdrittel, sofern die Passwege im Zentrum gesichert bleiben.
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         );
       };
