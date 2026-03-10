@@ -891,6 +891,7 @@
       const [primaryColor, setPrimaryColor] = useState("#00f3ff");
       const [secondaryColor, setSecondaryColor] = useState("#e21b4d");
       const [isMagicFilling, setIsMagicFilling] = useState(false);
+      const [epicKey, setEpicKey] = useState("");
 
       const handleMagicFill = async () => {
         if (!clubName) return alert("Bitte zuerst Vereinsnamen eingeben.");
@@ -927,12 +928,14 @@
       const handleFinish = () => {
         if (!clubName || !league)
           return alert("Bitte Name und Liga angeben.");
+        if (epicKey) localStorage.setItem("gerd_epicKey", epicKey);
         onComplete({
           name: clubName,
           league: league,
           primaryColor: primaryColor,
           secondaryColor: secondaryColor,
           researchData: "",
+          epicKey: epicKey,
         });
       };
 
@@ -954,6 +957,36 @@
             </div>
 
             <div className="space-y-8">
+
+              {/* === SYSTEM-AKTIVIERUNG === */}
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 font-black uppercase tracking-widest block flex items-center gap-2">
+                  <Icon name="key" size={10} /> System-Aktivierung <span className="text-neon/60">(Epic Key)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={epicKey}
+                    onChange={(e) => setEpicKey(e.target.value)}
+                    placeholder="Geben Sie Ihren persönlichen Autorisierungs-Key ein..."
+                    className={`w-full bg-white/5 border rounded p-4 text-white font-mono text-sm tracking-widest outline-none transition-all placeholder:text-white/10 placeholder:font-sans placeholder:text-xs placeholder:tracking-normal ${epicKey ? 'border-neon/60 shadow-[0_0_12px_rgba(0,243,255,0.15)]' : 'border-white/10 focus:border-neon/50 focus:shadow-[0_0_10px_rgba(0,243,255,0.1)]'}`}
+                  />
+                  {epicKey && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-neon">
+                      <Icon name="shield-check" size={16} />
+                    </div>
+                  )}
+                </div>
+                <a
+                  href="mailto:lizenz@gerd2.io?subject=Lizenz-Schlüssel Anfrage"
+                  className="inline-flex items-center gap-1.5 text-[11px] text-white/30 hover:text-neon transition-colors mt-1 group"
+                >
+                  <Icon name="external-link" size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                  Noch keinen Key? Fordern Sie hier Ihren Lizenz-Schlüssel an.
+                </a>
+              </div>
+
+              {/* === VEREINSNAME === */}
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 font-black uppercase tracking-widest block">
                   Vereinsname
@@ -968,8 +1001,12 @@
                   />
                   <button
                     onClick={handleMagicFill}
-                    disabled={isMagicFilling}
-                    className="px-6 bg-gold text-navy font-black uppercase text-[10px] tracking-widest rounded hover:bg-white transition-all flex items-center gap-2 disabled:opacity-50"
+                    disabled={isMagicFilling || !epicKey}
+                    title={!epicKey ? "Bitte zuerst Ihren Epic Key eingeben" : ""}
+                    className={`px-6 font-black uppercase text-[10px] tracking-widest rounded flex items-center gap-2 transition-all ${!epicKey
+                        ? 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'
+                        : 'bg-gold text-navy hover:bg-white disabled:opacity-50'
+                      }`}
                   >
                     <Icon
                       name="sparkles"
