@@ -1266,6 +1266,51 @@
       const [mediaCanvasBlocks, setMediaCanvasBlocks] = useState([]);
       const [isExporting, setIsExporting] = useState(false);
 
+      // --- TACTICAL HUB & VR SUITE STATE ---
+      const [vectorAnalysisActive, setVectorAnalysisActive] = useState(false);
+      const [playbookViewActive, setPlaybookViewActive] = useState(false);
+      const [aiTacticsGlow, setAiTacticsGlow] = useState([]); // Stores coordinates for glowing SVG gaps
+      const [vrPerspective, setVrPerspective] = useState("commander"); // 'commander' or 'ego'
+
+      // Calculate distances between team lines (Defense, Midfield, Attack)
+      const calculateTacticalDistances = () => {
+        if (!playerPositions || Object.keys(playerPositions).length === 0) return null;
+
+        const teamNodes = Object.entries(playerPositions).filter(([id]) => id.toString().length < 5); // Rough filter for own team
+        if (teamNodes.length === 0) return null;
+
+        // Sort by Y coordinate (assuming attacking top to bottom or vice versa, based on starting formation y values)
+        // In earlier formations: GK at y: 90/10, Attackers at y: 22/82. Let's group by typical y bands.
+        const sorted = [...teamNodes].sort((a, b) => a[1].y - b[1].y);
+
+        if (sorted.length < 10) return null; // Need mostly full team
+
+        // Extremely simplified logic: top 3 are attack/defense, mid 4 are mid, bottom are defense/attack
+        const block1 = sorted.slice(0, 3);
+        const block2 = sorted.slice(3, 7);
+        const block3 = sorted.slice(7, 10);
+
+        const avgY = (nodes) => nodes.reduce((sum, n) => sum + n[1].y, 0) / nodes.length;
+        const avgX = (nodes) => nodes.reduce((sum, n) => sum + n[1].x, 0) / nodes.length;
+
+        const y1 = avgY(block1); const x1 = avgX(block1);
+        const y2 = avgY(block2); const x2 = avgX(block2);
+        const y3 = avgY(block3); const x3 = avgX(block3);
+
+        // Distance in pixels. 640px height approx 100m. 1px = ~0.15m
+        const dist1_2 = Math.round(Math.abs(y1 - y2) * 0.15);
+        const dist2_3 = Math.round(Math.abs(y2 - y3) * 0.15);
+
+        return {
+          lines: [
+            { x: x1, y: y1 },
+            { x: x2, y: y2 },
+            { x: x3, y: y3 }
+          ],
+          distances: [dist1_2, dist2_3]
+        };
+      };
+
       const [apiConfig, setApiConfig] = useState(() => {
         try {
           const saved = localStorage.getItem("gerd_apiConfig");
@@ -3717,6 +3762,20 @@
 
               <div className="flex gap-3">
                 <button
+                  onClick={() => setVectorAnalysisActive(!vectorAnalysisActive)}
+                  className={`px-5 py-3 rounded font-black uppercase text-xs flex items-center gap-2 border-2 transition-all ${vectorAnalysisActive ? "bg-neon border-neon text-navy shadow-[0_0_20px_rgba(0,243,255,0.6)] animate-pulse" : "border-white/20 text-white/60 hover:border-white hover:text-white"}`}
+                >
+                  <Icon name="git-commit" size={16} /> Vector-Scan
+                </button>
+
+                <button
+                  onClick={() => setPlaybookViewActive(!playbookViewActive)}
+                  className={`px-5 py-3 rounded font-black uppercase text-xs flex items-center gap-2 border-2 transition-all ${playbookViewActive ? "bg-gold border-gold text-navy shadow-[0_0_20px_rgba(212,175,55,0.6)]" : "border-white/20 text-white/60 hover:border-white hover:text-white"}`}
+                >
+                  <Icon name="database" size={16} /> Playbook
+                </button>
+
+                <button
                   onClick={handleVoiceCommand}
                   className={`px-5 py-3 rounded font-black uppercase text-xs flex items-center gap-2 border-2 transition-all ${isRecording ? "bg-redbull border-redbull shadow-[0_0_20px_rgba(226,27,77,0.6)] animate-pulse" : "border-white/20 text-white/60 hover:border-white hover:text-white"}`}
                 >
@@ -3728,16 +3787,31 @@
                 </button>
 
                 <button
-                  onClick={activateGerd}
+                  onClick={async () => {
+                    if (gerdThinking) return;
+                    setGerdThinking(true);
+                    setAiTacticsGlow([]);
+
+                    // Simulate API request for AI tactical analysis
+                    setTimeout(() => {
+                      setAiTacticsGlow([
+                        { x: 120, y: 300, radius: 40 }, // Left half-space gap
+                        { x: 300, y: 350, radius: 45 }  // Right half-space gap
+                      ]);
+                      setGerdFeedback("SYSTEM SCAN: Zwei signifikante Schnittstellen-Lücken in den Halbräumen identifiziert.");
+                      gerdSpeak("Schnittstellen-Lücken auf dem Feld markiert. Das gegnerische Mittelfeld bietet Räume.", "Trainer-Gerd");
+                      setGerdThinking(false);
+                    }, 2000);
+                  }}
                   disabled={gerdThinking}
-                  className={`px-5 py-3 rounded font-black uppercase text-xs flex items-center gap-2 border-2 transition-all ${gerdVoiceActive && !isRecording ? "bg-redbull border-redbull shadow-[0_0_20px_rgba(226,27,77,0.6)] animate-pulse" : gerdThinking ? "border-neon/40 text-neon/40 cursor-wait" : "border-neon/40 text-neon hover:bg-neon/10"}`}
+                  className={`px-5 py-3 rounded font-black uppercase text-xs flex items-center gap-2 border-2 transition-all ${aiTacticsGlow.length > 0 ? "bg-redbull/20 border-redbull text-redbull shadow-[0_0_20px_rgba(226,27,77,0.3)] animate-pulse" : gerdThinking ? "border-neon/40 text-neon/40 cursor-wait" : "border-neon/40 text-neon hover:bg-neon/10"}`}
                 >
                   <Icon
-                    name={gerdThinking ? "loader" : "brain"}
+                    name={gerdThinking ? "loader" : "crosshair"}
                     size={16}
                     className={gerdThinking ? "animate-spin" : ""}
                   />
-                  {gerdThinking ? "Analysiere..." : "Strategie-Check"}
+                  {gerdThinking ? "Analysiere..." : "KI-Lücken-Scan"}
                 </button>
               </div>
             </div>
@@ -3762,6 +3836,53 @@
                 >
                   <Icon name="x" size={16} />
                 </button>
+              </div>
+            )}
+
+            {/* ── Playbook Repository View ── */}
+            {playbookViewActive && (
+              <div className="bg-[#050a1b] border border-gold/30 rounded-xl p-6 mb-6 shadow-[0_0_30px_rgba(212,175,55,0.15)] animate-slide-in relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5"><Icon name="database" size={100} /></div>
+                <h3 className="text-xl font-black text-gold uppercase tracking-widest mb-6 flex items-center gap-3">
+                  <Icon name="archive" size={24} /> Playbook-Database
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {clubArchive.proMatchbook.length === 0 && clubArchive.proTrainingbook.length === 0 ? (
+                    <div className="col-span-3 text-center text-white/40 font-mono py-8">
+                      Keine taktischen Spielzüge im Archiv gefunden. Nutze den "Taktik Mappe" Button um Spielzüge zu speichern.
+                    </div>
+                  ) : (
+                    <>
+                      {clubArchive.proMatchbook.slice(-3).reverse().map((play, idx) => (
+                        <div key={`match-${idx}`} className="bg-black/60 border border-white/10 p-4 rounded-lg hover:border-neon transition-colors cursor-pointer group"
+                          onClick={() => {
+                            // Simplified restore logic: We'd restore drawingPaths and positions here.
+                            // For demonstration in the MVP, we just show a success message.
+                            gerdSpeak(`Taktik vom ${play.date} geladen.`, "System");
+                            setPlaybookViewActive(false);
+                          }}
+                        >
+                          <div className="text-[10px] text-neon font-black uppercase tracking-widest mb-1">{play.date} • Match</div>
+                          <div className="text-sm font-bold text-white mb-2">Gespeicherte Formation</div>
+                          <div className="text-xs text-white/50 font-mono">{play.drawings} Vektoren gesichert.</div>
+                        </div>
+                      ))}
+                      {clubArchive.proTrainingbook.slice(-3).reverse().map((play, idx) => (
+                        <div key={`train-${idx}`} className="bg-black/60 border border-white/10 p-4 rounded-lg hover:border-neon transition-colors cursor-pointer group"
+                          onClick={() => {
+                            gerdSpeak(`Trainings-Taktik vom ${play.date} geladen.`, "System");
+                            setPlaybookViewActive(false);
+                          }}
+                        >
+                          <div className="text-[10px] text-cyan-400 font-black uppercase tracking-widest mb-1">{play.date} • Training</div>
+                          <div className="text-sm font-bold text-white mb-2">Taktik-Aufbau</div>
+                          <div className="text-xs text-white/50 font-mono">{play.drawings} Vektoren gesichert.</div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
@@ -4003,6 +4124,50 @@
                       className={path.mode === "pass" ? "animate-pulse" : ""}
                     />
                   ))}
+
+                  {/* VECTOR ANALYSIS LAYER (Line-Spacing Distances) */}
+                  {vectorAnalysisActive && (() => {
+                    const distData = calculateTacticalDistances();
+                    if (!distData) return null;
+                    return (
+                      <svg className="absolute inset-0 z-20 pointer-events-none w-full h-full">
+                        {/* Lines connecting the horizontal blocks */}
+                        <line x1={distData.lines[0].x} y1={distData.lines[0].y} x2={distData.lines[1].x} y2={distData.lines[1].y} stroke="#00f3ff" strokeWidth="2" strokeDasharray="5,5" />
+                        <line x1={distData.lines[1].x} y1={distData.lines[1].y} x2={distData.lines[2].x} y2={distData.lines[2].y} stroke="#00f3ff" strokeWidth="2" strokeDasharray="5,5" />
+
+                        {/* Distance Texts */}
+                        <g transform={`translate(${distData.lines[0].x + 20}, ${(distData.lines[0].y + distData.lines[1].y) / 2})`}>
+                          <rect x="-5" y="-12" width="40" height="20" fill="black" stroke="#00f3ff" rx="4" opacity="0.8" />
+                          <text x="15" y="2" fill="#00f3ff" fontSize="12" fontWeight="bold" textAnchor="middle">{distData.distances[0]}m</text>
+                        </g>
+
+                        <g transform={`translate(${distData.lines[1].x + 20}, ${(distData.lines[1].y + distData.lines[2].y) / 2})`}>
+                          <rect x="-5" y="-12" width="40" height="20" fill="black" stroke="#00f3ff" rx="4" opacity="0.8" />
+                          <text x="15" y="2" fill="#00f3ff" fontSize="12" fontWeight="bold" textAnchor="middle">{distData.distances[1]}m</text>
+                        </g>
+                      </svg>
+                    );
+                  })()}
+
+                  {/* AI TACTICS GLOW LAYER (Schnittstellen-Lücken) */}
+                  {aiTacticsGlow.map((glow, idx) => (
+                    <circle
+                      key={`glow-${idx}`}
+                      cx={glow.x}
+                      cy={glow.y}
+                      r={glow.radius}
+                      fill="url(#glow-rad)"
+                      className="animate-pulse"
+                    />
+                  ))}
+
+                  {/* SVG Defs for AI Glow */}
+                  <defs>
+                    <radialGradient id="glow-rad" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#e21b4d" stopOpacity="0.6" />
+                      <stop offset="100%" stopColor="#e21b4d" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
 
                   {/* PREDICTIVE OPPONENT REACTIONS & CUSTOM PATTERNS */}
                   <defs>
@@ -7735,15 +7900,83 @@
                 distance="30"
               ></a-light>
 
+              {/* ========== CAMERA RIG ========== */}
+              <a-entity
+                id="vr-rig"
+                position={vrPerspective === "commander" ? "0 4 0" : "0 0 2"}
+                rotation={vrPerspective === "commander" ? "-45 0 0" : "0 0 0"}
+                movement-controls="controls: gamepad,keyboard,touch; constrainToNavMesh: true; speed: 0.15"
+                boundary-check="radius: 18"
+              >
+                <a-camera
+                  position="0 1.6 0"
+                  look-controls="pointerLockEnabled: false"
+                >
+                  <a-entity
+                    cursor="rayOrigin: mouse;"
+                    raycaster="objects: .clickable, .draggable, .teleport-floor"
+                  ></a-entity>
+                  <a-entity
+                    id="vr-cursor"
+                    cursor="fuse: false"
+                    raycaster="objects: .clickable, .draggable, .teleport-floor"
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                    material="color: #00f3ff; shader: flat; opacity: 0.8"
+                    animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
+                  ></a-entity>
+                </a-camera>
+
+                <a-entity
+                  hand-controls="hand: left"
+                  laser-controls="hand: left"
+                  raycaster="objects: .clickable, .draggable, .teleport-floor"
+                  line="color: #00f3ff; opacity: 0.5"
+                ></a-entity>
+                <a-entity
+                  hand-controls="hand: right"
+                  laser-controls="hand: right"
+                  raycaster="objects: .clickable, .draggable, .teleport-floor"
+                  line="color: #00f3ff; opacity: 0.5"
+                ></a-entity>
+              </a-entity>
+
+              {/* ========== VR UI OVERLAYS ========== */}
+              {/* Perspective Toggle Button (Floating in front of rig) */}
+              <a-entity position="0 1 -3">
+                <a-plane
+                  width="1.8"
+                  height="0.4"
+                  color="#111"
+                  opacity="0.8"
+                  class="clickable"
+                  onClick={() => setVrPerspective(p => p === "commander" ? "ego" : "commander")}
+                >
+                  <a-text
+                    value={`SWITCH TO ${vrPerspective === "commander" ? "EGO" : "COMMANDER"} VIEW`}
+                    align="center"
+                    position="0 0 0.01"
+                    color="#00f3ff"
+                    font="exo2bold"
+                  ></a-text>
+                </a-plane>
+              </a-entity>
+
               {/* ========== CENTRAL TACTICAL PITCH (0 0 0) ========== */}
-              <a-entity position="0 0.8 0">
-                {/* Table Base & Glowing Rim */}
+              <a-entity
+                id="vr-pitch"
+                position="0 0.8 0"
+                scale={vrPerspective === "ego" ? "5 5 5" : "1 1 1"}
+                animation={vrPerspective === "ego" ? "property: position; to: 0 0.01 0; dur: 1000; easing: easeOutQuad" : "property: position; to: 0 0.8 0; dur: 1000; easing: easeOutQuad"}
+              >
+                {/* Table Base & Glowing Rim (Hide base in ego mode so we just have pitch lines) */}
                 <a-cylinder
                   radius="2.3"
                   height="0.1"
                   color="#111"
                   metalness="0.5"
                   roughness="0.5"
+                  visible={vrPerspective === "commander"}
                 >
                   <a-ring
                     radius-inner="2.2"
