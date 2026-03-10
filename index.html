@@ -1004,8 +1004,8 @@
                     disabled={isMagicFilling || !epicKey}
                     title={!epicKey ? "Bitte zuerst Ihren Epic Key eingeben" : ""}
                     className={`px-6 font-black uppercase text-[10px] tracking-widest rounded flex items-center gap-2 transition-all ${!epicKey
-                        ? 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'
-                        : 'bg-gold text-navy hover:bg-white disabled:opacity-50'
+                      ? 'bg-white/5 text-white/20 border border-white/10 cursor-not-allowed'
+                      : 'bg-gold text-navy hover:bg-white disabled:opacity-50'
                       }`}
                   >
                     <Icon
@@ -8345,7 +8345,7 @@
       return (
         <div className="app-root w-full h-full relative">
           <div
-            className={`min-h-screen flex flex-col md:flex-row bg-[#000000] relative transition-all duration-700 ${gerdThinking ? "ai-pulse-active" : ""}`}
+            className={`h-screen flex flex-col md:flex-row bg-[#000000] relative overflow-hidden transition-all duration-700 ${gerdThinking ? "ai-pulse-active" : ""}`}
           >
             <NeuralBackground />
             {/* SetupWizard Overlay */}
@@ -8600,7 +8600,7 @@
               </div>
             </div>
             {/* MAIN CONTENT AREA */}
-            <div className="flex-1 h-screen overflow-y-auto relative p-6 md:p-12 main-content-mobile">
+            <div className="flex-1 overflow-y-auto relative p-6 md:p-12 main-content-mobile">
               {showBriefing && (
                 <IntelligenceBriefing
                   onClose={() => setShowBriefing(false)}
