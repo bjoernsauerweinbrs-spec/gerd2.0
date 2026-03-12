@@ -19,8 +19,8 @@
         extend: {
           colors: {
             navy: "#001240",
-            redbull: "#E21B4D",
-            neon: "#00f3ff",
+            redbull: "var(--color-redbull, #E21B4D)",
+            neon: "var(--color-neon, #00f3ff)",
             gold: "#d4af37",
             "schalke-blau": "#004B91",
           },
@@ -49,6 +49,11 @@
     rel="stylesheet" />
 
   <style>
+    :root {
+      --color-neon: #00f3ff;
+      --color-redbull: #e21b4d;
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -907,7 +912,7 @@
           const res = await fetch("http://localhost:3001/api/hydrate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ clubName }),
+            body: JSON.stringify({ clubName, apiKey: epicKey }),
           });
           const payload = await res.json();
           if (payload.ok) {
@@ -2221,6 +2226,7 @@ ${prompt}`;
             body: JSON.stringify({
               messages: [{ role: "user", content: contextualPrompt }],
               persona: persona,
+              apiKey: localStorage.getItem("gerd_epicKey") || ""
             }),
           });
           const data = await res.json();
@@ -2909,6 +2915,23 @@ ${prompt}`;
         window.addEventListener("hashchange", handleHash);
         return () => window.removeEventListener("hashchange", handleHash);
       }, []);
+
+      useEffect(() => {
+        // Auto-apply 4-4-2 if board is empty and we have players
+        if (Object.keys(playerPositions || {}).length === 0 && players.length >= 11) {
+          console.log("Tactical Board: Empty state detected. Applying default 4-4-2 formation.");
+          const newPos = {};
+          const formation442 = FORMATIONS["4-4-2"];
+          const posKeys = Object.keys(formation442);
+          players.slice(0, 11).forEach((p, i) => {
+            if (posKeys[i]) {
+              newPos[p.id] = { ...formation442[posKeys[i]] };
+            }
+          });
+          setPlayerPositions(newPos);
+          localStorage.setItem("gerd_playerPositions", JSON.stringify(newPos));
+        }
+      }, [players]); // Re-run if players load/change
 
       useEffect(() => {
         localStorage.setItem("stark_elite_players", JSON.stringify(players));

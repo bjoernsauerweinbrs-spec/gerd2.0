@@ -206,8 +206,11 @@ app.get('/simulate/player', (req, res) => {
 
 // ── /api/chat — Gemini Universal Proxy ──────────────────────────────────
 app.post('/api/chat', async (req, res) => {
-    if (!GEMINI_API_KEY) {
-        return res.status(503).json({ ok: false, error: 'Gemini API-Schlüssel nicht konfiguriert.' });
+    const reqKey = req.body.apiKey;
+    const finalKey = reqKey || GEMINI_API_KEY;
+
+    if (!finalKey) {
+        return res.status(403).json({ ok: false, error: 'Gemini API-Schlüssel nicht konfiguriert.' });
     }
 
     if (!checkRateLimit()) {
@@ -229,7 +232,7 @@ app.post('/api/chat', async (req, res) => {
         const userPrompt = messages[messages.length - 1].content;
         const fullPrompt = `${SYSTEM_CONTEXT}\nAktuelle Persona: ${persona}\nUser-Anfrage: ${userPrompt}`;
 
-        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${finalKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -257,7 +260,9 @@ app.post('/api/chat', async (req, res) => {
 
 // ── /api/ai/morning-call — State-Grounded Executive Briefing ──────────
 app.post('/api/ai/morning-call', async (req, res) => {
-    if (!GEMINI_API_KEY) return res.status(503).json({ ok: false, error: 'AI Core offline.' });
+    const reqKey = req.body.apiKey;
+    const finalKey = reqKey || GEMINI_API_KEY;
+    if (!finalKey) return res.status(503).json({ ok: false, error: 'AI Core offline.' });
     if (!checkRateLimit()) return res.status(429).json({ ok: false, error: 'System overload. Try later.' });
 
     const { truthObject } = req.body;
@@ -283,7 +288,7 @@ app.post('/api/ai/morning-call', async (req, res) => {
         Wenn der Kader klein ist (< 18), fordere Scouting-Aktivität.
         Stil: Hoch-analytisch, Klopp/Nagelsmann Mix, keine Floskeln.`;
 
-        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${finalKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -379,7 +384,8 @@ app.get('/fussball-de/team', async (req, res) => {
 //   { ok, clubName, league, logoUrl, primaryColor, secondaryColor,
 //     players[], lastFormation, totalSquadValue, source }
 app.post('/api/hydrate', async (req, res) => {
-    const { clubName } = req.body || {};
+    const { clubName, apiKey } = req.body || {};
+    const finalKey = apiKey || GEMINI_API_KEY;
     if (!clubName) {
         return res.status(400).json({ ok: false, error: 'clubName required' });
     }
@@ -446,7 +452,7 @@ app.post('/api/hydrate', async (req, res) => {
     }
 
     // ── Step 2: AI fallback — generate squad via Gemini ─────────────────
-    if (players.length === 0 && GEMINI_API_KEY) {
+    if (players.length === 0 && finalKey) {
         try {
             const aiPrompt = `You are a football data expert. Generate a squad for the club: "${clubName}".
 
@@ -483,7 +489,7 @@ IMPORTANT RULES:
 
 
             const aiResp = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${finalKey}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
