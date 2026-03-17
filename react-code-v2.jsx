@@ -9078,6 +9078,52 @@ Sende NUR das JSON Objekt!`;
       },
     ];
 
+    const [isAutoFillingYouth, setIsAutoFillingYouth] = useState(false);
+    
+    const handleAutoFillYouthSquad = async () => {
+      if (!clubIdentity || !clubIdentity.name) {
+        gerdSpeak("Bitte zuerst Vereinsdaten in den Einstellungen hinterlegen.", "Trainer-Gerd");
+        return;
+      }
+      setIsAutoFillingYouth(true);
+      try {
+        const response = await askAI(
+          `Generiere ein Array von 15 Jugendspielern (U19/U17) für das NLZ von ${clubIdentity.name}.
+          Erfinde realistische Namen und vergebe Potential (POT) Werte zwischen 75 und 95 und realistische Jugend-Attribute.
+          Antworte NUR mit valider JSON (ohne Markdown-Tags).
+          Format-Beispiel: [{"id": 1, "name": "Talent A", "position": "ZOM", "group": "u19", "pac": 80, "sho": 75, "pas": 80, "dri": 82, "def": 40, "phy": 65, "pot": 90, "image": ""}]`,
+          "NLZ-Direktor",
+          true
+        );
+
+        let jsonStr = response.trim();
+        if (jsonStr.startsWith("```json")) jsonStr = jsonStr.substring(7);
+        if (jsonStr.startsWith("```")) jsonStr = jsonStr.substring(3);
+        if (jsonStr.endsWith("```")) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
+        jsonStr = jsonStr.trim();
+
+        const newYouthPlayers = JSON.parse(jsonStr).map((p, i) => ({
+            ...p,
+            id: `auto_y_${Date.now()}_${i}`,
+            image: p.image || "",
+            group: p.group || (i < 5 ? "u19" : i < 10 ? "u17" : "u15"),
+            focus: 70,
+            frustration: 2,
+            hrv: 75,
+            sleep: 8.0,
+            psychHistory: [],
+            videoTresor: []
+        }));
+        setYouthPlayers(newYouthPlayers);
+        gerdSpeak(`Youth Squad für ${clubIdentity.name} erfolgreich über KI-Scouting generiert.`, "System");
+      } catch (e) {
+        console.error("Youth Hydration Error:", e);
+        gerdSpeak("Fehler beim Ingest der NLZ Scouting-Daten.", "error");
+      } finally {
+        setIsAutoFillingYouth(false);
+      }
+    };
+
     const generatePlan = async () => {
       setIsGenerating(true);
       setTrainingPlan(null);
@@ -9630,6 +9676,15 @@ Sende NUR das JSON Objekt!`;
                 <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
                   <Icon name="users" size={28} className="text-redbull" /> Nachwuchs Kader
                 </h2>
+                <button
+                  onClick={handleAutoFillYouthSquad}
+                  disabled={isAutoFillingYouth || !clubIdentity.name}
+                  className={`px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all ${isAutoFillingYouth ? "bg-white/10 text-gray-500 cursor-not-allowed border border-gray-200" : clubIdentity.name ? "bg-neon text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)] hover:scale-105 hover:bg-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                  title={clubIdentity.name ? "Jugend-Kader via KI importieren" : "Bitte zuerst Club in Settings eintragen"}
+                >
+                  {isAutoFillingYouth ? <Icon name="loader" className="animate-spin" size={16} /> : <Icon name="zap" size={16} />}
+                  {isAutoFillingYouth ? "KI-Scouting läuft..." : "KI-Youth-Scouting (Auto-Fill)"}
+                </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {youthPlayers.map((p) => {
