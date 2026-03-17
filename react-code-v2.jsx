@@ -2132,6 +2132,1495 @@ const STARK_ELITE_PRESETS = [
   }
 ];
 
+  const FuchsNLZ = ({
+    youthPlayers,
+    setYouthPlayers,
+    nlzTab,
+    setNlzTab,
+    scoutModal,
+    setScoutModal,
+    dnaModules,
+    setDnaModules,
+    askAI,
+    gerdSpeak,
+    updateYouthPlayer,
+    addYouthPlayer,
+    deleteYouthPlayer,
+    promoteToProSquad,
+    openScoutModal,
+    clubIdentity,
+    truthObject,
+    dispatchAction,
+    addAiLog,
+  }) => {
+    const [ageGroup, setAgeGroup] = useState("funino"); // 'funino' | 'kleinfeld' | 'grossfeld'
+    const [trainingFocus, setTrainingFocus] = useState("dribbling");
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [trainingPlan, setTrainingPlan] = useState(null);
+
+    // --- NEW NLZ MED-TECH STATE ---
+    const [activeNlzView, setActiveNlzView] = useState("finance"); // 'character' | 'biomechanics' | 'pipeline' | 'finance'
+    const [activeDossierPlayerId, setActiveDossierPlayerId] = useState(null);
+    const [activeRatingPlayerId, setActiveRatingPlayerId] = useState(null);
+    const [draggedTalentId, setDraggedTalentId] = useState(null);
+    const [pedagogicalTip, setPedagogicalTip] = useState("");
+    const [isFetchingTip, setIsFetchingTip] = useState(false);
+    const [developmentReport, setDevelopmentReport] = useState("");
+    const [isDevLoading, setIsDevLoading] = useState(false);
+
+    const handleDevCheck = async (player) => {
+      setIsDevLoading(true);
+      gerdSpeak(`Abgleich von ${player.name} mit Profi-DNA gestartet...`, "System");
+
+      const prompt = `Du bist 'NLZ-Entwicklungs-Coach Gerd'. Analysiere das Potential von ${player.name} (Position: ${player.pos}).
+          AKTUELLE STATS: ${JSON.stringify(player.stats)}.
+          PROFI-VORGABE: ${truthObject.tactical_setup.formation_home}, Fokus auf ${truthObject.club_identity.philosophy}.
+
+          Erstelle einen 'Predictive Development Report' (Quelle: NLZ-Datenbank):
+          1. 'System-Kompatibilität': Passt er ins 4-4-2 / 3-4-3?
+          2. 'Physischer Gap': Was fehlt zur Profi-Reife?
+          3. 'Vorschlag': Spezielle Trainings-Provokationsregel für diesen Spieler.
+
+          Stil: Analytisch, fordernd, visionär.`;
+
+      try {
+        const res = await askAI(prompt, "Trainer-Gerd");
+        setDevelopmentReport(res);
+      } catch (e) {
+        setDevelopmentReport("Analyse im Neural-Link fehlgeschlagen.");
+      }
+      setIsDevLoading(false);
+    };
+
+    // Quick Rating Logic
+    const handleQuickRating = (type) => {
+      if (!activeRatingPlayerId) return;
+      if (navigator.vibrate) navigator.vibrate(50);
+
+      const player = youthPlayers.find(
+        (p) => p.id === activeRatingPlayerId,
+      );
+      if (!player) return;
+
+      let update = {};
+      if (type === "top") {
+        update = {
+          focus: Math.min(10, (player.focus || 5) + 1),
+          pac: Math.min(99, (player.pac || 60) + 1),
+        };
+        gerdSpeak(
+          `${player.name}: Top Aktion registriert! +1 Fokus.`,
+          "Trainer-Gerd",
+        );
+      } else if (type === "neutral") {
+        gerdSpeak(
+          `${player.name}: Aktion neutral bewertet.`,
+          "Trainer-Gerd",
+        );
+      } else if (type === "correction") {
+        update = {
+          frustration: Math.min(10, (player.frustration || 5) + 1),
+        };
+        gerdSpeak(
+          `${player.name}: Korrektur-Bedarf notiert.`,
+          "Trainer-Gerd",
+        );
+      }
+
+      if (Object.keys(update).length > 0) {
+        Object.entries(update).forEach(([key, val]) => {
+          updateYouthPlayer(activeRatingPlayerId, key, val);
+        });
+      }
+    };
+
+    // Psycho Tracking State
+    const [psychoScores, setPsychoScores] = useState({
+      focus: 5,
+      effort: 5,
+      teamplay: 5,
+      frustration: 5,
+    });
+    const [isGeneratingPsychReport, setIsGeneratingPsychReport] =
+      useState(false);
+
+    // Season Book State
+    const [seasonBookData, setSeasonBookData] = useState(null);
+    const [isGeneratingBook, setIsGeneratingBook] = useState(false);
+
+    // Video Analysis State
+    const [videoFile, setVideoFile] = useState(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisReport, setAnalysisReport] = useState(null);
+    const [videoSrc, setVideoSrc] = useState(null);
+
+    const ageClasses = [
+      { id: "funino", label: "Funino U6-U9", icon: "smile" },
+      { id: "kleinfeld", label: "Kleinfeld U10-U13", icon: "layout" },
+      { id: "grossfeld", label: "Großfeld U14+", icon: "maximize" },
+    ];
+
+    const foci = [
+      { id: "dribbling", label: "Dribbling & 1v1", icon: "zap" },
+      { id: "passing", label: "Passspiel & Raum", icon: "repeat" },
+      { id: "shooting", label: "Torschuss & Abschluss", icon: "target" },
+      {
+        id: "coordination",
+        label: "Koordination & Speed",
+        icon: "activity",
+      },
+    ];
+
+    const [isAutoFillingYouth, setIsAutoFillingYouth] = useState(false);
+    
+    const handleAutoFillYouthSquad = async () => {
+      if (!clubIdentity || !clubIdentity.name) {
+        gerdSpeak("Bitte zuerst Vereinsdaten in den Einstellungen hinterlegen.", "Trainer-Gerd");
+        return;
+      }
+      setIsAutoFillingYouth(true);
+      try {
+        const response = await askAI(
+          `Generiere ein Array von 15 Jugendspielern (U19/U17) für das NLZ von ${clubIdentity.name}.
+          Erfinde realistische Namen und vergebe Potential (POT) Werte zwischen 75 und 95 und realistische Jugend-Attribute.
+          Antworte NUR mit valider JSON (ohne Markdown-Tags).
+          Format-Beispiel: [{"id": 1, "name": "Talent A", "position": "ZOM", "group": "u19", "pac": 80, "sho": 75, "pas": 80, "dri": 82, "def": 40, "phy": 65, "pot": 90, "image": ""}]`,
+          "NLZ-Direktor",
+          true
+        );
+
+        let jsonStr = response.trim();
+        if (jsonStr.startsWith("```json")) jsonStr = jsonStr.substring(7);
+        if (jsonStr.startsWith("```")) jsonStr = jsonStr.substring(3);
+        if (jsonStr.endsWith("```")) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
+        jsonStr = jsonStr.trim();
+
+        const newYouthPlayers = JSON.parse(jsonStr).map((p, i) => ({
+            ...p,
+            id: `auto_y_${Date.now()}_${i}`,
+            image: p.image || "",
+            group: p.group || (i < 5 ? "u19" : i < 10 ? "u17" : "u15"),
+            focus: 70,
+            frustration: 2,
+            hrv: 75,
+            sleep: 8.0,
+            psychHistory: [],
+            videoTresor: []
+        }));
+        setYouthPlayers(newYouthPlayers);
+        gerdSpeak(`Youth Squad für ${clubIdentity.name} erfolgreich über KI-Scouting generiert.`, "System");
+      } catch (e) {
+        console.error("Youth Hydration Error:", e);
+        gerdSpeak("Fehler beim Ingest der NLZ Scouting-Daten.", "error");
+      } finally {
+        setIsAutoFillingYouth(false);
+      }
+    };
+
+    const generatePlan = async () => {
+      setIsGenerating(true);
+      setTrainingPlan(null);
+      try {
+          const prompt = `[STRICT JSON PROTOCOL]
+          Du bist der NLZ-Direktor und Entwicklungs-Coach vom 'Stark Elite' NLZ.
+          Erstelle einen detaillierten Trainingsplan für die Altersklasse [${ageGroup}], basierend auf der Red Bull Entwicklungs-DNA:
+          - Starkes, ballorientiertes Gegenpressing
+          - Vertikales, blitzschnelles Umschaltspiel
+          - Hohe Intensität und Resilienz-Aufbau
+          
+          Schwerpunkt: ${trainingFocus}.
+          Pädagogischer Fokus: Passe Komplexität an ${ageGroup} an (z.B. U15 mehr Technik/Funino, U19 Taktik).
+          
+          DU MUSST NUR EIN REINES JSON-ARRAY ZURÜCKGEBEN. KEIN TEXT DAVOR ODER DANACH.
+          Jeder Drill braucht: id (string), name (string), phase ("Warm-Up", "Hauptteil", "Abschluss"), description (string), duration (string), technicalData (object: positions für 4-6 Spieler im 420x640 Feld, keys als strings 1-6 mit x, y 0-100).
+          Format: [{"id":"1", "name":"...", "phase": "...", "description":"...", "duration":"...", "technicalData": {"positions": {"1":{"x":20,"y":30}}}}]`;
+
+        const res = await askAI(prompt, "NLZ-Direktor", true);
+        const jsonMatch = res.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error("No JSON array found");
+        
+        const drills = JSON.parse(jsonMatch[0]);
+        setTrainingPlan(drills);
+        setActiveDrillId(drills[0]?.id || null);
+        
+        gerdSpeak(
+          "Altersgerechter Plan wurde nach RB-DNA generiert und visualisiert.",
+          "NLZ-Direktor"
+        );
+      } catch (e) {
+        setTrainingPlan("Fehler beim Abruf des Trainingsplans.");
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    const handleVideoUpload = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        setVideoFile(file);
+        setVideoSrc(URL.createObjectURL(file));
+        startAnalysis();
+      }
+    };
+
+    const startAnalysis = async () => {
+      setIsAnalyzing(true);
+      setAnalysisReport(null);
+
+      // Simulate scanning animation time
+      setTimeout(async () => {
+        const prompt = `Du bist Biomechanik-Experte im Fuchs Leistungszentrum.
+          Analysiere eine fiktive Videoaufnahme eines Nachwuchsspielers beim ${trainingFocus}.
+          Gib Feedback zu:
+          1. Standfuß-Positionierung
+          2. Körperhaltung/Schwerpunkt
+          3. Armeinsatz zur Balance
+          4. Eindeutiger Korrektur-Tipp für den Amateur-Trainer.
+          Antworte prägnant im 'Stark Elite' Stil.`;
+
+        const res = await askAI(prompt, "Biomechanik-Expert");
+        setAnalysisReport(res);
+        setIsAnalyzing(false);
+        gerdSpeak(
+          "Biomechanik-Analyse abgeschlossen. Haltungskorrekturen liegen vor.",
+          "Trainer-Gerd",
+        );
+      }, 4000);
+    };
+
+    const saveVideoToTresor = () => {
+      if (!activeDossierPlayerId || !videoSrc || !analysisReport) {
+        alert(
+          "Bitte zuerst einen Spieler auswählen und ein Video analysieren.",
+        );
+        return;
+      }
+      const newVideo = {
+        date: new Date().toLocaleDateString("de-DE"),
+        title: `${trainingFocus.toUpperCase()} Analyse`,
+        feedback: analysisReport,
+        videoSrc: videoSrc,
+      };
+      const p = youthPlayers.find((p) => p.id === activeDossierPlayerId);
+      const currentVideos = p && p.videoTresor ? p.videoTresor : [];
+      updateYouthPlayer(activeDossierPlayerId, "videoTresor", [
+        ...currentVideos,
+        newVideo,
+      ]);
+      gerdSpeak(
+        "Video erfolgreich in den Tresor des Spielers verschoben.",
+        "Trainer-Gerd",
+      );
+      setVideoSrc(null);
+      setAnalysisReport(null);
+    };
+
+    const generatePsychReport = async (playerId) => {
+      setIsGeneratingPsychReport(true);
+      try {
+        const prompt = `Du bist 'NLZ-Sportpsychologe' für das Fuchs Leistungszentrum.
+          Erstelle einen kurzen diagnostischen Bericht (max 3 Sätze) basierend auf folgenden Trainer-Bewertungen (1-10):
+          Fokus: ${psychoScores.focus}, Einsatz: ${psychoScores.effort}, Teamplay: ${psychoScores.teamplay}, Frustrationstoleranz: ${psychoScores.frustration}.
+          Stil: Professionell, entwicklungsorientiert.`;
+
+        const report = await askAI(prompt, "NLZ-Sportpsychologe");
+
+        const newEntry = {
+          date: new Date().toLocaleDateString("de-DE"),
+          scores: { ...psychoScores },
+          aiReport: report,
+        };
+
+        const player = youthPlayers.find((p) => p.id === playerId);
+        updateYouthPlayer(playerId, "psychHistory", [
+          ...(player.psychHistory || []),
+          newEntry,
+        ]);
+        gerdSpeak(
+          "Psychologisches Profil aktualisiert.",
+          "NLZ-Sportpsychologe",
+        );
+      } catch (e) {
+        console.error("Fehler bei Psycho-Report:", e);
+      } finally {
+        setIsGeneratingPsychReport(false);
+      }
+    };
+
+    const generateSeasonBook = async () => {
+      setIsGeneratingBook(true);
+      setSeasonBookData(null);
+      try {
+        const squadData = youthPlayers.map((p) => ({
+          name: p.name,
+          pos: p.position,
+          ovr: Math.round(
+            (p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6,
+          ),
+          psych:
+            p.psychHistory && p.psychHistory.length > 0
+              ? p.psychHistory[p.psychHistory.length - 1].scores
+              : { focus: 5, effort: 5, teamplay: 5, frustration: 5 },
+        }));
+
+        const prompt = `Erstelle Inhalte für das 'Saison-Fachbuch' der Akademie.
+          Hier sind die Daten der Top-Talente: ${JSON.stringify(squadData)}.
+          Schreibe für jeden Spieler eine prägnante 'Scouting-Zusammenfassung' (ca. 40 Wörter), die Leistung und Psychologie verbindet.
+          Antworte als JSON-Array: [{"name": "...", "report": "..." }, ...]`;
+
+        const res = await askAI(prompt, "NLZ-Direktor");
+        const jsonMatch = res.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          setSeasonBookData(JSON.parse(jsonMatch[0]));
+          gerdSpeak(
+            "Das Saison-Fachbuch wurde erfolgreich generiert.",
+            "NLZ-Direktor",
+          );
+        } else {
+          setSeasonBookData([
+            {
+              name: "System",
+              report: "Fehler beim Parsen der Buchdaten.",
+            },
+          ]);
+        }
+      } catch (e) {
+        setSeasonBookData([
+          { name: "System", report: "Netzwerkfehler beim Abruf." },
+        ]);
+      } finally {
+        setIsGeneratingBook(false);
+      }
+    };
+
+    const renderPitch = () => {
+      if (ageGroup === "funino") {
+        return (
+          <svg
+            viewBox="0 0 420 300"
+            className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
+          >
+            {/* Funino Pitch */}
+            <rect
+              x="10"
+              y="10"
+              width="400"
+              height="280"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              opacity="0.5"
+            />
+            <line
+              x1="210"
+              y1="10"
+              x2="210"
+              y2="290"
+              stroke="white"
+              strokeWidth="1"
+              strokeDasharray="5,5"
+              opacity="0.3"
+            />
+
+            {/* 6m Shooting Zones */}
+            <line
+              x1="70"
+              y1="10"
+              x2="70"
+              y2="290"
+              stroke="#00f3ff"
+              strokeWidth="2"
+              strokeDasharray="4,4"
+              opacity="0.6"
+            />
+            <line
+              x1="350"
+              y1="10"
+              x2="350"
+              y2="290"
+              stroke="#00f3ff"
+              strokeWidth="2"
+              strokeDasharray="4,4"
+              opacity="0.6"
+            />
+            <text
+              x="40"
+              y="150"
+              fill="#00f3ff"
+              fontSize="10"
+              transform="rotate(-90, 40, 150)"
+              opacity="0.5"
+            >
+              SCHUSSZONE
+            </text>
+            <text
+              x="380"
+              y="150"
+              fill="#00f3ff"
+              fontSize="10"
+              transform="rotate(90, 380, 150)"
+              opacity="0.5"
+            >
+              SCHUSSZONE
+            </text>
+
+            {/* 4 Mini Goals */}
+            <g opacity="0.8">
+              <rect
+                x="5"
+                y="40"
+                width="10"
+                height="40"
+                fill="#ff4444"
+                rx="2"
+              />
+              <rect
+                x="5"
+                y="220"
+                width="10"
+                height="40"
+                fill="#ff4444"
+                rx="2"
+              />
+              <rect
+                x="405"
+                y="40"
+                width="10"
+                height="40"
+                fill="#ff4444"
+                rx="2"
+              />
+              <rect
+                x="405"
+                y="220"
+                width="10"
+                height="40"
+                fill="#ff4444"
+                rx="2"
+              />
+            </g>
+          </svg>
+        );
+      }
+      if (ageGroup === "kleinfeld") {
+        return (
+          <svg
+            viewBox="0 0 420 300"
+            className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
+          >
+            <rect
+              x="10"
+              y="10"
+              width="400"
+              height="280"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              opacity="0.5"
+            />
+            <line
+              x1="210"
+              y1="10"
+              x2="210"
+              y2="290"
+              stroke="white"
+              strokeWidth="1"
+              opacity="0.5"
+            />
+            <circle
+              cx="210"
+              cy="150"
+              r="40"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              opacity="0.5"
+            />
+            {/* Penalty Areas */}
+            <rect
+              x="10"
+              y="75"
+              width="60"
+              height="150"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              opacity="0.5"
+            />
+            <rect
+              x="350"
+              y="75"
+              width="60"
+              height="150"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              opacity="0.5"
+            />
+          </svg>
+        );
+      }
+      return (
+        <svg
+          viewBox="0 0 420 300"
+          className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
+        >
+          <rect
+            x="10"
+            y="10"
+            width="400"
+            height="280"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            opacity="0.8"
+          />
+          <line
+            x1="210"
+            y1="10"
+            x2="210"
+            y2="290"
+            stroke="white"
+            strokeWidth="2"
+            opacity="0.8"
+          />
+          <circle
+            cx="210"
+            cy="150"
+            r="50"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            opacity="0.8"
+          />
+          {/* Penalty Areas Full */}
+          <rect
+            x="10"
+            y="50"
+            width="80"
+            height="200"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            opacity="0.8"
+          />
+          <rect
+            x="330"
+            y="50"
+            width="80"
+            height="200"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            opacity="0.8"
+          />
+        </svg>
+      );
+    };
+
+    return (
+      <div className="w-full">
+        <div className="space-y-8 animate-fade-in pb-20">
+          {/* Header Section - Med-Tech Aesthetic */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-2xl border border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
+            <div className="absolute right-0 top-0 opacity-[0.03] pointer-events-none">
+              <Icon name="activity" size={240} className="text-navy" />
+            </div>
+            <div className="relative z-10">
+              <h2 className="text-4xl font-black tracking-tighter text-navy flex items-center gap-4 uppercase mb-2">
+                <Icon name="plus-square" size={32} className="text-neon" />{" "}
+                Fuchs NLZ Hub
+              </h2>
+              <div className="text-[10px] font-mono text-gray-500 tracking-[0.4em] uppercase font-black">
+                Elite Youth Academy | Psycho & Biomechanics Center
+              </div>
+            </div>
+            <div className="mt-6 md:mt-0 flex flex-wrap gap-4 bg-gray-100 p-2 rounded-xl border border-gray-200">
+              <button
+                onClick={() => setActiveNlzView("finance")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "finance" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="pie-chart" size={16} className={activeNlzView === "finance" ? "text-gold" : ""} /> Finance & Admin
+              </button>
+              <button
+                onClick={() => setActiveNlzView("character")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "character" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="user" size={16} className={activeNlzView === "character" ? "text-neon" : ""} /> Character Matrix
+              </button>
+              <button
+                onClick={() => setActiveNlzView("biomechanics")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "biomechanics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="activity" size={16} className={activeNlzView === "biomechanics" ? "text-redbull" : ""} /> Biomechanik
+              </button>
+              <button
+                onClick={() => setActiveNlzView("squad")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "squad" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="users" size={16} className={activeNlzView === "squad" ? "text-redbull" : ""} /> Youth Squad
+              </button>
+              <button
+                onClick={() => setActiveNlzView("tactics")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "tactics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="layout" size={16} className={activeNlzView === "tactics" ? "text-neon" : ""} /> Tactics & Training
+              </button>
+              <button
+                onClick={() => setActiveNlzView("pipeline")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "pipeline" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="git-pull-request" size={16} className={activeNlzView === "pipeline" ? "text-neon" : ""} /> Pipeline
+              </button>
+            </div>
+          </div>
+
+          {/* === TACTICS & TRAINING (Phase 30) === */}
+          {activeNlzView === "tactics" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
+                  <Icon name="layout" size={28} className="text-neon" /> NLZ Taktik Board
+                </h2>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Board Configuration */}
+                <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-neon/5 rounded-bl-[100px] pointer-events-none"></div>
+                  <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                    <Icon name="sliders" className="text-neon" size={20} /> Age & Tactic Selection
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-3">1. Altersklasse wählen</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {ageClasses.map(ac => (
+                          <button
+                            key={ac.id}
+                            onClick={() => setAgeGroup(ac.id)}
+                            className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${ageGroup === ac.id ? "bg-white border-neon shadow-[0_0_15px_rgba(0,243,255,0.3)] text-navy" : "bg-gray-50 border-gray-200 text-gray-400 hover:bg-white hover:border-neon/50"}`}
+                          >
+                            <Icon name={ac.icon} size={24} className={ageGroup === ac.id ? "text-neon" : "text-gray-300"} />
+                            <span className="text-[9px] font-black uppercase mt-3">{ac.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-3">2. Taktischer Fokus</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {foci.map(f => (
+                          <button
+                            key={f.id}
+                            onClick={() => setTrainingFocus(f.id)}
+                            className={`p-3 rounded-lg border text-left transition-all ${trainingFocus === f.id ? "bg-neon/10 border-neon text-navy font-black" : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-white"}`}
+                          >
+                            <span className="text-xs uppercase tracking-widest">{f.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={generatePlan}
+                      disabled={isGenerating}
+                      className="w-full mt-4 bg-navy text-white font-black uppercase text-xs tracking-widest py-4 rounded-xl hover:bg-redbull transition-all shadow-lg shadow-navy/20 flex justify-center items-center gap-2"
+                    >
+                      {isGenerating ? <Icon name="loader" size={20} className="animate-spin" /> : <Icon name="cpu" size={20} />}
+                      {isGenerating ? "Erstelle DNA-Plan..." : "Gerd: Altersgerechten Plan erstellen"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* AI Plan Renderer / Pitch Mock */}
+                <div className="bg-[#050a14] p-8 rounded-2xl border border-neon/20 shadow-2xl relative overflow-hidden flex flex-col min-h-[500px]">
+                  <h3 className="text-white font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3 relative z-10 shrink-0">
+                    <Icon name="file-text" className="text-neon" size={20} /> NLZ Training Protocol
+                  </h3>
+
+                  <div className="flex-1 overflow-hidden relative z-10 flex flex-col">
+                    {trainingPlan && Array.isArray(trainingPlan) ? (
+                      <div className="flex flex-col h-full gap-4">
+                        <div className="flex gap-2 pb-2 overflow-x-auto custom-scrollbar shrink-0">
+                          {trainingPlan.map((d, i) => (
+                            <button
+                              key={d.id}
+                              onClick={() => setActiveDrillId(d.id)}
+                              className={`px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all flex items-center gap-2 ${activeDrillId === d.id ? "bg-neon text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)]" : "bg-white/5 text-white/40 hover:text-white border border-white/10"}`}
+                            >
+                              Phase {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        {/* Rendering the active drill */}
+                        {(() => {
+                          const activeDrill = trainingPlan.find(d => d.id === activeDrillId) || trainingPlan[0];
+                          if (!activeDrill) return null;
+                          return (
+                            <div className="flex-1 bg-black/60 rounded-xl border border-neon/30 flex flex-col overflow-hidden animate-fade-in">
+                               <div className="p-4 border-b border-white/10 flex justify-between items-start bg-navy/20">
+                                  <div>
+                                     <div className="text-[10px] text-neon font-mono uppercase mb-1">{activeDrill.phase || "Drill"} • {activeDrill.duration || "15 Min"}</div>
+                                     <h4 className="text-white font-black uppercase text-sm">{activeDrill.name}</h4>
+                                  </div>
+                               </div>
+                               <div className="p-4 flex-1 overflow-y-auto custom-scrollbar flex flex-col md:flex-row gap-6">
+                                  <div className="flex-1">
+                                    <p className="text-xs text-white/70 leading-relaxed font-mono whitespace-pre-wrap">{activeDrill.description}</p>
+                                  </div>
+                                  
+                                  {/* THE PITCH VISUALIZATION */}
+                                  <div className="w-full md:w-48 xl:w-64 shrink-0 relative flex justify-center">
+                                      <div className="relative w-full aspect-[420/640] border-2 border-white/10 rounded-lg bg-green-900/10 overflow-hidden">
+                                        <div className="absolute top-1/2 left-0 right-0 border-t-2 border-white/10 pointer-events-none"></div>
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border-2 border-white/10 rounded-full pointer-events-none"></div>
+                                        
+                                        {/* Player Dots */}
+                                        {activeDrill.technicalData && activeDrill.technicalData.positions && Object.entries(activeDrill.technicalData.positions).map(([pId, pos]) => (
+                                          <div key={pId} className="absolute w-3 h-3 bg-neon rounded-full shadow-[0_0_8px_rgba(0,243,255,0.8)] flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500" style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
+                                             <div className="w-1 h-1 bg-black rounded-full" />
+                                          </div>
+                                        ))}
+                                      </div>
+                                  </div>
+                               </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="absolute inset-x-8 inset-y-8 border-2 border-white/10 rounded-lg pointer-events-none"></div>
+                        <div className="absolute top-1/2 left-8 right-8 border-t-2 border-white/10 pointer-events-none"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/10 rounded-full pointer-events-none"></div>
+                        <div className="h-full flex flex-col items-center justify-center opacity-40 text-center px-8 relative z-10">
+                            <Icon name="layout" size={48} className="text-neon mb-4" />
+                            <p className="text-xs uppercase tracking-widest font-black text-white leading-relaxed">
+                            Wähle Altersklasse und Fokus.<br/>
+                            Gerd 2.0 kontextualisiert die Übungen basierend auf der Red Bull DNA und der kognitiven Aufnahmefähigkeit der Spieler.
+                            </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* === YOUTH SQUAD (FIFA CARDS) === */}
+          {activeNlzView === "squad" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
+                  <Icon name="users" size={28} className="text-redbull" /> Nachwuchs Kader
+                </h2>
+                <button
+                  onClick={handleAutoFillYouthSquad}
+                  disabled={isAutoFillingYouth || !clubIdentity.name}
+                  className={`px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all ${isAutoFillingYouth ? "bg-white/10 text-gray-500 cursor-not-allowed border border-gray-200" : clubIdentity.name ? "bg-neon text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)] hover:scale-105 hover:bg-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
+                  title={clubIdentity.name ? "Jugend-Kader via KI importieren" : "Bitte zuerst Club in Settings eintragen"}
+                >
+                  {isAutoFillingYouth ? <Icon name="loader" className="animate-spin" size={16} /> : <Icon name="zap" size={16} />}
+                  {isAutoFillingYouth ? "KI-Scouting läuft..." : "KI-Youth-Scouting (Auto-Fill)"}
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {youthPlayers.map((p) => {
+                  const ovr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6) || 60;
+                  const pot = p.pot || Math.min(99, ovr + 15);
+                  
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => setActiveDossierPlayerId(p.id)}
+                      className="group relative p-0 rounded-xl border-2 transition-all cursor-pointer overflow-hidden bg-white border-gray-200 hover:border-gold hover:shadow-[0_0_25px_rgba(255,215,0,0.3)] hover:-translate-y-1"
+                    >
+                      {/* NLZ FIFA CARD LAYOUT */}
+                      {p.image && (
+                        <div className="absolute inset-0 z-0">
+                           <img src={p.image} alt={p.name} className="w-full h-full object-cover mix-blend-luminosity opacity-20 transition-opacity group-hover:opacity-40" />
+                           <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
+                        </div>
+                      )}
+                      {!p.image && (
+                        <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-50 to-gray-200"></div>
+                      )}
+                      
+                      <div className="flex flex-col h-[280px] uppercase font-black tracking-tighter justify-between relative z-10 p-1">
+                        <div>
+                          <div className="flex justify-between p-3 pb-0">
+                            <div className="flex flex-col items-center">
+                              <span className="text-3xl leading-none text-navy">
+                                {ovr}
+                              </span>
+                              <span className="text-[10px] text-gray-500 tracking-widest mt-1">
+                                OVR
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <span className="text-3xl leading-none text-gold">
+                                {pot}
+                              </span>
+                              <span className="text-[10px] text-gray-500 tracking-widest mt-1">
+                                POT
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-center mt-2">
+                            <span className="px-3 py-1 bg-navy/10 text-navy rounded-full text-[9px] font-black uppercase tracking-widest">
+                              {p.group.toUpperCase()} • {p.position}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="px-4 text-center mt-auto bg-white/50 backdrop-blur-sm mx-2 mb-2 rounded-xl border border-white/50 pb-3 pt-2">
+                           <div className="text-sm text-navy truncate font-black italic tracking-widest leading-none mb-2">
+                             {p.name}
+                           </div>
+                           <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-2"></div>
+                           <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-gray-600 font-mono">
+                               <div className="flex justify-between"><span>PAC</span><span className="text-navy">{p.pac || 50}</span></div>
+                               <div className="flex justify-between"><span>DRI</span><span className="text-navy">{p.dri || 50}</span></div>
+                               <div className="flex justify-between"><span>SHO</span><span className="text-navy">{p.sho || 50}</span></div>
+                               <div className="flex justify-between"><span>DEF</span><span className="text-navy">{p.def || 50}</span></div>
+                               <div className="flex justify-between"><span>PAS</span><span className="text-navy">{p.pas || 50}</span></div>
+                               <div className="flex justify-between"><span>PHY</span><span className="text-navy">{p.phy || 50}</span></div>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* === FINANCE & ADMIN (Phase 30) === */}
+          {activeNlzView === "finance" && (() => {
+            const nlzCount = youthPlayers.length;
+            const finances = truthObject.nlz_hub?.finances || { monthly_fee_per_player: 150, equipment_budget: 15000, travel_costs: 5000, materials: 3000 };
+            const monthlyRevenue = nlzCount * finances.monthly_fee_per_player;
+            const annualRevenue = monthlyRevenue * 12;
+            const totalExpenses = finances.equipment_budget + finances.travel_costs + finances.materials;
+            const netBalance = annualRevenue - totalExpenses;
+
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+                {/* Finance Overview Panel */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-[100px] pointer-events-none"></div>
+                    <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                      <Icon name="pie-chart" className="text-gold" size={20} /> NLZ Budget Calculator
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Jahres-Einnahmen (Beiträge)</div>
+                        <div className="text-4xl font-black text-navy leading-none">€ {annualRevenue.toLocaleString()}</div>
+                        <div className="text-xs text-gray-500 mt-2 font-mono">{nlzCount} Spieler × €{finances.monthly_fee_per_player} / Monat</div>
+                      </div>
+                      <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Fixe Ausgaben (Jahr)</div>
+                        <div className="text-4xl font-black text-redbull leading-none">€ {totalExpenses.toLocaleString()}</div>
+                        <div className="text-xs text-gray-500 mt-2 font-mono">Equipment, Reisen, Material</div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-xl border border-gray-200 bg-white flex justify-between items-center">
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Netto-Bilanz (P.A.)</div>
+                        <div className={`text-2xl font-black uppercase tracking-tighter ${netBalance >= 0 ? "text-green-600" : "text-redbull"}`}>
+                          {netBalance >= 0 ? "+" : ""}€ {netBalance.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50">
+                        <Icon name={netBalance >= 0 ? "trending-up" : "trending-down"} className={netBalance >= 0 ? "text-green-600" : "text-redbull"} size={20} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expense Settings Panel */}
+                <div className="space-y-6">
+                  <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl h-full">
+                    <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                      <Icon name="settings" className="text-gray-400" size={20} /> Kosten-Kalkulator
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Spielerbeitrag / Monat (€)</label>
+                        <input
+                          type="number"
+                          value={finances.monthly_fee_per_player}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'monthly_fee_per_player', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trikotsätze & Equipment (€)</label>
+                        <input
+                          type="number"
+                          value={finances.equipment_budget}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'equipment_budget', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Fahrtkosten / Turniere (€)</label>
+                        <input
+                          type="number"
+                          value={finances.travel_costs}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'travel_costs', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trainingsmaterialien (€)</label>
+                        <input
+                          type="number"
+                          value={finances.materials}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'materials', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* === CHARACTER MATRIX (Psycho Profiling) === */}
+          {activeNlzView === "character" && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                {youthPlayers.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setActiveDossierPlayerId(p.id)}
+                    className={`shrink-0 flex items-center gap-3 p-4 rounded-xl border transition-all ${activeDossierPlayerId === p.id ? "bg-white border-neon shadow-[0_5px_15px_rgba(0,243,255,0.2)]" : "bg-white/50 border-gray-200 text-gray-400 hover:bg-white"}`}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center font-black text-white text-[10px] tracking-widest">
+                      {p.position}
+                    </div>
+                    <div className="text-left">
+                      <div className={`font-black ${activeDossierPlayerId === p.id ? "text-navy" : "text-gray-500"}`}>
+                        {p.name}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-widest text-gray-400">
+                        PSY-INDEX: {Math.round((p.focus * 10) + (10 - p.frustration) * 5)}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {activeDossierPlayerId && (() => {
+                const p = youthPlayers.find((x) => x.id === activeDossierPlayerId);
+                if (!p) return null;
+
+                // Mock Psycho Data based on player stats
+                const traits = [
+                  { label: "Resilienz", val: Math.min(100, (10 - p.frustration) * 10 + 20) },
+                  { label: "Führung", val: p.phy > 70 ? 85 : 45 },
+                  { label: "Teamgeist", val: p.pas > 65 ? 90 : 60 },
+                  { label: "Fokus", val: p.focus * 10 },
+                  { label: "Ehrgeiz", val: p.pac > 75 ? 95 : 70 },
+                ];
+
+                // SVG Radar Math
+                const size = 300;
+                const center = size / 2;
+                const radius = 100;
+                const angleStep = (Math.PI * 2) / traits.length;
+
+                const getCoordinates = (val, index) => {
+                  const r = (val / 100) * radius;
+                  const a = index * angleStep - Math.PI / 2;
+                  return `${center + r * Math.cos(a)},${center + r * Math.sin(a)}`;
+                };
+
+                const polygonPoints = traits.map((t, i) => getCoordinates(t.val, i)).join(" ");
+
+                const generatePedagogicalTip = async () => {
+                  setIsFetchingTip(true);
+                  setPedagogicalTip("");
+                  try {
+                    const prompt = `Du bist 'Pedagogical Advisor' im Fuchs NLZ.
+                        Ein Trainer fragt nach Umgangstipps für den Spieler ${p.name}.
+                        Sein Profil: Resilienz ${traits[0].val}/100, Führung ${traits[1].val}/100, Fokus ${traits[3].val}/100.
+                        Gib dem Trainer 2 konkrete, psychologisch fundierte Kommunikations-Tipps im 'Med-Tech' Stil.`;
+
+                    const res = await askAI(prompt, "System");
+                    setPedagogicalTip(res);
+                    gerdSpeak("Pädagogische Empfehlung geladen.", "System");
+                  } catch (e) {
+                    setPedagogicalTip("Fehler beim Abruf der Empfehlung.");
+                  } finally {
+                    setIsFetchingTip(false);
+                  }
+                };
+
+                return (
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    {/* LEFT: Radar Chart Dashboard */}
+                    <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-neon/5 rounded-bl-[100px] pointer-events-none"></div>
+
+                      <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-8 flex items-center gap-3">
+                        <Icon name="target" className="text-neon" size={20} /> Character Matrix: {p.name}
+                      </h3>
+
+                      <div className="flex justify-center items-center mb-8 relative">
+                        <svg width={size} height={size} className="overflow-visible">
+                          {/* Background Web */}
+                          {[0.2, 0.4, 0.6, 0.8, 1].map((scale, levelIndex) => (
+                            <polygon
+                              key={levelIndex}
+                              points={traits.map((_, i) => {
+                                const r = radius * scale;
+                                const a = i * angleStep - Math.PI / 2;
+                                return `${center + r * Math.cos(a)},${center + r * Math.sin(a)}`;
+                              }).join(" ")}
+                              fill="none"
+                              stroke="#e5e7eb"
+                              strokeWidth="1"
+                            />
+                          ))}
+                          {/* Axes */}
+                          {traits.map((_, i) => {
+                            const a = i * angleStep - Math.PI / 2;
+                            return (
+                              <line
+                                key={`axis-${i}`}
+                                x1={center}
+                                y1={center}
+                                x2={center + radius * Math.cos(a)}
+                                y2={center + radius * Math.sin(a)}
+                                stroke="#e5e7eb"
+                                strokeWidth="1"
+                              />
+                            );
+                          })}
+                          {/* Data Polygon */}
+                          <polygon
+                            points={polygonPoints}
+                            fill="rgba(0, 243, 255, 0.2)"
+                            stroke="#00f3ff"
+                            strokeWidth="3"
+                            className="drop-shadow-[0_0_10px_rgba(0,243,255,0.5)] transition-all duration-700"
+                          />
+                          {/* Data Points & Labels */}
+                          {traits.map((t, i) => {
+                            const rLabel = radius + 25;
+                            const a = i * angleStep - Math.PI / 2;
+                            const lx = center + rLabel * Math.cos(a);
+                            const ly = center + rLabel * Math.sin(a);
+                            const [cx, cy] = getCoordinates(t.val, i).split(",");
+                            return (
+                              <g key={`data-${i}`}>
+                                <circle cx={cx} cy={cy} r="4" fill="#fff" stroke="#00f3ff" strokeWidth="2" />
+                                <text x={lx} y={ly} textAnchor="middle" alignmentBaseline="middle" className="text-[9px] font-black uppercase tracking-widest fill-navy">
+                                  {t.label}
+                                </text>
+                                <text x={lx} y={ly + 12} textAnchor="middle" alignmentBaseline="middle" className="text-[10px] font-mono fill-gray-400">
+                                  {t.val}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+                      </div>
+
+                      {/* Professional Contract Input (Truth Object Feed) */}
+                      <div className="mt-8 pt-8 border-t border-gray-100">
+                        <h4 className="text-[10px] text-navy font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                          <Icon name="file-text" size={14} className="text-gold" /> Vertrags-Daten (CFO Bridge)
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-gray-400 uppercase font-black">Monatl. Fahrtkosten (€)</label>
+                            <input
+                              type="number"
+                              className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-xs font-mono"
+                              placeholder="0"
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                setTruthObject(prev => ({
+                                  ...prev,
+                                  financials: {
+                                    ...prev.financials,
+                                    fixed_costs: {
+                                      ...prev.financials.fixed_costs,
+                                      nlz_parent_payments: val + (prev.financials.fixed_costs.nlz_parent_payments || 0) // Simplified additive simulation
+                                    }
+                                  }
+                                }));
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] text-gray-400 uppercase font-black">Teilnahme-Gebühr (€)</label>
+                            <input
+                              type="number"
+                              className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-xs font-mono"
+                              placeholder="0"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-[8px] text-gray-400 font-mono mt-2 italic">* Diese Daten fließen direkt in das CFO 2.0 Dashboard ein.</p>
+                      </div>
+                    </div>
+
+                    {/* RIGHT: Pedagogical Advisor */}
+                    <div className="flex flex-col gap-8">
+                      <div className="bg-navy p-8 rounded-2xl border border-gray-800 shadow-2xl flex-1 flex flex-col relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-40 h-40 opacity-5 pointer-events-none">
+                          <Icon name="cpu" size={160} className="text-neon" />
+                        </div>
+
+                        <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2 flex items-center gap-3">
+                          <Icon name="message-circle" className="text-neon" size={20} /> Pedagogical Advisor
+                        </h3>
+                        <p className="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-8">KI-Coaching Feedback System</p>
+
+                        <div className="flex-1">
+                          {pedagogicalTip ? (
+                            <div className="bg-black/30 p-6 rounded-xl border border-neon/20 animate-scale-in">
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="w-8 h-8 rounded-full bg-neon flex items-center justify-center text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)]">
+                                  <Icon name="check" size={16} />
+                                </div>
+                                <span className="text-[10px] font-black text-neon uppercase tracking-widest">Empfehlung Bereit</span>
+                              </div>
+                              <div className="text-sm font-mono text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                {pedagogicalTip}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center opacity-50 border-2 border-dashed border-gray-700 rounded-xl p-8">
+                              <Icon name="user-plus" size={32} className="text-gray-500 mb-4" />
+                              <p className="text-[10px] text-gray-400 uppercase tracking-widest">Generiere spezifische Umgangstipps basierend auf dem Psyche-Profil.</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={generatePedagogicalTip}
+                          disabled={isFetchingTip}
+                          className="mt-6 w-full bg-neon text-navy py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          {isFetchingTip ? <Icon name="loader" size={16} className="animate-spin" /> : <Icon name="zap" size={16} />}
+                          {isFetchingTip ? "Analysiere Psyche..." : "Coaching-Tipp anfordern"}
+                        </button>
+                      </div>
+
+                      {/* AI DEVELOPMENT COACH (NEW) */}
+                      <div className="bg-[#050a14] p-8 rounded-2xl border border-cyan-500/20 shadow-2xl relative overflow-hidden flex flex-col">
+                        <div className="absolute top-0 right-0 w-40 h-40 opacity-5 pointer-events-none text-cyan-400">
+                          <Icon name="trending-up" size={160} />
+                        </div>
+
+                        <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2 flex items-center gap-3">
+                          <Icon name="shield" className="text-cyan-400" size={20} /> AI Development Coach
+                        </h3>
+                        <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] mb-8">Profi-DNA Gap-Analysator</p>
+
+                        <div className="flex-1">
+                          {developmentReport ? (
+                            <div className="bg-cyan-900/10 p-6 rounded-xl border border-cyan-500/30 animate-slide-up">
+                              <div className="text-[11px] font-mono text-cyan-100/80 leading-relaxed whitespace-pre-wrap">
+                                {developmentReport}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center opacity-40 border-2 border-dashed border-white/10 rounded-xl p-8">
+                              <Icon name="activity" size={32} className="text-white/20 mb-4" />
+                              <p className="text-[9px] text-white/40 uppercase tracking-widest leading-relaxed">Abgleich mit der Taktik-DNA der 1. Mannschaft (Global Context Core): {truthObject.tactical_setup.formation_home}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleDevCheck(p)}
+                          disabled={isDevLoading}
+                          className="mt-6 w-full bg-cyan-600 hover:bg-cyan-400 text-white font-black uppercase text-[10px] tracking-widest py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(34,211,238,0.2)] flex items-center justify-center gap-2"
+                        >
+                          {isDevLoading ? <Icon name="loader" size={16} className="animate-spin" /> : <Icon name="crosshair" size={16} />}
+                          {isDevLoading ? "Berechne Gap..." : "Profi-Check starten"}
+                        </button>
+                      </div>
+
+                      {/* Quick Stats overview */}
+                      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-lg grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-xl font-black text-navy">{p.focus * 10}%</div>
+                          <div className="text-[8px] uppercase tracking-widest text-gray-400 font-black mt-1">Trainingsfokus</div>
+                        </div>
+                        <div className="border-x border-gray-100">
+                          <div className="text-xl font-black text-redbull">{p.frustration * 10}%</div>
+                          <div className="text-[8px] uppercase tracking-widest text-gray-400 font-black mt-1">Frust-Level</div>
+                        </div>
+                        <div>
+                          <div className="text-xl font-black text-gold">{p.phy || 60}</div>
+                          <div className="text-[8px] uppercase tracking-widest text-gray-400 font-black mt-1">Physis</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* === BIOMECHANICS DASHBOARD === */}
+          {activeNlzView === "biomechanics" && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="bg-white p-1 rounded-2xl border border-gray-200 shadow-xl overflow-hidden flex flex-col xl:flex-row">
+
+                {/* LEFT: Player Selection & Alerts */}
+                <div className="w-full xl:w-1/3 bg-gray-50 p-8 border-r border-gray-200 flex flex-col">
+                  <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-8 flex items-center gap-3">
+                    <Icon name="activity" className="text-redbull" size={20} /> Medical Watchlist
+                  </h3>
+
+                  {/* Growth Spurt Alert Mock */}
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-redbull opacity-10 rounded-bl-[100px]"></div>
+                    <div className="flex items-start gap-3">
+                      <Icon name="alert-triangle" className="text-redbull mt-1" size={18} />
+                      <div>
+                        <h4 className="text-[10px] font-black text-redbull uppercase tracking-widest mb-1">Growth Spurt Alert</h4>
+                        <p className="text-xs text-red-900 font-mono">3 Spieler in kritischer Wachstumsphase. Osgood-Schlatter Risiko erhöht. Trainingslast reduzieren.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
+                    {youthPlayers.slice(0, 5).map((p, idx) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setActiveDossierPlayerId(p.id)}
+                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all ${activeDossierPlayerId === p.id ? "bg-white border-redbull shadow-md" : "bg-transparent border-gray-200 hover:bg-white"}`}
+                      >
+                        <div>
+                          <div className="font-black text-navy text-sm">{p.name}</div>
+                          <div className="text-[9px] uppercase tracking-widest text-gray-400 font-black">{p.position} | Alter: {14 + (idx % 4)}</div>
+                        </div>
+                        {idx % 3 === 0 && <div className="w-2 h-2 rounded-full bg-redbull animate-pulse"></div>}
+                        {idx % 3 === 1 && <div className="w-2 h-2 rounded-full bg-gold"></div>}
+                        {idx % 3 === 2 && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* RIGHT: Wireframe Body Heatmap */}
+                <div className="flex-1 p-8 bg-white relative flex items-center justify-center min-h-[500px]">
+                  <div className="absolute top-8 left-8">
+                    <h4 className="font-black uppercase text-xl text-navy tracking-tighter">
+                      {activeDossierPlayerId ? youthPlayers.find(p => p.id === activeDossierPlayerId)?.name : "Bitte Spieler wählen"}
+                    </h4>
+                    <p className="text-[10px] font-mono uppercase text-gray-400 tracking-[0.2em] mt-1">Live Biomechanik-Scan</p>
+                  </div>
+
+                  <div className="absolute top-8 right-8 flex gap-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-redbull"></div> High Stress</div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-gold"></div> Mod. Stress</div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-neon"></div> Optimal</div>
+                  </div>
+
+                  {activeDossierPlayerId ? (
+                    <div className="relative w-64 h-96">
+                      {/* Minimalist SVG Body Wireframe Mock */}
+                      <svg viewBox="0 0 100 200" className="w-full h-full drop-shadow-2xl">
+                        {/* Head */}
+                        <circle cx="50" cy="20" r="12" fill="none" stroke="#e5e7eb" strokeWidth="2" />
+                        {/* Torso */}
+                        <path d="M 35 40 L 65 40 L 60 100 L 40 100 Z" fill="none" stroke="#e5e7eb" strokeWidth="2" />
+                        {/* Arms */}
+                        <path d="M 35 40 L 15 70 L 10 100" fill="none" stroke="#e5e7eb" strokeWidth="2" />
+                        <path d="M 65 40 L 85 70 L 90 100" fill="none" stroke="#e5e7eb" strokeWidth="2" />
+                        {/* Legs */}
+                        <path d="M 40 100 L 30 150 L 30 190" fill="none" stroke="#e5e7eb" strokeWidth="2" />
+                        <path d="M 60 100 L 70 150 L 70 190" fill="none" stroke="#e5e7eb" strokeWidth="2" />
+
+                        {/* Joint Indicators (Heatmap) */}
+                        {/* Shoulders */}
+                        <circle cx="35" cy="40" r="4" fill="#00f3ff" className="animate-pulse" />
+                        <circle cx="65" cy="40" r="4" fill="#00f3ff" className="animate-pulse" />
+                        {/* Knees - High Risk Zone Mock */}
+                        <circle cx="30" cy="150" r="6" fill="#E21B4D" className="animate-ping opacity-75" />
+                        <circle cx="30" cy="150" r="4" fill="#E21B4D" />
+
+                        <circle cx="70" cy="150" r="4" fill="#E21B4D" />
+
+                        {/* Ankles */}
+                        <circle cx="30" cy="190" r="4" fill="#D4AF37" />
+                        <circle cx="70" cy="190" r="4" fill="#D4AF37" />
+                      </svg>
+
+                      {/* Data Tooltips */}
+                      <div className="absolute top-[70%] -left-16 bg-black text-white p-3 rounded-lg border border-redbull shadow-[0_0_20px_rgba(226,27,77,0.3)] w-40 animate-fade-in">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-redbull mb-1">Patellasehne L</div>
+                        <div className="text-xs font-mono">Belastung: 89%</div>
+                        <div className="text-[8px] text-gray-400 mt-1">Intervention empfohlen</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-gray-300 text-center">
+                      <Icon name="user" size={64} className="mx-auto mb-4 opacity-20" />
+                      <p className="text-xs font-black uppercase tracking-widest opacity-50">Select Player to view Biomechanics</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* === TALENT PIPELINE === */}
+          {activeNlzView === "pipeline" && (
+            <div className="space-y-8 animate-fade-in">
+              <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5 font-black text-9xl italic tracking-tighter text-navy pointer-events-none">
+                  PRO
+                </div>
+
+                <div className="mb-12">
+                  <h3 className="text-navy font-black uppercase text-xl tracking-widest flex items-center gap-3 mb-2">
+                    <Icon name="git-pull-request" size={28} className="text-gold" /> Vertical Talent-Pipeline
+                  </h3>
+                  <p className="text-gray-400 text-[10px] font-mono uppercase tracking-[0.2em]">Drag & Drop Promotion to Shadow-Scouting Pool</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                  {/* Pipeline Connectors */}
+                  <div className="hidden md:block absolute top-[50%] left-[20%] right-[20%] h-1 bg-gradient-to-r from-gray-200 via-neon to-redbull -z-10 transform -translate-y-1/2"></div>
+
+                  {/* Stage 1: U15 / U17 (Mock data) */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm relative">
+                    <div className="absolute -top-3 left-6 bg-navy text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
+                      Phase 1: U15-U17
+                    </div>
+                    <div className="mt-4 space-y-3 min-h-[200px]">
+                      {youthPlayers.slice(0, 3).map(p => (
+                        <div
+                          key={p.id}
+                          className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm flex justify-between items-center"
+                        >
+                          <div>
+                            <div className="text-xs font-black text-navy">{p.name}</div>
+                            <div className="text-[9px] uppercase tracking-widest text-gray-400">{p.position}</div>
+                          </div>
+                          <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-400">
+                            {Math.round((p.pac + p.sho + p.pas) / 3)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stage 2: U19 Elite */}
+                  <div className="bg-neon/5 border border-neon/30 rounded-xl p-6 shadow-sm relative shadow-[0_0_30px_rgba(0,243,255,0.1)]">
+                    <div className="absolute -top-3 left-6 bg-neon text-navy px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
+                      Phase 2: U19 Elite
+                    </div>
+                    <div className="mt-4 space-y-3 min-h-[200px]">
+                      {youthPlayers.slice(3, 5).map(p => (
+                        <div
+                          key={p.id}
+                          draggable
+                          onDragStart={(e) => {
+                            setDraggedTalentId(p.id);
+                            e.dataTransfer.setData('text/plain', p.id);
+                          }}
+                          className="bg-white p-3 border border-neon/50 rounded-lg shadow-md cursor-grab active:cursor-grabbing flex justify-between items-center transform hover:-translate-y-1 transition-transform relative group"
+                        >
+                          <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-6 bg-neon rounded-r opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div>
+                            <div className="text-xs font-black text-navy">{p.name}</div>
+                            <div className="text-[9px] uppercase tracking-widest text-neon font-black drop-shadow-sm">{p.position}</div>
+                          </div>
+                          <div className="w-6 h-6 rounded-full bg-neon flex items-center justify-center text-[10px] font-black text-navy">
+                            {Math.round((p.pac + p.sho + p.pas + 10) / 3)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stage 3: Pro Shadow Pool (Dropzone) */}
+                  <div
+                    className="bg-black border-2 border-dashed border-redbull/50 rounded-xl p-6 shadow-2xl relative transition-all"
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-redbull/10', 'border-redbull'); }}
+                    onDragLeave={(e) => { e.currentTarget.classList.remove('bg-redbull/10', 'border-redbull'); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('bg-redbull/10', 'border-redbull');
+                      if (draggedTalentId) {
+                        const player = youthPlayers.find(p => p.id === draggedTalentId);
+                        if (player && window.confirm(`${player.name} in den Shadow-Scouting Pool der Profis übernehmen?`)) {
+                          promoteToProSquad(draggedTalentId);
+                          setDraggedTalentId(null);
+                          setActiveNlzView("character"); // Redirect to reset view
+                        }
+                      }
+                    }}
+                  >
+                    <div className="absolute -top-3 left-6 bg-redbull text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(226,27,77,0.5)]">
+                      Phase 3: Shadow-Scouting Pool
+                    </div>
+                    <div className="mt-4 h-full min-h-[200px] flex flex-col items-center justify-center text-center opacity-70">
+                      <Icon name="arrow-down-circle" size={48} className="text-redbull mb-4 animate-bounce" />
+                      <p className="text-white text-xs font-black uppercase tracking-widest">Drop Talent Here</p>
+                      <p className="text-[9px] text-gray-400 font-mono mt-2">Export to CFO/Scouting System</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Academy Showcase */}
+          <div className="glass-panel p-8 rounded-3xl border border-gold/20 bg-gold/5">
+            <h3 className="text-gold font-black uppercase text-sm tracking-widest mb-4 flex items-center gap-3">
+              <Icon name="star" size={20} /> Stark Elite Tutorials
+            </h3>
+            <p className="text-white/40 text-[10px] uppercase font-black mb-6">
+              Offizielle Referenz-Videos der Akademie
+            </p>
+            <div className="space-y-4">
+              {[
+                "Dribbling Masterclass",
+                "Ballkontrolle U12",
+                "Funino Prinzipien",
+              ].map((t, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-white/5 hover:border-gold/50 cursor-pointer transition-all"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
+                    <Icon name="play" size={20} className="text-gold" />
+                  </div>
+                  <div className="text-[10px] font-black text-white uppercase tracking-widest">
+                    {t}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
 const App = () => {
   const [view, setView] = useState("dashboard"); // 'dashboard' | 'vr'
   const [activeTab, setActiveTab] = useState("home");
@@ -8943,1440 +10432,6 @@ Sende NUR das JSON Objekt!`;
   };
 
   // --- NLZ / YOUTH ACADEMY COMPONENT ---
-  const FuchsNLZ = ({
-    youthPlayers,
-    setYouthPlayers,
-    nlzTab,
-    setNlzTab,
-    scoutModal,
-    setScoutModal,
-    dnaModules,
-    setDnaModules,
-    askAI,
-    gerdSpeak,
-    updateYouthPlayer,
-    addYouthPlayer,
-    deleteYouthPlayer,
-    promoteToProSquad,
-    openScoutModal,
-  }) => {
-    const [ageGroup, setAgeGroup] = useState("funino"); // 'funino' | 'kleinfeld' | 'grossfeld'
-    const [trainingFocus, setTrainingFocus] = useState("dribbling");
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [trainingPlan, setTrainingPlan] = useState(null);
-
-    // --- NEW NLZ MED-TECH STATE ---
-    const [activeNlzView, setActiveNlzView] = useState("finance"); // 'character' | 'biomechanics' | 'pipeline' | 'finance'
-    const [activeDossierPlayerId, setActiveDossierPlayerId] = useState(null);
-    const [activeRatingPlayerId, setActiveRatingPlayerId] = useState(null);
-    const [draggedTalentId, setDraggedTalentId] = useState(null);
-    const [pedagogicalTip, setPedagogicalTip] = useState("");
-    const [isFetchingTip, setIsFetchingTip] = useState(false);
-    const [developmentReport, setDevelopmentReport] = useState("");
-    const [isDevLoading, setIsDevLoading] = useState(false);
-
-    const handleDevCheck = async (player) => {
-      setIsDevLoading(true);
-      gerdSpeak(`Abgleich von ${player.name} mit Profi-DNA gestartet...`, "System");
-
-      const prompt = `Du bist 'NLZ-Entwicklungs-Coach Gerd'. Analysiere das Potential von ${player.name} (Position: ${player.pos}).
-          AKTUELLE STATS: ${JSON.stringify(player.stats)}.
-          PROFI-VORGABE: ${truthObject.tactical_setup.formation_home}, Fokus auf ${truthObject.club_identity.philosophy}.
-
-          Erstelle einen 'Predictive Development Report' (Quelle: NLZ-Datenbank):
-          1. 'System-Kompatibilität': Passt er ins 4-4-2 / 3-4-3?
-          2. 'Physischer Gap': Was fehlt zur Profi-Reife?
-          3. 'Vorschlag': Spezielle Trainings-Provokationsregel für diesen Spieler.
-
-          Stil: Analytisch, fordernd, visionär.`;
-
-      try {
-        const res = await askAI(prompt, "Trainer-Gerd");
-        setDevelopmentReport(res);
-      } catch (e) {
-        setDevelopmentReport("Analyse im Neural-Link fehlgeschlagen.");
-      }
-      setIsDevLoading(false);
-    };
-
-    // Quick Rating Logic
-    const handleQuickRating = (type) => {
-      if (!activeRatingPlayerId) return;
-      if (navigator.vibrate) navigator.vibrate(50);
-
-      const player = youthPlayers.find(
-        (p) => p.id === activeRatingPlayerId,
-      );
-      if (!player) return;
-
-      let update = {};
-      if (type === "top") {
-        update = {
-          focus: Math.min(10, (player.focus || 5) + 1),
-          pac: Math.min(99, (player.pac || 60) + 1),
-        };
-        gerdSpeak(
-          `${player.name}: Top Aktion registriert! +1 Fokus.`,
-          "Trainer-Gerd",
-        );
-      } else if (type === "neutral") {
-        gerdSpeak(
-          `${player.name}: Aktion neutral bewertet.`,
-          "Trainer-Gerd",
-        );
-      } else if (type === "correction") {
-        update = {
-          frustration: Math.min(10, (player.frustration || 5) + 1),
-        };
-        gerdSpeak(
-          `${player.name}: Korrektur-Bedarf notiert.`,
-          "Trainer-Gerd",
-        );
-      }
-
-      if (Object.keys(update).length > 0) {
-        Object.entries(update).forEach(([key, val]) => {
-          updateYouthPlayer(activeRatingPlayerId, key, val);
-        });
-      }
-    };
-
-    // Psycho Tracking State
-    const [psychoScores, setPsychoScores] = useState({
-      focus: 5,
-      effort: 5,
-      teamplay: 5,
-      frustration: 5,
-    });
-    const [isGeneratingPsychReport, setIsGeneratingPsychReport] =
-      useState(false);
-
-    // Season Book State
-    const [seasonBookData, setSeasonBookData] = useState(null);
-    const [isGeneratingBook, setIsGeneratingBook] = useState(false);
-
-    // Video Analysis State
-    const [videoFile, setVideoFile] = useState(null);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [analysisReport, setAnalysisReport] = useState(null);
-    const [videoSrc, setVideoSrc] = useState(null);
-
-    const ageClasses = [
-      { id: "funino", label: "Funino U6-U9", icon: "smile" },
-      { id: "kleinfeld", label: "Kleinfeld U10-U13", icon: "layout" },
-      { id: "grossfeld", label: "Großfeld U14+", icon: "maximize" },
-    ];
-
-    const foci = [
-      { id: "dribbling", label: "Dribbling & 1v1", icon: "zap" },
-      { id: "passing", label: "Passspiel & Raum", icon: "repeat" },
-      { id: "shooting", label: "Torschuss & Abschluss", icon: "target" },
-      {
-        id: "coordination",
-        label: "Koordination & Speed",
-        icon: "activity",
-      },
-    ];
-
-    const [isAutoFillingYouth, setIsAutoFillingYouth] = useState(false);
-    
-    const handleAutoFillYouthSquad = async () => {
-      if (!clubIdentity || !clubIdentity.name) {
-        gerdSpeak("Bitte zuerst Vereinsdaten in den Einstellungen hinterlegen.", "Trainer-Gerd");
-        return;
-      }
-      setIsAutoFillingYouth(true);
-      try {
-        const response = await askAI(
-          `Generiere ein Array von 15 Jugendspielern (U19/U17) für das NLZ von ${clubIdentity.name}.
-          Erfinde realistische Namen und vergebe Potential (POT) Werte zwischen 75 und 95 und realistische Jugend-Attribute.
-          Antworte NUR mit valider JSON (ohne Markdown-Tags).
-          Format-Beispiel: [{"id": 1, "name": "Talent A", "position": "ZOM", "group": "u19", "pac": 80, "sho": 75, "pas": 80, "dri": 82, "def": 40, "phy": 65, "pot": 90, "image": ""}]`,
-          "NLZ-Direktor",
-          true
-        );
-
-        let jsonStr = response.trim();
-        if (jsonStr.startsWith("```json")) jsonStr = jsonStr.substring(7);
-        if (jsonStr.startsWith("```")) jsonStr = jsonStr.substring(3);
-        if (jsonStr.endsWith("```")) jsonStr = jsonStr.substring(0, jsonStr.length - 3);
-        jsonStr = jsonStr.trim();
-
-        const newYouthPlayers = JSON.parse(jsonStr).map((p, i) => ({
-            ...p,
-            id: `auto_y_${Date.now()}_${i}`,
-            image: p.image || "",
-            group: p.group || (i < 5 ? "u19" : i < 10 ? "u17" : "u15"),
-            focus: 70,
-            frustration: 2,
-            hrv: 75,
-            sleep: 8.0,
-            psychHistory: [],
-            videoTresor: []
-        }));
-        setYouthPlayers(newYouthPlayers);
-        gerdSpeak(`Youth Squad für ${clubIdentity.name} erfolgreich über KI-Scouting generiert.`, "System");
-      } catch (e) {
-        console.error("Youth Hydration Error:", e);
-        gerdSpeak("Fehler beim Ingest der NLZ Scouting-Daten.", "error");
-      } finally {
-        setIsAutoFillingYouth(false);
-      }
-    };
-
-    const generatePlan = async () => {
-      setIsGenerating(true);
-      setTrainingPlan(null);
-      try {
-        const prompt = `Du bist der NLZ-Direktor und Entwicklungs-Coach vom 'Stark Elite' NLZ (Gerd 2.0).
-          Erstelle einen detaillierten Trainingsplan für die Altersklasse [${ageGroup}], basierend auf der Red Bull Entwicklungs-DNA:
-          - Starkes, ballorientiertes Gegenpressing
-          - Vertikales, blitzschnelles Umschaltspiel
-          - Hohe Intensität und Resilienz-Aufbau (Kognitiv & Physisch)
-          
-          Schwerpunkt: ${trainingFocus}.
-          Pädagogischer Fokus: Passe die Komplexität und Trainingsintensität exakt an die Aufnahmefähigkeit der Altersklasse ${ageGroup} an (z.B. U15 mehr Technik/Funino, U19 komplexe Taktik). Integriere eine klare Feedback-Lob-Kultur.
-          
-          TEILE DEN PLAN IN 3 PHASEN:
-          1. WARM-UP (DNA-Aktivierung & Neuronaler Fokus)
-          2. HAUPTTEIL (DNA-spezifische Spielformen unter Druck)
-          3. ABSCHLUSS (Wettkampf unter Provokationsregeln für Umschaltspiel)
-          
-          Antworte in einem sauberen Format, fachlich fundiert im 'Med-Tech' Stil, motivierend und klar strukturiert.`;
-
-        const res = await askAI(prompt, "NLZ-Direktor");
-        setTrainingPlan(res);
-        gerdSpeak(
-          "Trainingsplan für das Fuchs Leistungszentrum wurde erstellt. Bereit zur Umsetzung.",
-          "NLZ-Direktor",
-        );
-      } catch (e) {
-        setTrainingPlan("Fehler beim Abruf des Trainingsplans.");
-      } finally {
-        setIsGenerating(false);
-      }
-    };
-
-    const handleVideoUpload = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        setVideoFile(file);
-        setVideoSrc(URL.createObjectURL(file));
-        startAnalysis();
-      }
-    };
-
-    const startAnalysis = async () => {
-      setIsAnalyzing(true);
-      setAnalysisReport(null);
-
-      // Simulate scanning animation time
-      setTimeout(async () => {
-        const prompt = `Du bist Biomechanik-Experte im Fuchs Leistungszentrum.
-          Analysiere eine fiktive Videoaufnahme eines Nachwuchsspielers beim ${trainingFocus}.
-          Gib Feedback zu:
-          1. Standfuß-Positionierung
-          2. Körperhaltung/Schwerpunkt
-          3. Armeinsatz zur Balance
-          4. Eindeutiger Korrektur-Tipp für den Amateur-Trainer.
-          Antworte prägnant im 'Stark Elite' Stil.`;
-
-        const res = await askAI(prompt, "Biomechanik-Expert");
-        setAnalysisReport(res);
-        setIsAnalyzing(false);
-        gerdSpeak(
-          "Biomechanik-Analyse abgeschlossen. Haltungskorrekturen liegen vor.",
-          "Trainer-Gerd",
-        );
-      }, 4000);
-    };
-
-    const saveVideoToTresor = () => {
-      if (!activeDossierPlayerId || !videoSrc || !analysisReport) {
-        alert(
-          "Bitte zuerst einen Spieler auswählen und ein Video analysieren.",
-        );
-        return;
-      }
-      const newVideo = {
-        date: new Date().toLocaleDateString("de-DE"),
-        title: `${trainingFocus.toUpperCase()} Analyse`,
-        feedback: analysisReport,
-        videoSrc: videoSrc,
-      };
-      const p = youthPlayers.find((p) => p.id === activeDossierPlayerId);
-      const currentVideos = p && p.videoTresor ? p.videoTresor : [];
-      updateYouthPlayer(activeDossierPlayerId, "videoTresor", [
-        ...currentVideos,
-        newVideo,
-      ]);
-      gerdSpeak(
-        "Video erfolgreich in den Tresor des Spielers verschoben.",
-        "Trainer-Gerd",
-      );
-      setVideoSrc(null);
-      setAnalysisReport(null);
-    };
-
-    const generatePsychReport = async (playerId) => {
-      setIsGeneratingPsychReport(true);
-      try {
-        const prompt = `Du bist 'NLZ-Sportpsychologe' für das Fuchs Leistungszentrum.
-          Erstelle einen kurzen diagnostischen Bericht (max 3 Sätze) basierend auf folgenden Trainer-Bewertungen (1-10):
-          Fokus: ${psychoScores.focus}, Einsatz: ${psychoScores.effort}, Teamplay: ${psychoScores.teamplay}, Frustrationstoleranz: ${psychoScores.frustration}.
-          Stil: Professionell, entwicklungsorientiert.`;
-
-        const report = await askAI(prompt, "NLZ-Sportpsychologe");
-
-        const newEntry = {
-          date: new Date().toLocaleDateString("de-DE"),
-          scores: { ...psychoScores },
-          aiReport: report,
-        };
-
-        const player = youthPlayers.find((p) => p.id === playerId);
-        updateYouthPlayer(playerId, "psychHistory", [
-          ...(player.psychHistory || []),
-          newEntry,
-        ]);
-        gerdSpeak(
-          "Psychologisches Profil aktualisiert.",
-          "NLZ-Sportpsychologe",
-        );
-      } catch (e) {
-        console.error("Fehler bei Psycho-Report:", e);
-      } finally {
-        setIsGeneratingPsychReport(false);
-      }
-    };
-
-    const generateSeasonBook = async () => {
-      setIsGeneratingBook(true);
-      setSeasonBookData(null);
-      try {
-        const squadData = youthPlayers.map((p) => ({
-          name: p.name,
-          pos: p.position,
-          ovr: Math.round(
-            (p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6,
-          ),
-          psych:
-            p.psychHistory && p.psychHistory.length > 0
-              ? p.psychHistory[p.psychHistory.length - 1].scores
-              : { focus: 5, effort: 5, teamplay: 5, frustration: 5 },
-        }));
-
-        const prompt = `Erstelle Inhalte für das 'Saison-Fachbuch' der Akademie.
-          Hier sind die Daten der Top-Talente: ${JSON.stringify(squadData)}.
-          Schreibe für jeden Spieler eine prägnante 'Scouting-Zusammenfassung' (ca. 40 Wörter), die Leistung und Psychologie verbindet.
-          Antworte als JSON-Array: [{"name": "...", "report": "..." }, ...]`;
-
-        const res = await askAI(prompt, "NLZ-Direktor");
-        const jsonMatch = res.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          setSeasonBookData(JSON.parse(jsonMatch[0]));
-          gerdSpeak(
-            "Das Saison-Fachbuch wurde erfolgreich generiert.",
-            "NLZ-Direktor",
-          );
-        } else {
-          setSeasonBookData([
-            {
-              name: "System",
-              report: "Fehler beim Parsen der Buchdaten.",
-            },
-          ]);
-        }
-      } catch (e) {
-        setSeasonBookData([
-          { name: "System", report: "Netzwerkfehler beim Abruf." },
-        ]);
-      } finally {
-        setIsGeneratingBook(false);
-      }
-    };
-
-    const renderPitch = () => {
-      if (ageGroup === "funino") {
-        return (
-          <svg
-            viewBox="0 0 420 300"
-            className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
-          >
-            {/* Funino Pitch */}
-            <rect
-              x="10"
-              y="10"
-              width="400"
-              height="280"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              opacity="0.5"
-            />
-            <line
-              x1="210"
-              y1="10"
-              x2="210"
-              y2="290"
-              stroke="white"
-              strokeWidth="1"
-              strokeDasharray="5,5"
-              opacity="0.3"
-            />
-
-            {/* 6m Shooting Zones */}
-            <line
-              x1="70"
-              y1="10"
-              x2="70"
-              y2="290"
-              stroke="#00f3ff"
-              strokeWidth="2"
-              strokeDasharray="4,4"
-              opacity="0.6"
-            />
-            <line
-              x1="350"
-              y1="10"
-              x2="350"
-              y2="290"
-              stroke="#00f3ff"
-              strokeWidth="2"
-              strokeDasharray="4,4"
-              opacity="0.6"
-            />
-            <text
-              x="40"
-              y="150"
-              fill="#00f3ff"
-              fontSize="10"
-              transform="rotate(-90, 40, 150)"
-              opacity="0.5"
-            >
-              SCHUSSZONE
-            </text>
-            <text
-              x="380"
-              y="150"
-              fill="#00f3ff"
-              fontSize="10"
-              transform="rotate(90, 380, 150)"
-              opacity="0.5"
-            >
-              SCHUSSZONE
-            </text>
-
-            {/* 4 Mini Goals */}
-            <g opacity="0.8">
-              <rect
-                x="5"
-                y="40"
-                width="10"
-                height="40"
-                fill="#ff4444"
-                rx="2"
-              />
-              <rect
-                x="5"
-                y="220"
-                width="10"
-                height="40"
-                fill="#ff4444"
-                rx="2"
-              />
-              <rect
-                x="405"
-                y="40"
-                width="10"
-                height="40"
-                fill="#ff4444"
-                rx="2"
-              />
-              <rect
-                x="405"
-                y="220"
-                width="10"
-                height="40"
-                fill="#ff4444"
-                rx="2"
-              />
-            </g>
-          </svg>
-        );
-      }
-      if (ageGroup === "kleinfeld") {
-        return (
-          <svg
-            viewBox="0 0 420 300"
-            className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
-          >
-            <rect
-              x="10"
-              y="10"
-              width="400"
-              height="280"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              opacity="0.5"
-            />
-            <line
-              x1="210"
-              y1="10"
-              x2="210"
-              y2="290"
-              stroke="white"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-            <circle
-              cx="210"
-              cy="150"
-              r="40"
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-            {/* Penalty Areas */}
-            <rect
-              x="10"
-              y="75"
-              width="60"
-              height="150"
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-            <rect
-              x="350"
-              y="75"
-              width="60"
-              height="150"
-              fill="none"
-              stroke="white"
-              strokeWidth="1"
-              opacity="0.5"
-            />
-          </svg>
-        );
-      }
-      return (
-        <svg
-          viewBox="0 0 420 300"
-          className="w-full h-auto rounded-lg bg-[#0d2b1d] border border-white/10 shadow-2xl"
-        >
-          <rect
-            x="10"
-            y="10"
-            width="400"
-            height="280"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            opacity="0.8"
-          />
-          <line
-            x1="210"
-            y1="10"
-            x2="210"
-            y2="290"
-            stroke="white"
-            strokeWidth="2"
-            opacity="0.8"
-          />
-          <circle
-            cx="210"
-            cy="150"
-            r="50"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            opacity="0.8"
-          />
-          {/* Penalty Areas Full */}
-          <rect
-            x="10"
-            y="50"
-            width="80"
-            height="200"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            opacity="0.8"
-          />
-          <rect
-            x="330"
-            y="50"
-            width="80"
-            height="200"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            opacity="0.8"
-          />
-        </svg>
-      );
-    };
-
-    return (
-      <div className="w-full">
-        <div className="space-y-8 animate-fade-in pb-20">
-          {/* Header Section - Med-Tech Aesthetic */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-2xl border border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
-            <div className="absolute right-0 top-0 opacity-[0.03] pointer-events-none">
-              <Icon name="activity" size={240} className="text-navy" />
-            </div>
-            <div className="relative z-10">
-              <h2 className="text-4xl font-black tracking-tighter text-navy flex items-center gap-4 uppercase mb-2">
-                <Icon name="plus-square" size={32} className="text-neon" />{" "}
-                Fuchs NLZ Hub
-              </h2>
-              <div className="text-[10px] font-mono text-gray-500 tracking-[0.4em] uppercase font-black">
-                Elite Youth Academy | Psycho & Biomechanics Center
-              </div>
-            </div>
-            <div className="mt-6 md:mt-0 flex flex-wrap gap-4 bg-gray-100 p-2 rounded-xl border border-gray-200">
-              <button
-                onClick={() => setActiveNlzView("finance")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "finance" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-              >
-                <Icon name="pie-chart" size={16} className={activeNlzView === "finance" ? "text-gold" : ""} /> Finance & Admin
-              </button>
-              <button
-                onClick={() => setActiveNlzView("character")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "character" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-              >
-                <Icon name="user" size={16} className={activeNlzView === "character" ? "text-neon" : ""} /> Character Matrix
-              </button>
-              <button
-                onClick={() => setActiveNlzView("biomechanics")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "biomechanics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-              >
-                <Icon name="activity" size={16} className={activeNlzView === "biomechanics" ? "text-redbull" : ""} /> Biomechanik
-              </button>
-              <button
-                onClick={() => setActiveNlzView("squad")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "squad" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-              >
-                <Icon name="users" size={16} className={activeNlzView === "squad" ? "text-redbull" : ""} /> Youth Squad
-              </button>
-              <button
-                onClick={() => setActiveNlzView("tactics")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "tactics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-              >
-                <Icon name="layout" size={16} className={activeNlzView === "tactics" ? "text-neon" : ""} /> Tactics & Training
-              </button>
-              <button
-                onClick={() => setActiveNlzView("pipeline")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "pipeline" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-              >
-                <Icon name="git-pull-request" size={16} className={activeNlzView === "pipeline" ? "text-neon" : ""} /> Pipeline
-              </button>
-            </div>
-          </div>
-
-          {/* === TACTICS & TRAINING (Phase 30) === */}
-          {activeNlzView === "tactics" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
-                  <Icon name="layout" size={28} className="text-neon" /> NLZ Taktik Board
-                </h2>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Board Configuration */}
-                <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-neon/5 rounded-bl-[100px] pointer-events-none"></div>
-                  <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                    <Icon name="sliders" className="text-neon" size={20} /> Age & Tactic Selection
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-3">1. Altersklasse wählen</label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {ageClasses.map(ac => (
-                          <button
-                            key={ac.id}
-                            onClick={() => setAgeGroup(ac.id)}
-                            className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${ageGroup === ac.id ? "bg-white border-neon shadow-[0_0_15px_rgba(0,243,255,0.3)] text-navy" : "bg-gray-50 border-gray-200 text-gray-400 hover:bg-white hover:border-neon/50"}`}
-                          >
-                            <Icon name={ac.icon} size={24} className={ageGroup === ac.id ? "text-neon" : "text-gray-300"} />
-                            <span className="text-[9px] font-black uppercase mt-3">{ac.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-3">2. Taktischer Fokus</label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {foci.map(f => (
-                          <button
-                            key={f.id}
-                            onClick={() => setTrainingFocus(f.id)}
-                            className={`p-3 rounded-lg border text-left transition-all ${trainingFocus === f.id ? "bg-neon/10 border-neon text-navy font-black" : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-white"}`}
-                          >
-                            <span className="text-xs uppercase tracking-widest">{f.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={generatePlan}
-                      disabled={isGenerating}
-                      className="w-full mt-4 bg-navy text-white font-black uppercase text-xs tracking-widest py-4 rounded-xl hover:bg-redbull transition-all shadow-lg shadow-navy/20 flex justify-center items-center gap-2"
-                    >
-                      {isGenerating ? <Icon name="loader" size={20} className="animate-spin" /> : <Icon name="cpu" size={20} />}
-                      {isGenerating ? "Erstelle DNA-Plan..." : "Gerd: Altersgerechten Plan erstellen"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* AI Plan Renderer / Pitch Mock */}
-                <div className="bg-[#050a14] p-8 rounded-2xl border border-neon/20 shadow-2xl relative overflow-hidden flex flex-col">
-                  {/* Decorative pitch lines */}
-                  <div className="absolute inset-x-8 inset-y-8 border-2 border-white/10 rounded-lg pointer-events-none"></div>
-                  <div className="absolute top-1/2 left-8 right-8 border-t-2 border-white/10 pointer-events-none"></div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/10 rounded-full pointer-events-none"></div>
-
-                  <h3 className="text-white font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3 relative z-10">
-                    <Icon name="file-text" className="text-neon" size={20} /> NLZ Training Protocol
-                  </h3>
-
-                  <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10">
-                    {trainingPlan ? (
-                      <div className="bg-black/60 p-6 rounded-xl border border-neon/30 text-white font-mono text-xs leading-relaxed whitespace-pre-wrap animate-slide-up shadow-[0_0_20px_rgba(0,243,255,0.1)]">
-                        {trainingPlan}
-                      </div>
-                    ) : (
-                      <div className="h-full flex flex-col items-center justify-center opacity-40 text-center px-8">
-                        <Icon name="layout" size={48} className="text-neon mb-4" />
-                        <p className="text-xs uppercase tracking-widest font-black text-white leading-relaxed">
-                          Wähle Altersklasse und Fokus.<br/>
-                          Gerd 2.0 kontextualisiert die Übungen basierend auf der Red Bull DNA und der kognitiven Aufnahmefähigkeit der Spieler.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* === YOUTH SQUAD (FIFA CARDS) === */}
-          {activeNlzView === "squad" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
-                  <Icon name="users" size={28} className="text-redbull" /> Nachwuchs Kader
-                </h2>
-                <button
-                  onClick={handleAutoFillYouthSquad}
-                  disabled={isAutoFillingYouth || !clubIdentity.name}
-                  className={`px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all ${isAutoFillingYouth ? "bg-white/10 text-gray-500 cursor-not-allowed border border-gray-200" : clubIdentity.name ? "bg-neon text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)] hover:scale-105 hover:bg-white" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
-                  title={clubIdentity.name ? "Jugend-Kader via KI importieren" : "Bitte zuerst Club in Settings eintragen"}
-                >
-                  {isAutoFillingYouth ? <Icon name="loader" className="animate-spin" size={16} /> : <Icon name="zap" size={16} />}
-                  {isAutoFillingYouth ? "KI-Scouting läuft..." : "KI-Youth-Scouting (Auto-Fill)"}
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {youthPlayers.map((p) => {
-                  const ovr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6) || 60;
-                  const pot = p.pot || Math.min(99, ovr + 15);
-                  
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() => setActiveDossierPlayerId(p.id)}
-                      className="group relative p-0 rounded-xl border-2 transition-all cursor-pointer overflow-hidden bg-white border-gray-200 hover:border-gold hover:shadow-[0_0_25px_rgba(255,215,0,0.3)] hover:-translate-y-1"
-                    >
-                      {/* NLZ FIFA CARD LAYOUT */}
-                      {p.image && (
-                        <div className="absolute inset-0 z-0">
-                           <img src={p.image} alt={p.name} className="w-full h-full object-cover mix-blend-luminosity opacity-20 transition-opacity group-hover:opacity-40" />
-                           <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
-                        </div>
-                      )}
-                      {!p.image && (
-                        <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-50 to-gray-200"></div>
-                      )}
-                      
-                      <div className="flex flex-col h-[280px] uppercase font-black tracking-tighter justify-between relative z-10 p-1">
-                        <div>
-                          <div className="flex justify-between p-3 pb-0">
-                            <div className="flex flex-col items-center">
-                              <span className="text-3xl leading-none text-navy">
-                                {ovr}
-                              </span>
-                              <span className="text-[10px] text-gray-500 tracking-widest mt-1">
-                                OVR
-                              </span>
-                            </div>
-                            <div className="flex flex-col items-center">
-                              <span className="text-3xl leading-none text-gold">
-                                {pot}
-                              </span>
-                              <span className="text-[10px] text-gray-500 tracking-widest mt-1">
-                                POT
-                              </span>
-                            </div>
-                          </div>
-                          <div className="text-center mt-2">
-                            <span className="px-3 py-1 bg-navy/10 text-navy rounded-full text-[9px] font-black uppercase tracking-widest">
-                              {p.group.toUpperCase()} • {p.position}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="px-4 text-center mt-auto bg-white/50 backdrop-blur-sm mx-2 mb-2 rounded-xl border border-white/50 pb-3 pt-2">
-                           <div className="text-sm text-navy truncate font-black italic tracking-widest leading-none mb-2">
-                             {p.name}
-                           </div>
-                           <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-2"></div>
-                           <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-gray-600 font-mono">
-                               <div className="flex justify-between"><span>PAC</span><span className="text-navy">{p.pac || 50}</span></div>
-                               <div className="flex justify-between"><span>DRI</span><span className="text-navy">{p.dri || 50}</span></div>
-                               <div className="flex justify-between"><span>SHO</span><span className="text-navy">{p.sho || 50}</span></div>
-                               <div className="flex justify-between"><span>DEF</span><span className="text-navy">{p.def || 50}</span></div>
-                               <div className="flex justify-between"><span>PAS</span><span className="text-navy">{p.pas || 50}</span></div>
-                               <div className="flex justify-between"><span>PHY</span><span className="text-navy">{p.phy || 50}</span></div>
-                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* === FINANCE & ADMIN (Phase 30) === */}
-          {activeNlzView === "finance" && (() => {
-            const nlzCount = youthPlayers.length;
-            const finances = truthObject.nlz_hub?.finances || { monthly_fee_per_player: 150, equipment_budget: 15000, travel_costs: 5000, materials: 3000 };
-            const monthlyRevenue = nlzCount * finances.monthly_fee_per_player;
-            const annualRevenue = monthlyRevenue * 12;
-            const totalExpenses = finances.equipment_budget + finances.travel_costs + finances.materials;
-            const netBalance = annualRevenue - totalExpenses;
-
-            return (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-                {/* Finance Overview Panel */}
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-[100px] pointer-events-none"></div>
-                    <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                      <Icon name="pie-chart" className="text-gold" size={20} /> NLZ Budget Calculator
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                      <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
-                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Jahres-Einnahmen (Beiträge)</div>
-                        <div className="text-4xl font-black text-navy leading-none">€ {annualRevenue.toLocaleString()}</div>
-                        <div className="text-xs text-gray-500 mt-2 font-mono">{nlzCount} Spieler × €{finances.monthly_fee_per_player} / Monat</div>
-                      </div>
-                      <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
-                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Fixe Ausgaben (Jahr)</div>
-                        <div className="text-4xl font-black text-redbull leading-none">€ {totalExpenses.toLocaleString()}</div>
-                        <div className="text-xs text-gray-500 mt-2 font-mono">Equipment, Reisen, Material</div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 rounded-xl border border-gray-200 bg-white flex justify-between items-center">
-                      <div>
-                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Netto-Bilanz (P.A.)</div>
-                        <div className={`text-2xl font-black uppercase tracking-tighter ${netBalance >= 0 ? "text-green-600" : "text-redbull"}`}>
-                          {netBalance >= 0 ? "+" : ""}€ {netBalance.toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50">
-                        <Icon name={netBalance >= 0 ? "trending-up" : "trending-down"} className={netBalance >= 0 ? "text-green-600" : "text-redbull"} size={20} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expense Settings Panel */}
-                <div className="space-y-6">
-                  <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl h-full">
-                    <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                      <Icon name="settings" className="text-gray-400" size={20} /> Kosten-Kalkulator
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Spielerbeitrag / Monat (€)</label>
-                        <input
-                          type="number"
-                          value={finances.monthly_fee_per_player}
-                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'monthly_fee_per_player', value: parseInt(e.target.value) || 0 })}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trikotsätze & Equipment (€)</label>
-                        <input
-                          type="number"
-                          value={finances.equipment_budget}
-                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'equipment_budget', value: parseInt(e.target.value) || 0 })}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Fahrtkosten / Turniere (€)</label>
-                        <input
-                          type="number"
-                          value={finances.travel_costs}
-                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'travel_costs', value: parseInt(e.target.value) || 0 })}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trainingsmaterialien (€)</label>
-                        <input
-                          type="number"
-                          value={finances.materials}
-                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'materials', value: parseInt(e.target.value) || 0 })}
-                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* === CHARACTER MATRIX (Psycho Profiling) === */}
-          {activeNlzView === "character" && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
-                {youthPlayers.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setActiveDossierPlayerId(p.id)}
-                    className={`shrink-0 flex items-center gap-3 p-4 rounded-xl border transition-all ${activeDossierPlayerId === p.id ? "bg-white border-neon shadow-[0_5px_15px_rgba(0,243,255,0.2)]" : "bg-white/50 border-gray-200 text-gray-400 hover:bg-white"}`}
-                  >
-                    <div className="w-10 h-10 rounded-full bg-navy flex items-center justify-center font-black text-white text-[10px] tracking-widest">
-                      {p.position}
-                    </div>
-                    <div className="text-left">
-                      <div className={`font-black ${activeDossierPlayerId === p.id ? "text-navy" : "text-gray-500"}`}>
-                        {p.name}
-                      </div>
-                      <div className="text-[9px] uppercase tracking-widest text-gray-400">
-                        PSY-INDEX: {Math.round((p.focus * 10) + (10 - p.frustration) * 5)}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {activeDossierPlayerId && (() => {
-                const p = youthPlayers.find((x) => x.id === activeDossierPlayerId);
-                if (!p) return null;
-
-                // Mock Psycho Data based on player stats
-                const traits = [
-                  { label: "Resilienz", val: Math.min(100, (10 - p.frustration) * 10 + 20) },
-                  { label: "Führung", val: p.phy > 70 ? 85 : 45 },
-                  { label: "Teamgeist", val: p.pas > 65 ? 90 : 60 },
-                  { label: "Fokus", val: p.focus * 10 },
-                  { label: "Ehrgeiz", val: p.pac > 75 ? 95 : 70 },
-                ];
-
-                // SVG Radar Math
-                const size = 300;
-                const center = size / 2;
-                const radius = 100;
-                const angleStep = (Math.PI * 2) / traits.length;
-
-                const getCoordinates = (val, index) => {
-                  const r = (val / 100) * radius;
-                  const a = index * angleStep - Math.PI / 2;
-                  return `${center + r * Math.cos(a)},${center + r * Math.sin(a)}`;
-                };
-
-                const polygonPoints = traits.map((t, i) => getCoordinates(t.val, i)).join(" ");
-
-                const generatePedagogicalTip = async () => {
-                  setIsFetchingTip(true);
-                  setPedagogicalTip("");
-                  try {
-                    const prompt = `Du bist 'Pedagogical Advisor' im Fuchs NLZ.
-                        Ein Trainer fragt nach Umgangstipps für den Spieler ${p.name}.
-                        Sein Profil: Resilienz ${traits[0].val}/100, Führung ${traits[1].val}/100, Fokus ${traits[3].val}/100.
-                        Gib dem Trainer 2 konkrete, psychologisch fundierte Kommunikations-Tipps im 'Med-Tech' Stil.`;
-
-                    const res = await askAI(prompt, "System");
-                    setPedagogicalTip(res);
-                    gerdSpeak("Pädagogische Empfehlung geladen.", "System");
-                  } catch (e) {
-                    setPedagogicalTip("Fehler beim Abruf der Empfehlung.");
-                  } finally {
-                    setIsFetchingTip(false);
-                  }
-                };
-
-                return (
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                    {/* LEFT: Radar Chart Dashboard */}
-                    <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-neon/5 rounded-bl-[100px] pointer-events-none"></div>
-
-                      <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-8 flex items-center gap-3">
-                        <Icon name="target" className="text-neon" size={20} /> Character Matrix: {p.name}
-                      </h3>
-
-                      <div className="flex justify-center items-center mb-8 relative">
-                        <svg width={size} height={size} className="overflow-visible">
-                          {/* Background Web */}
-                          {[0.2, 0.4, 0.6, 0.8, 1].map((scale, levelIndex) => (
-                            <polygon
-                              key={levelIndex}
-                              points={traits.map((_, i) => {
-                                const r = radius * scale;
-                                const a = i * angleStep - Math.PI / 2;
-                                return `${center + r * Math.cos(a)},${center + r * Math.sin(a)}`;
-                              }).join(" ")}
-                              fill="none"
-                              stroke="#e5e7eb"
-                              strokeWidth="1"
-                            />
-                          ))}
-                          {/* Axes */}
-                          {traits.map((_, i) => {
-                            const a = i * angleStep - Math.PI / 2;
-                            return (
-                              <line
-                                key={`axis-${i}`}
-                                x1={center}
-                                y1={center}
-                                x2={center + radius * Math.cos(a)}
-                                y2={center + radius * Math.sin(a)}
-                                stroke="#e5e7eb"
-                                strokeWidth="1"
-                              />
-                            );
-                          })}
-                          {/* Data Polygon */}
-                          <polygon
-                            points={polygonPoints}
-                            fill="rgba(0, 243, 255, 0.2)"
-                            stroke="#00f3ff"
-                            strokeWidth="3"
-                            className="drop-shadow-[0_0_10px_rgba(0,243,255,0.5)] transition-all duration-700"
-                          />
-                          {/* Data Points & Labels */}
-                          {traits.map((t, i) => {
-                            const rLabel = radius + 25;
-                            const a = i * angleStep - Math.PI / 2;
-                            const lx = center + rLabel * Math.cos(a);
-                            const ly = center + rLabel * Math.sin(a);
-                            const [cx, cy] = getCoordinates(t.val, i).split(",");
-                            return (
-                              <g key={`data-${i}`}>
-                                <circle cx={cx} cy={cy} r="4" fill="#fff" stroke="#00f3ff" strokeWidth="2" />
-                                <text x={lx} y={ly} textAnchor="middle" alignmentBaseline="middle" className="text-[9px] font-black uppercase tracking-widest fill-navy">
-                                  {t.label}
-                                </text>
-                                <text x={lx} y={ly + 12} textAnchor="middle" alignmentBaseline="middle" className="text-[10px] font-mono fill-gray-400">
-                                  {t.val}
-                                </text>
-                              </g>
-                            );
-                          })}
-                        </svg>
-                      </div>
-
-                      {/* Professional Contract Input (Truth Object Feed) */}
-                      <div className="mt-8 pt-8 border-t border-gray-100">
-                        <h4 className="text-[10px] text-navy font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                          <Icon name="file-text" size={14} className="text-gold" /> Vertrags-Daten (CFO Bridge)
-                        </h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-gray-400 uppercase font-black">Monatl. Fahrtkosten (€)</label>
-                            <input
-                              type="number"
-                              className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-xs font-mono"
-                              placeholder="0"
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                setTruthObject(prev => ({
-                                  ...prev,
-                                  financials: {
-                                    ...prev.financials,
-                                    fixed_costs: {
-                                      ...prev.financials.fixed_costs,
-                                      nlz_parent_payments: val + (prev.financials.fixed_costs.nlz_parent_payments || 0) // Simplified additive simulation
-                                    }
-                                  }
-                                }));
-                              }}
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="text-[9px] text-gray-400 uppercase font-black">Teilnahme-Gebühr (€)</label>
-                            <input
-                              type="number"
-                              className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-xs font-mono"
-                              placeholder="0"
-                            />
-                          </div>
-                        </div>
-                        <p className="text-[8px] text-gray-400 font-mono mt-2 italic">* Diese Daten fließen direkt in das CFO 2.0 Dashboard ein.</p>
-                      </div>
-                    </div>
-
-                    {/* RIGHT: Pedagogical Advisor */}
-                    <div className="flex flex-col gap-8">
-                      <div className="bg-navy p-8 rounded-2xl border border-gray-800 shadow-2xl flex-1 flex flex-col relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-40 h-40 opacity-5 pointer-events-none">
-                          <Icon name="cpu" size={160} className="text-neon" />
-                        </div>
-
-                        <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2 flex items-center gap-3">
-                          <Icon name="message-circle" className="text-neon" size={20} /> Pedagogical Advisor
-                        </h3>
-                        <p className="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-8">KI-Coaching Feedback System</p>
-
-                        <div className="flex-1">
-                          {pedagogicalTip ? (
-                            <div className="bg-black/30 p-6 rounded-xl border border-neon/20 animate-scale-in">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 rounded-full bg-neon flex items-center justify-center text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)]">
-                                  <Icon name="check" size={16} />
-                                </div>
-                                <span className="text-[10px] font-black text-neon uppercase tracking-widest">Empfehlung Bereit</span>
-                              </div>
-                              <div className="text-sm font-mono text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                {pedagogicalTip}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-center opacity-50 border-2 border-dashed border-gray-700 rounded-xl p-8">
-                              <Icon name="user-plus" size={32} className="text-gray-500 mb-4" />
-                              <p className="text-[10px] text-gray-400 uppercase tracking-widest">Generiere spezifische Umgangstipps basierend auf dem Psyche-Profil.</p>
-                            </div>
-                          )}
-                        </div>
-
-                        <button
-                          onClick={generatePedagogicalTip}
-                          disabled={isFetchingTip}
-                          className="mt-6 w-full bg-neon text-navy py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
-                        >
-                          {isFetchingTip ? <Icon name="loader" size={16} className="animate-spin" /> : <Icon name="zap" size={16} />}
-                          {isFetchingTip ? "Analysiere Psyche..." : "Coaching-Tipp anfordern"}
-                        </button>
-                      </div>
-
-                      {/* AI DEVELOPMENT COACH (NEW) */}
-                      <div className="bg-[#050a14] p-8 rounded-2xl border border-cyan-500/20 shadow-2xl relative overflow-hidden flex flex-col">
-                        <div className="absolute top-0 right-0 w-40 h-40 opacity-5 pointer-events-none text-cyan-400">
-                          <Icon name="trending-up" size={160} />
-                        </div>
-
-                        <h3 className="text-white font-black uppercase text-sm tracking-widest mb-2 flex items-center gap-3">
-                          <Icon name="shield" className="text-cyan-400" size={20} /> AI Development Coach
-                        </h3>
-                        <p className="text-white/40 text-[10px] uppercase tracking-[0.2em] mb-8">Profi-DNA Gap-Analysator</p>
-
-                        <div className="flex-1">
-                          {developmentReport ? (
-                            <div className="bg-cyan-900/10 p-6 rounded-xl border border-cyan-500/30 animate-slide-up">
-                              <div className="text-[11px] font-mono text-cyan-100/80 leading-relaxed whitespace-pre-wrap">
-                                {developmentReport}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-center opacity-40 border-2 border-dashed border-white/10 rounded-xl p-8">
-                              <Icon name="activity" size={32} className="text-white/20 mb-4" />
-                              <p className="text-[9px] text-white/40 uppercase tracking-widest leading-relaxed">Abgleich mit der Taktik-DNA der 1. Mannschaft (Global Context Core): {truthObject.tactical_setup.formation_home}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        <button
-                          onClick={() => handleDevCheck(p)}
-                          disabled={isDevLoading}
-                          className="mt-6 w-full bg-cyan-600 hover:bg-cyan-400 text-white font-black uppercase text-[10px] tracking-widest py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(34,211,238,0.2)] flex items-center justify-center gap-2"
-                        >
-                          {isDevLoading ? <Icon name="loader" size={16} className="animate-spin" /> : <Icon name="crosshair" size={16} />}
-                          {isDevLoading ? "Berechne Gap..." : "Profi-Check starten"}
-                        </button>
-                      </div>
-
-                      {/* Quick Stats overview */}
-                      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-lg grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-xl font-black text-navy">{p.focus * 10}%</div>
-                          <div className="text-[8px] uppercase tracking-widest text-gray-400 font-black mt-1">Trainingsfokus</div>
-                        </div>
-                        <div className="border-x border-gray-100">
-                          <div className="text-xl font-black text-redbull">{p.frustration * 10}%</div>
-                          <div className="text-[8px] uppercase tracking-widest text-gray-400 font-black mt-1">Frust-Level</div>
-                        </div>
-                        <div>
-                          <div className="text-xl font-black text-gold">{p.phy || 60}</div>
-                          <div className="text-[8px] uppercase tracking-widest text-gray-400 font-black mt-1">Physis</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* === BIOMECHANICS DASHBOARD === */}
-          {activeNlzView === "biomechanics" && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="bg-white p-1 rounded-2xl border border-gray-200 shadow-xl overflow-hidden flex flex-col xl:flex-row">
-
-                {/* LEFT: Player Selection & Alerts */}
-                <div className="w-full xl:w-1/3 bg-gray-50 p-8 border-r border-gray-200 flex flex-col">
-                  <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-8 flex items-center gap-3">
-                    <Icon name="activity" className="text-redbull" size={20} /> Medical Watchlist
-                  </h3>
-
-                  {/* Growth Spurt Alert Mock */}
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-redbull opacity-10 rounded-bl-[100px]"></div>
-                    <div className="flex items-start gap-3">
-                      <Icon name="alert-triangle" className="text-redbull mt-1" size={18} />
-                      <div>
-                        <h4 className="text-[10px] font-black text-redbull uppercase tracking-widest mb-1">Growth Spurt Alert</h4>
-                        <p className="text-xs text-red-900 font-mono">3 Spieler in kritischer Wachstumsphase. Osgood-Schlatter Risiko erhöht. Trainingslast reduzieren.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 flex-1 overflow-y-auto custom-scrollbar">
-                    {youthPlayers.slice(0, 5).map((p, idx) => (
-                      <button
-                        key={p.id}
-                        onClick={() => setActiveDossierPlayerId(p.id)}
-                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all ${activeDossierPlayerId === p.id ? "bg-white border-redbull shadow-md" : "bg-transparent border-gray-200 hover:bg-white"}`}
-                      >
-                        <div>
-                          <div className="font-black text-navy text-sm">{p.name}</div>
-                          <div className="text-[9px] uppercase tracking-widest text-gray-400 font-black">{p.position} | Alter: {14 + (idx % 4)}</div>
-                        </div>
-                        {idx % 3 === 0 && <div className="w-2 h-2 rounded-full bg-redbull animate-pulse"></div>}
-                        {idx % 3 === 1 && <div className="w-2 h-2 rounded-full bg-gold"></div>}
-                        {idx % 3 === 2 && <div className="w-2 h-2 rounded-full bg-green-500"></div>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* RIGHT: Wireframe Body Heatmap */}
-                <div className="flex-1 p-8 bg-white relative flex items-center justify-center min-h-[500px]">
-                  <div className="absolute top-8 left-8">
-                    <h4 className="font-black uppercase text-xl text-navy tracking-tighter">
-                      {activeDossierPlayerId ? youthPlayers.find(p => p.id === activeDossierPlayerId)?.name : "Bitte Spieler wählen"}
-                    </h4>
-                    <p className="text-[10px] font-mono uppercase text-gray-400 tracking-[0.2em] mt-1">Live Biomechanik-Scan</p>
-                  </div>
-
-                  <div className="absolute top-8 right-8 flex gap-4 text-[9px] font-black uppercase tracking-widest text-gray-400">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-redbull"></div> High Stress</div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-gold"></div> Mod. Stress</div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-neon"></div> Optimal</div>
-                  </div>
-
-                  {activeDossierPlayerId ? (
-                    <div className="relative w-64 h-96">
-                      {/* Minimalist SVG Body Wireframe Mock */}
-                      <svg viewBox="0 0 100 200" className="w-full h-full drop-shadow-2xl">
-                        {/* Head */}
-                        <circle cx="50" cy="20" r="12" fill="none" stroke="#e5e7eb" strokeWidth="2" />
-                        {/* Torso */}
-                        <path d="M 35 40 L 65 40 L 60 100 L 40 100 Z" fill="none" stroke="#e5e7eb" strokeWidth="2" />
-                        {/* Arms */}
-                        <path d="M 35 40 L 15 70 L 10 100" fill="none" stroke="#e5e7eb" strokeWidth="2" />
-                        <path d="M 65 40 L 85 70 L 90 100" fill="none" stroke="#e5e7eb" strokeWidth="2" />
-                        {/* Legs */}
-                        <path d="M 40 100 L 30 150 L 30 190" fill="none" stroke="#e5e7eb" strokeWidth="2" />
-                        <path d="M 60 100 L 70 150 L 70 190" fill="none" stroke="#e5e7eb" strokeWidth="2" />
-
-                        {/* Joint Indicators (Heatmap) */}
-                        {/* Shoulders */}
-                        <circle cx="35" cy="40" r="4" fill="#00f3ff" className="animate-pulse" />
-                        <circle cx="65" cy="40" r="4" fill="#00f3ff" className="animate-pulse" />
-                        {/* Knees - High Risk Zone Mock */}
-                        <circle cx="30" cy="150" r="6" fill="#E21B4D" className="animate-ping opacity-75" />
-                        <circle cx="30" cy="150" r="4" fill="#E21B4D" />
-
-                        <circle cx="70" cy="150" r="4" fill="#E21B4D" />
-
-                        {/* Ankles */}
-                        <circle cx="30" cy="190" r="4" fill="#D4AF37" />
-                        <circle cx="70" cy="190" r="4" fill="#D4AF37" />
-                      </svg>
-
-                      {/* Data Tooltips */}
-                      <div className="absolute top-[70%] -left-16 bg-black text-white p-3 rounded-lg border border-redbull shadow-[0_0_20px_rgba(226,27,77,0.3)] w-40 animate-fade-in">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-redbull mb-1">Patellasehne L</div>
-                        <div className="text-xs font-mono">Belastung: 89%</div>
-                        <div className="text-[8px] text-gray-400 mt-1">Intervention empfohlen</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-gray-300 text-center">
-                      <Icon name="user" size={64} className="mx-auto mb-4 opacity-20" />
-                      <p className="text-xs font-black uppercase tracking-widest opacity-50">Select Player to view Biomechanics</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* === TALENT PIPELINE === */}
-          {activeNlzView === "pipeline" && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5 font-black text-9xl italic tracking-tighter text-navy pointer-events-none">
-                  PRO
-                </div>
-
-                <div className="mb-12">
-                  <h3 className="text-navy font-black uppercase text-xl tracking-widest flex items-center gap-3 mb-2">
-                    <Icon name="git-pull-request" size={28} className="text-gold" /> Vertical Talent-Pipeline
-                  </h3>
-                  <p className="text-gray-400 text-[10px] font-mono uppercase tracking-[0.2em]">Drag & Drop Promotion to Shadow-Scouting Pool</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-                  {/* Pipeline Connectors */}
-                  <div className="hidden md:block absolute top-[50%] left-[20%] right-[20%] h-1 bg-gradient-to-r from-gray-200 via-neon to-redbull -z-10 transform -translate-y-1/2"></div>
-
-                  {/* Stage 1: U15 / U17 (Mock data) */}
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm relative">
-                    <div className="absolute -top-3 left-6 bg-navy text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
-                      Phase 1: U15-U17
-                    </div>
-                    <div className="mt-4 space-y-3 min-h-[200px]">
-                      {youthPlayers.slice(0, 3).map(p => (
-                        <div
-                          key={p.id}
-                          className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm flex justify-between items-center"
-                        >
-                          <div>
-                            <div className="text-xs font-black text-navy">{p.name}</div>
-                            <div className="text-[9px] uppercase tracking-widest text-gray-400">{p.position}</div>
-                          </div>
-                          <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-400">
-                            {Math.round((p.pac + p.sho + p.pas) / 3)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Stage 2: U19 Elite */}
-                  <div className="bg-neon/5 border border-neon/30 rounded-xl p-6 shadow-sm relative shadow-[0_0_30px_rgba(0,243,255,0.1)]">
-                    <div className="absolute -top-3 left-6 bg-neon text-navy px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest">
-                      Phase 2: U19 Elite
-                    </div>
-                    <div className="mt-4 space-y-3 min-h-[200px]">
-                      {youthPlayers.slice(3, 5).map(p => (
-                        <div
-                          key={p.id}
-                          draggable
-                          onDragStart={(e) => {
-                            setDraggedTalentId(p.id);
-                            e.dataTransfer.setData('text/plain', p.id);
-                          }}
-                          className="bg-white p-3 border border-neon/50 rounded-lg shadow-md cursor-grab active:cursor-grabbing flex justify-between items-center transform hover:-translate-y-1 transition-transform relative group"
-                        >
-                          <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-6 bg-neon rounded-r opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                          <div>
-                            <div className="text-xs font-black text-navy">{p.name}</div>
-                            <div className="text-[9px] uppercase tracking-widest text-neon font-black drop-shadow-sm">{p.position}</div>
-                          </div>
-                          <div className="w-6 h-6 rounded-full bg-neon flex items-center justify-center text-[10px] font-black text-navy">
-                            {Math.round((p.pac + p.sho + p.pas + 10) / 3)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Stage 3: Pro Shadow Pool (Dropzone) */}
-                  <div
-                    className="bg-black border-2 border-dashed border-redbull/50 rounded-xl p-6 shadow-2xl relative transition-all"
-                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('bg-redbull/10', 'border-redbull'); }}
-                    onDragLeave={(e) => { e.currentTarget.classList.remove('bg-redbull/10', 'border-redbull'); }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      e.currentTarget.classList.remove('bg-redbull/10', 'border-redbull');
-                      if (draggedTalentId) {
-                        const player = youthPlayers.find(p => p.id === draggedTalentId);
-                        if (player && window.confirm(`${player.name} in den Shadow-Scouting Pool der Profis übernehmen?`)) {
-                          promoteToProSquad(draggedTalentId);
-                          setDraggedTalentId(null);
-                          setActiveNlzView("character"); // Redirect to reset view
-                        }
-                      }
-                    }}
-                  >
-                    <div className="absolute -top-3 left-6 bg-redbull text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(226,27,77,0.5)]">
-                      Phase 3: Shadow-Scouting Pool
-                    </div>
-                    <div className="mt-4 h-full min-h-[200px] flex flex-col items-center justify-center text-center opacity-70">
-                      <Icon name="arrow-down-circle" size={48} className="text-redbull mb-4 animate-bounce" />
-                      <p className="text-white text-xs font-black uppercase tracking-widest">Drop Talent Here</p>
-                      <p className="text-[9px] text-gray-400 font-mono mt-2">Export to CFO/Scouting System</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Academy Showcase */}
-          <div className="glass-panel p-8 rounded-3xl border border-gold/20 bg-gold/5">
-            <h3 className="text-gold font-black uppercase text-sm tracking-widest mb-4 flex items-center gap-3">
-              <Icon name="star" size={20} /> Stark Elite Tutorials
-            </h3>
-            <p className="text-white/40 text-[10px] uppercase font-black mb-6">
-              Offizielle Referenz-Videos der Akademie
-            </p>
-            <div className="space-y-4">
-              {[
-                "Dribbling Masterclass",
-                "Ballkontrolle U12",
-                "Funino Prinzipien",
-              ].map((t, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-4 bg-black/40 p-4 rounded-xl border border-white/5 hover:border-gold/50 cursor-pointer transition-all"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
-                    <Icon name="play" size={20} className="text-gold" />
-                  </div>
-                  <div className="text-[10px] font-black text-white uppercase tracking-widest">
-                    {t}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // 6. Professional Media Suite
   const renderJournal = () => {
@@ -13033,7 +13088,7 @@ Sende NUR das JSON Objekt!`;
             {activeTab === "cfo" && renderCFO()}
             {activeTab === "nlz" && (
               <div className="animate-fade-in min-h-screen bg-[#000000] relative z-20">
-                <FuchsNLZ
+                <FuchsNLZ clubIdentity={clubIdentity} truthObject={truthObject} dispatchAction={dispatchAction} addAiLog={addAiLog}
                   youthPlayers={youthPlayers}
                   setYouthPlayers={setYouthPlayers}
                   nlzTab={nlzTab}
