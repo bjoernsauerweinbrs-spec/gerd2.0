@@ -51,5 +51,38 @@
     ],
     "links": {
         "gemini_studio": "https://aistudio.google.com/"
-    }
+    },
+    "sponsors": [
+        {
+            "id": "redbull",
+            "name": "Red Bull",
+            "slogan": "Gibt dir Flügel.",
+            "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/Red_Bull_GmbH_logo.svg/1200px-Red_Bull_GmbH_logo.svg.png",
+            "type": "PREMIUM_PARTNER"
+        },
+        {
+            "id": "stark_industries",
+            "name": "Stark Industries",
+            "slogan": "Changing the world for a better future.",
+            "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Stark_Industries_logo.svg/1280px-Stark_Industries_logo.svg.png",
+            "type": "TECH_PARTNER"
+        }
+    ],
+    "ad_slots": [
+        {
+            "id": "full_page_cover",
+            "price": 5000,
+            "description": "Full Page Cover Backside"
+        },
+        {
+            "id": "half_page_article",
+            "price": 2500,
+            "description": "Half Page within Feature Story"
+        },
+        {
+            "id": "banner_footer",
+            "price": 1000,
+            "description": "Horizontal Banner Footer"
+        }
+    ]
 }
