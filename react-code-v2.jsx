@@ -8935,7 +8935,7 @@ Sende NUR das JSON Objekt!`;
             {isAutoFilling ? "Importing..." : "AI Squad Auto-Fill"}
           </button>
           <button
-            onClick={toggleVoiceAI}
+            onClick={handleVoiceCommand}
             className={`px-4 py-2 font-black uppercase text-xs rounded tracking-widest flex items-center gap-2 transition-all shadow-lg ${isRecording && activeTab === "medical" ? "bg-redbull text-white animate-pulse shadow-redbull/50" : "bg-black text-redbull border border-redbull hover:bg-redbull hover:text-white"}`}
           >
             <Icon name={isRecording && activeTab === "medical" ? "square" : "mic"} size={16} />
@@ -9631,7 +9631,7 @@ Sende NUR das JSON Objekt!`;
           </div>
           <div className="flex gap-2 items-center">
             <button
-               onClick={toggleVoiceAI}
+               onClick={handleVoiceCommand}
                className={`h-full px-4 py-2 font-black uppercase text-xs rounded-lg tracking-widest flex items-center gap-2 transition-all shadow-lg ${isRecording && activeTab === "cfo" ? "bg-gold text-navy animate-pulse shadow-gold/50" : "bg-black text-gold border border-gold hover:bg-gold hover:text-navy"}`}
                >
                <Icon name={isRecording && activeTab === "cfo" ? "square" : "mic"} size={16} />
@@ -13214,7 +13214,7 @@ Sende NUR das JSON Objekt!`;
                 setActiveTab={setActiveTab}
                 setPlayerPositions={setPlayerPositions}
                 isRecording={isRecording}
-                toggleVoiceAI={toggleVoiceAI}
+                toggleVoiceAI={handleVoiceCommand}
                 activeTab={activeTab}
               />
             )}
