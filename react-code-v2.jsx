@@ -1397,6 +1397,9 @@ const LegacyView = ({ identityData }) => {
   return (
     <div className={`animate-fade-in min-h-[100vh] relative font-sans text-white overflow-hidden pb-40 transition-all duration-1000 ${isPlaying ? 'bg-black/90' : 'bg-black'}`}>
       
+      {/* BACKGROUND AUDIO: Dedicated Legacy Anthem */}
+      <audio ref={audioRef} src="./Papa.mp3.mp3" preload="auto" loop />
+
       {/* PHASE 18: GOLDEN HOUR OVERLAY & BACKGROUND BLUR */}
       <div className={`absolute inset-0 z-0 pointer-events-none transition-opacity duration-1000 ${isPlaying ? 'opacity-100 backdrop-blur-md' : 'opacity-0'}`}>
          <div className="absolute inset-0 bg-gradient-to-t from-gold/30 via-gold/5 to-transparent mix-blend-overlay"></div>
