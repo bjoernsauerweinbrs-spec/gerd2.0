@@ -2148,10 +2148,11 @@ const STARK_ELITE_PRESETS = [
     deleteYouthPlayer,
     promoteToProSquad,
     openScoutModal,
-    clubIdentity,
     truthObject,
     dispatchAction,
     addAiLog,
+    isRecording,
+    toggleVoiceAI
   }) => {
     const [ageGroup, setAgeGroup] = useState("funino"); // 'funino' | 'kleinfeld' | 'grossfeld'
     const [trainingFocus, setTrainingFocus] = useState("dribbling");
@@ -2824,14 +2825,23 @@ const STARK_ELITE_PRESETS = [
                       </div>
                     </div>
 
-                    <button
-                      onClick={generatePlan}
-                      disabled={isGenerating}
-                      className="w-full mt-4 bg-navy text-white font-black uppercase text-xs tracking-widest py-4 rounded-xl hover:bg-redbull transition-all shadow-lg shadow-navy/20 flex justify-center items-center gap-2"
-                    >
-                      {isGenerating ? <Icon name="loader" size={20} className="animate-spin" /> : <Icon name="cpu" size={20} />}
-                      {isGenerating ? "Erstelle DNA-Plan..." : "Gerd: Altersgerechten Plan erstellen"}
-                    </button>
+                    <div className="flex gap-2 w-full mt-4">
+                      <button
+                        onClick={generatePlan}
+                        disabled={isGenerating}
+                        className="flex-1 bg-navy text-white font-black uppercase text-xs tracking-widest py-4 rounded-xl hover:bg-redbull transition-all shadow-lg shadow-navy/20 flex justify-center items-center gap-2"
+                      >
+                        {isGenerating ? <Icon name="loader" size={20} className="animate-spin" /> : <Icon name="cpu" size={20} />}
+                        {isGenerating ? "Erstelle DNA-Plan..." : "Gerd: Altersgerechten Plan erstellen"}
+                      </button>
+                      <button
+                        onClick={toggleVoiceAI}
+                        className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all shadow-lg ${isRecording ? "bg-redbull/20 text-redbull border border-redbull animate-pulse" : "bg-white/5 border border-gray-200 text-gray-400 hover:bg-white/10 hover:text-navy hover:border-neon"}`}
+                        title="Voice AI für NLZ-Spezifische Fragen"
+                      >
+                        <Icon name={isRecording ? "square" : "mic"} size={20} />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -3624,6 +3634,7 @@ const STARK_ELITE_PRESETS = [
 const App = () => {
   const [view, setView] = useState("dashboard"); // 'dashboard' | 'vr'
   const [activeTab, setActiveTab] = useState("home");
+  const [nlzAgeGroup, setNlzAgeGroup] = useState("funino");
   const [isShift, setIsShift] = useState(false);
   const [isSymbols, setIsSymbols] = useState(false);
   const [kbValue, setKbValue] = useState("");
@@ -5373,6 +5384,19 @@ ${historyContext}
 Entscheide AKTION (JSON):
 1. "ASK_FINANCE": Der User fragt nach Budget, ROI, Sponsoren oder Kostensenkung (Zero-Base). -> { "action": "ASK_FINANCE", "analysis": "Finanzstrategische Analyse im sachlichen CFO-Stil..." }
 Sende NUR das JSON Objekt!`;
+      }
+      else if (activeTab === "nlz") {
+        prompt = `Du bist Nachwuchs-Gerd, Direktor der Stark Elite Jugend-Akademie.
+Aktuelle Altersklasse: ${nlzAgeGroup}.
+[VERLAUF]
+${historyContext}
+PHILOSOPHIE:
+- U9 (Funino): Spaß, Dribbling, keine Taktik.
+- U13 (Kleinfeld): Beidfüßigkeit (wie in der Ajax-Schule).
+- U19 (Großfeld): Red Bull Intensität & Taktik.
+Entscheide AKTION (JSON):
+1. "ASK_YOUTH": User fragt nach Trainingstipps, Ajax-Philosophie oder Entwicklung. -> { "action": "ASK_YOUTH", "analysis": "Deine proaktive Antwort..." }
+Sende NUR das JSON Objekt!`;
       } else {
          setGerdFeedback("Das Sprach-Modul (Multi-Turn) ist in diesem Bereich (noch) nicht verfügbar.");
          gerdSpeak("Das Sprach-Modul ist hier offline.", "Trainer-Gerd");
@@ -5416,6 +5440,11 @@ Sende NUR das JSON Objekt!`;
         else if (data.action === "GENERATE_ARTICLE" && data.article) {
            addAiLog(`Gerd hat einen neuen Artikel verfasst: ${data.article.headline}`, "success");
            dispatchAction('PUBLISH_ARTICLE', data.article); 
+        }
+        
+        // --- YOUTH (NLZ) ACTIONS ---
+        else if (data.action === "ASK_YOUTH") {
+           addAiLog("NLZ Voice AI: Proaktives Audio-Feedback zur Altersklasse geliefert.", "process");
         }
 
       } catch (err) {
@@ -13104,6 +13133,10 @@ Sende NUR das JSON Objekt!`;
                   deleteYouthPlayer={deleteYouthPlayer}
                   promoteToProSquad={promoteToProSquad}
                   openScoutModal={openScoutModal}
+                  ageGroup={nlzAgeGroup}
+                  setAgeGroup={setNlzAgeGroup}
+                  isRecording={isRecording}
+                  toggleVoiceAI={handleVoiceCommand}
                 />
               </div>
             )}
