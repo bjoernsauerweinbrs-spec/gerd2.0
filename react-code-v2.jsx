@@ -4639,6 +4639,9 @@ const App = () => {
   const videoRef = useRef(null); // Keep for local uploads
 
   useEffect(() => {
+    // Only init if we are on the video tab
+    if (activeTab !== "video") return;
+
     const initPlayer = () => {
       const clip = playlist[activeClipIndex];
       if (window.YT && window.YT.Player && clip.isYouTube) {
@@ -4656,9 +4659,17 @@ const App = () => {
     };
 
     const createNewPlayer = () => {
+      // First wipe existing iframe if any
+      const container = document.getElementById('youtubepayer-container');
+      if (container) {
+          container.innerHTML = '<div id="youtubepayer" className="w-full h-full pointer-events-none"></div>';
+      }
+
       const clip = playlist[activeClipIndex];
-      playerRef.current = new YT.Player("youtubepayer", {
+      playerRef.current = new window.YT.Player("youtubepayer", {
         videoId: clip.url,
+        width: '100%',
+        height: '100%',
         playerVars: {
           autoplay: 1,
           controls: 0,
@@ -4666,6 +4677,7 @@ const App = () => {
           loop: 1,
           modestbranding: 1,
           playlist: clip.url,
+          enablejsapi: 1
         },
         events: {
           onReady: (event) => event.target.playVideo(),
@@ -4673,12 +4685,19 @@ const App = () => {
       });
     };
 
-    if (window.YT && window.YT.Player) {
-      initPlayer();
+    // Load API script if not present
+    if (!window.YT) {
+       const tag = document.createElement('script');
+       tag.src = "https://www.youtube.com/iframe_api";
+       const firstScriptTag = document.getElementsByTagName('script')[0];
+       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+       window.onYouTubeIframeAPIReady = initPlayer;
+    } else if (window.YT && window.YT.Player) {
+       initPlayer();
     } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
+       window.onYouTubeIframeAPIReady = initPlayer;
     }
-  }, [activeClipIndex, playlist]);
+  }, [activeClipIndex, playlist, activeTab]);
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPos, setStartPos] = useState(null);
@@ -4697,6 +4716,79 @@ const App = () => {
       setActiveClipIndex(0);
       clearDrawings();
       triggerAiAnalysis();
+    }
+  };
+
+  // --- ERIK MEIJER AI TELESTRATOR ---
+  const triggerAiTelestrator = async () => {
+    gerdSpeak("Bild analyse läuft. Suche nach Passwegen und Räumen...", "System");
+    setIsDrawing(true);
+    addAiLog("AI Telestrator: Interpreting visual frame for tactical overlays...", "process");
+    
+    // Pause video if we can
+    if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
+        playerRef.current.pauseVideo();
+    }
+    if (videoRef.current) {
+       videoRef.current.pause();
+    }
+
+    try {
+      const prompt = `[STRICT JSON PROTOCOL]
+Du bist der taktische Video-Analyst der Stark Elite Akademie (wie Erik Meijer bei Sky).
+Analysiere die fiktive aktuelle Spielszene und generiere 2-3 taktische Vektoren, die direkt auf den Bildschirm (Canvas 1280x720) gezeichnet werden sollen.
+Erzeuge ein JSON Array mit Zeichenobjekten.
+Format:
+[
+  { "mode": "pass", "points": [{"x": 400, "y": 600}, {"x": 800, "y": 300}] },
+  { "mode": "run", "points": [{"x": 300, "y": 550}, {"x": 350, "y": 250}] }
+]
+Nur das JSON zurückgeben.`;
+
+      const res = await askAI(prompt, "System", true);
+      const jsonMatch = res.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+         const vectors = JSON.parse(jsonMatch[0]);
+         const canvas = canvasRef.current;
+         if (!canvas) return;
+         const ctx = canvas.getContext("2d");
+         ctx.clearRect(0, 0, canvas.width, canvas.height);
+         
+         // Helper to animate lines and pause
+         vectors.forEach((v, index) => {
+             setTimeout(() => {
+                 ctx.beginPath();
+                 ctx.strokeStyle = v.mode === "pass" ? "#00f3ff" : "#e21b4d";
+                 ctx.lineWidth = 4;
+                 ctx.lineCap = "round";
+                 ctx.setLineDash(v.mode === "run" ? [15, 15] : []);
+                   
+                 const pts = v.points;
+                 if (pts.length >= 2) {
+                     ctx.moveTo(pts[0].x, pts[0].y);
+                     ctx.lineTo(pts[1].x, pts[1].y);
+                     ctx.stroke();
+                     
+                     // Draw Arrowhead
+                     const angle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+                     ctx.beginPath();
+                     ctx.moveTo(pts[1].x, pts[1].y);
+                     ctx.lineTo(pts[1].x - 20 * Math.cos(angle - Math.PI / 6), pts[1].y - 20 * Math.sin(angle - Math.PI / 6));
+                     ctx.lineTo(pts[1].x - 20 * Math.cos(angle + Math.PI / 6), pts[1].y - 20 * Math.sin(angle + Math.PI / 6));
+                     ctx.lineTo(pts[1].x, pts[1].y);
+                     ctx.fillStyle = v.mode === "pass" ? "#00f3ff" : "#e21b4d";
+                     ctx.fill();
+                 }
+                 gerdSpeak("Siehst du hier den Laufweg? Genau da muss der Ball in die Tiefe gespielt werden.", "Trainer-Gerd");
+                 addAiLog("AI Telestrator vectors rendered", "success");
+                 setIsDrawing(false);
+             }, index * 1000);
+         });
+      }
+    } catch (e) {
+       console.error(e);
+       setIsDrawing(false);
+       gerdSpeak("Verbindungsfehler zum Neural-Link des Telestrators.", "System");
     }
   };
 
@@ -9189,6 +9281,12 @@ Sende NUR das JSON Objekt!`;
             <Icon name="Zap" size={14} className="mr-2" /> 3D Flight
           </button>
           <button
+            onClick={triggerAiTelestrator}
+            className="bg-navy text-neon border border-neon px-4 py-2 rounded font-black text-xs uppercase hover:bg-neon hover:text-navy transition-all shadow-[0_0_15px_rgba(0,243,255,0.4)]"
+          >
+            <Icon name="pen-tool" size={14} className="mr-2" /> AI Telestrator
+          </button>
+          <button
             onClick={clearDrawings}
             className="bg-redbull/20 text-redbull border border-redbull/50 px-4 py-2 rounded font-black text-xs uppercase hover:bg-redbull hover:text-white transition-all"
           >
@@ -9204,10 +9302,9 @@ Sende NUR das JSON Objekt!`;
             className={`relative w-full aspect-video bg-[#050505] rounded-xl border border-white/10 overflow-hidden shadow-2xl video-container-3d ${is3DFlight ? "active-3d" : ""}`}
           >
             {playlist[activeClipIndex].isYouTube ? (
-              <div
-                id="youtubepayer"
-                className="w-full h-full pointer-events-none"
-              ></div>
+              <div id="youtubepayer-container" className="w-full h-full pointer-events-none">
+                <div id="youtubepayer" className="w-full h-full"></div>
+              </div>
             ) : (
               <video
                 key={playlist[activeClipIndex].url}
