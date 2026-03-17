@@ -4639,33 +4639,43 @@ const App = () => {
   const videoRef = useRef(null); // Keep for local uploads
 
   useEffect(() => {
-    // Only init if we are on the video tab
-    if (activeTab !== "video") return;
+    // Wenn wir nicht auf dem Video Tab sind, Player zerstören und Referenz leeren
+    if (activeTab !== "video") {
+       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+           try { playerRef.current.destroy(); } catch(e) {}
+           playerRef.current = null;
+       }
+       return;
+    }
 
     const initPlayer = () => {
+      // Wenn das DOM Element von React noch nicht gerendert wurde, abbrechen
+      const playerDiv = document.getElementById("youtubepayer");
+      if (!playerDiv) return;
+
       const clip = playlist[activeClipIndex];
-      if (window.YT && window.YT.Player && clip.isYouTube) {
-        if (playerRef.current) {
-          try {
-            playerRef.current.loadVideoById(clip.url);
-          } catch (e) {
-            console.log("YT Reload needed");
-            createNewPlayer();
+      // Wir haben bereits eine gültige Player-Instanz und laden nur das Video neu
+      if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
+          // Falls das DOM-Element des Players nicht mehr da ist (React Re-Mount), müssen wir neu bauen
+          if (playerRef.current.getIframe && !document.body.contains(playerRef.current.getIframe())) {
+              try { playerRef.current.destroy(); } catch(e) {}
+              playerRef.current = null;
+              createNewPlayer(clip);
+          } else {
+              playerRef.current.loadVideoById(clip.url);
           }
-        } else {
-          createNewPlayer();
-        }
+      } else {
+          createNewPlayer(clip);
       }
     };
 
-    const createNewPlayer = () => {
-      // First wipe existing iframe if any
-      const container = document.getElementById('youtubepayer-container');
+    const createNewPlayer = (clip) => {
+      // Create fresh div for YT to replace to avoid React VDOM clashes
+      const container = document.getElementById("youtubepayer-container");
       if (container) {
-          container.innerHTML = '<div id="youtubepayer" className="w-full h-full pointer-events-none"></div>';
+          container.innerHTML = '<div id="youtubepayer" class="w-full h-full pointer-events-none"></div>';
       }
 
-      const clip = playlist[activeClipIndex];
       playerRef.current = new window.YT.Player("youtubepayer", {
         videoId: clip.url,
         width: '100%',
@@ -4685,7 +4695,6 @@ const App = () => {
       });
     };
 
-    // Load API script if not present
     if (!window.YT) {
        const tag = document.createElement('script');
        tag.src = "https://www.youtube.com/iframe_api";
@@ -4693,9 +4702,8 @@ const App = () => {
        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
        window.onYouTubeIframeAPIReady = initPlayer;
     } else if (window.YT && window.YT.Player) {
-       initPlayer();
-    } else {
-       window.onYouTubeIframeAPIReady = initPlayer;
+       // Try catching when the API is done loading
+       setTimeout(initPlayer, 100);
     }
   }, [activeClipIndex, playlist, activeTab]);
 
@@ -9302,9 +9310,7 @@ Sende NUR das JSON Objekt!`;
             className={`relative w-full aspect-video bg-[#050505] rounded-xl border border-white/10 overflow-hidden shadow-2xl video-container-3d ${is3DFlight ? "active-3d" : ""}`}
           >
             {playlist[activeClipIndex].isYouTube ? (
-              <div id="youtubepayer-container" className="w-full h-full pointer-events-none">
-                <div id="youtubepayer" className="w-full h-full"></div>
-              </div>
+              <div id="youtubepayer-container" className="w-full h-full absolute inset-0 z-0"></div>
             ) : (
               <video
                 key={playlist[activeClipIndex].url}
@@ -9422,7 +9428,7 @@ Sende NUR das JSON Objekt!`;
               <div className="opacity-40 mb-4 tracking-tighter italic">
                 Initializing analysis engine...
               </div>
-              {videoFeedback.split("\n").map((line, i) => (
+              {(videoFeedback || "").split("\n").map((line, i) => (
                 <div
                   key={i}
                   className="mb-2 leading-relaxed whitespace-pre-wrap"
