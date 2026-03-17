@@ -3653,91 +3653,98 @@ const App = () => {
   );
   const [activeRole, setActiveRole] = useState("Trainer"); // Phase 17: Role Switcher State
   const [truthObject, setTruthObject] = useState(() => {
-    const saved = localStorage.getItem("gerd_truthObject");
-    if (saved) return JSON.parse(saved);
-    return {
+    const defaultTruth = {
       club_identity: {
-      name: "Stark Elite",
-      league: "Regionalliga",
-      philosophy: "Ballbesitz & Pressing"
-    },
-    financials: {
-      current_budget: 0,
-      fixed_costs: {
-        nlz_parent_payments: 0,
-        staff_salaries: 0,
-        facility_maintenance: 0
+        name: "Stark Elite",
+        league: "Regionalliga",
+        philosophy: "Ballbesitz & Pressing"
       },
-      variable_costs: {
-        scouting_travel: 0,
-        transfer_installments: []
-      },
-      revenue: {
-        sponsoring: 0,
-        merchandising: 0
-      }
-    },
-    tactical_setup: {
-      formation_home: "4-4-2",
-      formation_away: "3-4-3",
-      active_players_on_field: [],
-      saved_plays: []
-    },
-    training_lab: {
-      schedule: [
-        {
-          day: "Montag",
-          name: "Ginga & Gegenpressing Foundation",
-          focus: "Technik/Taktik",
-          intensity: 90,
-          timestamp: new Date().toISOString(),
-          drills: [
-            { id: "d1", name: "Ginga Circle", description: "Close control in tight spaces", duration: "15m", technicalData: { positions: { 1: { x: 200, y: 300 }, 2: { x: 250, y: 350 } }, paths: [] } },
-            { id: "d2", name: "Heavy Pressing 4v4", description: "High intensity ball recovery", duration: "20m", technicalData: { positions: { 3: { x: 100, y: 100 }, 4: { x: 150, y: 150 } }, paths: [] } }
-          ]
+      financials: {
+        current_budget: 0,
+        fixed_costs: {
+          nlz_parent_payments: 0,
+          staff_salaries: 0,
+          facility_maintenance: 0
+        },
+        variable_costs: {
+          scouting_travel: 0,
+          transfer_installments: []
+        },
+        revenue: {
+          sponsoring: 0,
+          merchandising: 0
         }
-      ],
-      presets: [
-        { id: "ginga_1", name: "Ginga Skill Circle (Brasilien-Style)", focus: "Technik", intensity: 75 },
-        { id: "samba_rondo", name: "Samba Rondo 5v2", focus: "Ballkontrolle", intensity: 80 },
-        { id: "gegn_1", name: "Heavy Metal Pressing (Vollgas)", focus: "Taktik", intensity: 100 }
-      ],
-      active_focus: "Gegenpressing"
-    },
-    match_day_manifesto: {
-      strategy: "Offensive Power",
-      starting_xi_notes: "",
-      intensity_level: 95
-    },
-    scouting_pool: {
-      shadow_roster: [],
-      shortlisted_players: []
-    },
-    nlz_hub: {
-      registered_talents: [],
-      medical_reports: [],
-      finances: {
-        monthly_fee_per_player: 150,
-        equipment_budget: 15000,
-        travel_costs: 5000,
-        materials: 3000
-      }
-    },
-    media_suite: {
-      editorial_history: [],
-      ad_spaces: [
-        { id: "full_page_premium", booked: false, sponsor: null, price: 7500, type: "FULL_PAGE" },
-        { id: "half_page_article", booked: false, sponsor: null, price: 2000, type: "HALF_PAGE" },
-        { id: "banner_footer", booked: false, sponsor: null, price: 1000, type: "BANDERLOE" },
-        { id: "player_patron_berg", booked: false, sponsor: null, price: 2500, type: "PATRON" }
-      ],
-      branding: {
-        primary_color: "#00f3ff",
-        accent_color: "#e21b4d",
-        style: "RED_BULLETIN"
-      }
+      },
+      tactical_setup: {
+        formation_home: "4-4-2",
+        formation_away: "3-4-3",
+        active_players_on_field: [],
+        saved_plays: []
+      },
+      training_lab: {
+        schedule: [
+          {
+            day: "Montag",
+            name: "Ginga & Gegenpressing Foundation",
+            focus: "Technik/Taktik",
+            intensity: 90,
+            timestamp: new Date().toISOString(),
+            drills: [
+              { id: "d1", name: "Ginga Circle", description: "Close control in tight spaces", duration: "15m", technicalData: { positions: { 1: { x: 200, y: 300 }, 2: { x: 250, y: 350 } }, paths: [] } },
+              { id: "d2", name: "Heavy Pressing 4v4", description: "High intensity ball recovery", duration: "20m", technicalData: { positions: { 3: { x: 100, y: 100 }, 4: { x: 150, y: 150 } }, paths: [] } }
+            ]
+          }
+        ],
+        presets: [
+          { id: "ginga_1", name: "Ginga Skill Circle (Brasilien-Style)", focus: "Technik", intensity: 75 },
+          { id: "samba_rondo", name: "Samba Rondo 5v2", focus: "Ballkontrolle", intensity: 80 },
+          { id: "gegn_1", name: "Heavy Metal Pressing (Vollgas)", focus: "Taktik", intensity: 100 }
+        ],
+        active_focus: "Gegenpressing"
+      },
+      match_day_manifesto: {
+        strategy: "Offensive Power",
+        starting_xi_notes: "",
+        intensity_level: 95
+      },
+      scouting_pool: {
+        shadow_roster: [],
+        shortlisted_players: []
+      },
+      medical: [],
+      cfo: []
+    };
+
+    const saved = localStorage.getItem("gerd_truthObject");
+    if (saved) {
+       try {
+           const parsed = JSON.parse(saved);
+           // Deep merge to ensure deeply nested defaults (like financials.fixed_costs) are always present
+           return {
+               ...defaultTruth,
+               ...parsed,
+               financials: {
+                   ...defaultTruth.financials,
+                   ...(parsed.financials || {}),
+                   fixed_costs: {
+                       ...defaultTruth.financials.fixed_costs,
+                       ...(parsed.financials?.fixed_costs || {})
+                   },
+                   variable_costs: {
+                       ...defaultTruth.financials.variable_costs,
+                       ...(parsed.financials?.variable_costs || {})
+                   },
+                   revenue: {
+                       ...defaultTruth.financials.revenue,
+                       ...(parsed.financials?.revenue || {})
+                   }
+               }
+           };
+       } catch (e) {
+           return defaultTruth;
+       }
     }
-  };
+    return defaultTruth;
   });
 
   useEffect(() => {
