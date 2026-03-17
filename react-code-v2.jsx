@@ -2215,7 +2215,13 @@ const App = () => {
     },
     nlz_hub: {
       registered_talents: [],
-      medical_reports: []
+      medical_reports: [],
+      finances: {
+        monthly_fee_per_player: 150,
+        equipment_budget: 15000,
+        travel_costs: 5000,
+        materials: 3000
+      }
     },
     media_suite: {
       editorial_history: [],
@@ -2323,6 +2329,9 @@ const App = () => {
             next.financials.current_budget += payload.data.price;
             setBudget(prevB => prevB + payload.data.price);
           }
+          break;
+        case 'UPDATE_NLZ_FINANCE':
+          next.nlz_hub.finances[payload.key] = payload.value;
           break;
         case 'SAVE_TRAINING_SESSION':
           next.training_lab.schedule = [...next.training_lab.schedule, payload];
@@ -4225,6 +4234,7 @@ Sende NUR das JSON Objekt!`;
       dri: 85,
       def: 40,
       phy: 65,
+      pot: 92,
       image: "",
       hrv: 72,
       sleep: 7.5,
@@ -4242,6 +4252,7 @@ Sende NUR das JSON Objekt!`;
       dri: 76,
       def: 35,
       phy: 78,
+      pot: 88,
       image: "",
       hrv: 68,
       sleep: 8.0,
@@ -4259,6 +4270,7 @@ Sende NUR das JSON Objekt!`;
       dri: 68,
       def: 60,
       phy: 62,
+      pot: 85,
       image: "",
       hrv: 75,
       sleep: 8.5,
@@ -4276,6 +4288,7 @@ Sende NUR das JSON Objekt!`;
       dri: 70,
       def: 65,
       phy: 72,
+      pot: 86,
       image: "",
       hrv: 80,
       sleep: 7.0,
@@ -4289,13 +4302,14 @@ Sende NUR das JSON Objekt!`;
       group: "basis",
       pac: 70,
       sho: 55,
-      pas: 65,
-      dri: 80,
+      pas: 68,
+      dri: 82,
       def: 30,
       phy: 50,
+      pot: 89,
       image: "",
-      hrv: 65,
-      sleep: 8.0,
+      hrv: 70,
+      sleep: 8.2,
       psychHistory: [],
       videoTresor: [],
     },
@@ -8952,7 +8966,7 @@ Sende NUR das JSON Objekt!`;
     const [trainingPlan, setTrainingPlan] = useState(null);
 
     // --- NEW NLZ MED-TECH STATE ---
-    const [activeNlzView, setActiveNlzView] = useState("character"); // 'character' | 'biomechanics' | 'pipeline'
+    const [activeNlzView, setActiveNlzView] = useState("finance"); // 'character' | 'biomechanics' | 'pipeline' | 'finance'
     const [activeDossierPlayerId, setActiveDossierPlayerId] = useState(null);
     const [activeRatingPlayerId, setActiveRatingPlayerId] = useState(null);
     const [draggedTalentId, setDraggedTalentId] = useState(null);
@@ -9068,14 +9082,21 @@ Sende NUR das JSON Objekt!`;
       setIsGenerating(true);
       setTrainingPlan(null);
       try {
-        const prompt = `Du bist der NLZ-Direktor vom 'Fuchs Leistungszentrum'.
-          Erstelle einen hochprofessionellen, aber für Laien leicht verständlichen Trainingsplan für die Altersklasse [${ageGroup}].
+        const prompt = `Du bist der NLZ-Direktor und Entwicklungs-Coach vom 'Stark Elite' NLZ (Gerd 2.0).
+          Erstelle einen detaillierten Trainingsplan für die Altersklasse [${ageGroup}], basierend auf der Red Bull Entwicklungs-DNA:
+          - Starkes, ballorientiertes Gegenpressing
+          - Vertikales, blitzschnelles Umschaltspiel
+          - Hohe Intensität und Resilienz-Aufbau (Kognitiv & Physisch)
+          
           Schwerpunkt: ${trainingFocus}.
+          Pädagogischer Fokus: Passe die Komplexität und Trainingsintensität exakt an die Aufnahmefähigkeit der Altersklasse ${ageGroup} an (z.B. U15 mehr Technik/Funino, U19 komplexe Taktik). Integriere eine klare Feedback-Lob-Kultur.
+          
           TEILE DEN PLAN IN 3 PHASEN:
-          1. WARM-UP (Mobilisation & Koordination)
-          2. HAUPTTEIL (Spielformen & Technik)
-          3. ABSCHLUSS-SPIEL (Wettkampf unter Provokationsregeln)
-          Antworte in einem sauberen Listenformat, motivierend und sportwissenschaftlich fundiert.`;
+          1. WARM-UP (DNA-Aktivierung & Neuronaler Fokus)
+          2. HAUPTTEIL (DNA-spezifische Spielformen unter Druck)
+          3. ABSCHLUSS (Wettkampf unter Provokationsregeln für Umschaltspiel)
+          
+          Antworte in einem sauberen Format, fachlich fundiert im 'Med-Tech' Stil, motivierend und klar strukturiert.`;
 
         const res = await askAI(prompt, "NLZ-Direktor");
         setTrainingPlan(res);
@@ -9471,27 +9492,312 @@ Sende NUR das JSON Objekt!`;
                 Elite Youth Academy | Psycho & Biomechanics Center
               </div>
             </div>
-            <div className="mt-6 md:mt-0 flex gap-4 bg-gray-100 p-2 rounded-xl border border-gray-200">
+            <div className="mt-6 md:mt-0 flex flex-wrap gap-4 bg-gray-100 p-2 rounded-xl border border-gray-200">
+              <button
+                onClick={() => setActiveNlzView("finance")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "finance" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="pie-chart" size={16} className={activeNlzView === "finance" ? "text-gold" : ""} /> Finance & Admin
+              </button>
               <button
                 onClick={() => setActiveNlzView("character")}
-                className={`px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-3 ${activeNlzView === "character" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "character" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
               >
                 <Icon name="user" size={16} className={activeNlzView === "character" ? "text-neon" : ""} /> Character Matrix
               </button>
               <button
                 onClick={() => setActiveNlzView("biomechanics")}
-                className={`px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-3 ${activeNlzView === "biomechanics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "biomechanics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
               >
                 <Icon name="activity" size={16} className={activeNlzView === "biomechanics" ? "text-redbull" : ""} /> Biomechanik
               </button>
               <button
-                onClick={() => setActiveNlzView("pipeline")}
-                className={`px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-3 ${activeNlzView === "pipeline" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+                onClick={() => setActiveNlzView("squad")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "squad" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
               >
-                <Icon name="git-pull-request" size={16} className={activeNlzView === "pipeline" ? "text-gold" : ""} /> Talent-Pipeline
+                <Icon name="users" size={16} className={activeNlzView === "squad" ? "text-redbull" : ""} /> Youth Squad
+              </button>
+              <button
+                onClick={() => setActiveNlzView("tactics")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "tactics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="layout" size={16} className={activeNlzView === "tactics" ? "text-neon" : ""} /> Tactics & Training
+              </button>
+              <button
+                onClick={() => setActiveNlzView("pipeline")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "pipeline" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="git-pull-request" size={16} className={activeNlzView === "pipeline" ? "text-neon" : ""} /> Pipeline
               </button>
             </div>
           </div>
+
+          {/* === TACTICS & TRAINING (Phase 30) === */}
+          {activeNlzView === "tactics" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
+                  <Icon name="layout" size={28} className="text-neon" /> NLZ Taktik Board
+                </h2>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Board Configuration */}
+                <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-neon/5 rounded-bl-[100px] pointer-events-none"></div>
+                  <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                    <Icon name="sliders" className="text-neon" size={20} /> Age & Tactic Selection
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-3">1. Altersklasse wählen</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {ageClasses.map(ac => (
+                          <button
+                            key={ac.id}
+                            onClick={() => setAgeGroup(ac.id)}
+                            className={`p-4 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${ageGroup === ac.id ? "bg-white border-neon shadow-[0_0_15px_rgba(0,243,255,0.3)] text-navy" : "bg-gray-50 border-gray-200 text-gray-400 hover:bg-white hover:border-neon/50"}`}
+                          >
+                            <Icon name={ac.icon} size={24} className={ageGroup === ac.id ? "text-neon" : "text-gray-300"} />
+                            <span className="text-[9px] font-black uppercase mt-3">{ac.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-3">2. Taktischer Fokus</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {foci.map(f => (
+                          <button
+                            key={f.id}
+                            onClick={() => setTrainingFocus(f.id)}
+                            className={`p-3 rounded-lg border text-left transition-all ${trainingFocus === f.id ? "bg-neon/10 border-neon text-navy font-black" : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-white"}`}
+                          >
+                            <span className="text-xs uppercase tracking-widest">{f.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={generatePlan}
+                      disabled={isGenerating}
+                      className="w-full mt-4 bg-navy text-white font-black uppercase text-xs tracking-widest py-4 rounded-xl hover:bg-redbull transition-all shadow-lg shadow-navy/20 flex justify-center items-center gap-2"
+                    >
+                      {isGenerating ? <Icon name="loader" size={20} className="animate-spin" /> : <Icon name="cpu" size={20} />}
+                      {isGenerating ? "Erstelle DNA-Plan..." : "Gerd: Altersgerechten Plan erstellen"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* AI Plan Renderer / Pitch Mock */}
+                <div className="bg-[#050a14] p-8 rounded-2xl border border-neon/20 shadow-2xl relative overflow-hidden flex flex-col">
+                  {/* Decorative pitch lines */}
+                  <div className="absolute inset-x-8 inset-y-8 border-2 border-white/10 rounded-lg pointer-events-none"></div>
+                  <div className="absolute top-1/2 left-8 right-8 border-t-2 border-white/10 pointer-events-none"></div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/10 rounded-full pointer-events-none"></div>
+
+                  <h3 className="text-white font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3 relative z-10">
+                    <Icon name="file-text" className="text-neon" size={20} /> NLZ Training Protocol
+                  </h3>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10">
+                    {trainingPlan ? (
+                      <div className="bg-black/60 p-6 rounded-xl border border-neon/30 text-white font-mono text-xs leading-relaxed whitespace-pre-wrap animate-slide-up shadow-[0_0_20px_rgba(0,243,255,0.1)]">
+                        {trainingPlan}
+                      </div>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center opacity-40 text-center px-8">
+                        <Icon name="layout" size={48} className="text-neon mb-4" />
+                        <p className="text-xs uppercase tracking-widest font-black text-white leading-relaxed">
+                          Wähle Altersklasse und Fokus.<br/>
+                          Gerd 2.0 kontextualisiert die Übungen basierend auf der Red Bull DNA und der kognitiven Aufnahmefähigkeit der Spieler.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* === YOUTH SQUAD (FIFA CARDS) === */}
+          {activeNlzView === "squad" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
+                  <Icon name="users" size={28} className="text-redbull" /> Nachwuchs Kader
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {youthPlayers.map((p) => {
+                  const ovr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6) || 60;
+                  const pot = p.pot || Math.min(99, ovr + 15);
+                  
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() => setActiveDossierPlayerId(p.id)}
+                      className="group relative p-0 rounded-xl border-2 transition-all cursor-pointer overflow-hidden bg-white border-gray-200 hover:border-gold hover:shadow-[0_0_25px_rgba(255,215,0,0.3)] hover:-translate-y-1"
+                    >
+                      {/* NLZ FIFA CARD LAYOUT */}
+                      {p.image && (
+                        <div className="absolute inset-0 z-0">
+                           <img src={p.image} alt={p.name} className="w-full h-full object-cover mix-blend-luminosity opacity-20 transition-opacity group-hover:opacity-40" />
+                           <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent"></div>
+                        </div>
+                      )}
+                      {!p.image && (
+                        <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-50 to-gray-200"></div>
+                      )}
+                      
+                      <div className="flex flex-col h-[280px] uppercase font-black tracking-tighter justify-between relative z-10 p-1">
+                        <div>
+                          <div className="flex justify-between p-3 pb-0">
+                            <div className="flex flex-col items-center">
+                              <span className="text-3xl leading-none text-navy">
+                                {ovr}
+                              </span>
+                              <span className="text-[10px] text-gray-500 tracking-widest mt-1">
+                                OVR
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                              <span className="text-3xl leading-none text-gold">
+                                {pot}
+                              </span>
+                              <span className="text-[10px] text-gray-500 tracking-widest mt-1">
+                                POT
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-center mt-2">
+                            <span className="px-3 py-1 bg-navy/10 text-navy rounded-full text-[9px] font-black uppercase tracking-widest">
+                              {p.group.toUpperCase()} • {p.position}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="px-4 text-center mt-auto bg-white/50 backdrop-blur-sm mx-2 mb-2 rounded-xl border border-white/50 pb-3 pt-2">
+                           <div className="text-sm text-navy truncate font-black italic tracking-widest leading-none mb-2">
+                             {p.name}
+                           </div>
+                           <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-2"></div>
+                           <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-gray-600 font-mono">
+                               <div className="flex justify-between"><span>PAC</span><span className="text-navy">{p.pac || 50}</span></div>
+                               <div className="flex justify-between"><span>DRI</span><span className="text-navy">{p.dri || 50}</span></div>
+                               <div className="flex justify-between"><span>SHO</span><span className="text-navy">{p.sho || 50}</span></div>
+                               <div className="flex justify-between"><span>DEF</span><span className="text-navy">{p.def || 50}</span></div>
+                               <div className="flex justify-between"><span>PAS</span><span className="text-navy">{p.pas || 50}</span></div>
+                               <div className="flex justify-between"><span>PHY</span><span className="text-navy">{p.phy || 50}</span></div>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* === FINANCE & ADMIN (Phase 30) === */}
+          {activeNlzView === "finance" && (() => {
+            const nlzCount = youthPlayers.length;
+            const finances = truthObject.nlz_hub?.finances || { monthly_fee_per_player: 150, equipment_budget: 15000, travel_costs: 5000, materials: 3000 };
+            const monthlyRevenue = nlzCount * finances.monthly_fee_per_player;
+            const annualRevenue = monthlyRevenue * 12;
+            const totalExpenses = finances.equipment_budget + finances.travel_costs + finances.materials;
+            const netBalance = annualRevenue - totalExpenses;
+
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+                {/* Finance Overview Panel */}
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-[100px] pointer-events-none"></div>
+                    <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                      <Icon name="pie-chart" className="text-gold" size={20} /> NLZ Budget Calculator
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Jahres-Einnahmen (Beiträge)</div>
+                        <div className="text-4xl font-black text-navy leading-none">€ {annualRevenue.toLocaleString()}</div>
+                        <div className="text-xs text-gray-500 mt-2 font-mono">{nlzCount} Spieler × €{finances.monthly_fee_per_player} / Monat</div>
+                      </div>
+                      <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
+                        <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Fixe Ausgaben (Jahr)</div>
+                        <div className="text-4xl font-black text-redbull leading-none">€ {totalExpenses.toLocaleString()}</div>
+                        <div className="text-xs text-gray-500 mt-2 font-mono">Equipment, Reisen, Material</div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 rounded-xl border border-gray-200 bg-white flex justify-between items-center">
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Netto-Bilanz (P.A.)</div>
+                        <div className={`text-2xl font-black uppercase tracking-tighter ${netBalance >= 0 ? "text-green-600" : "text-redbull"}`}>
+                          {netBalance >= 0 ? "+" : ""}€ {netBalance.toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50">
+                        <Icon name={netBalance >= 0 ? "trending-up" : "trending-down"} className={netBalance >= 0 ? "text-green-600" : "text-redbull"} size={20} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expense Settings Panel */}
+                <div className="space-y-6">
+                  <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl h-full">
+                    <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
+                      <Icon name="settings" className="text-gray-400" size={20} /> Kosten-Kalkulator
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Spielerbeitrag / Monat (€)</label>
+                        <input
+                          type="number"
+                          value={finances.monthly_fee_per_player}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'monthly_fee_per_player', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trikotsätze & Equipment (€)</label>
+                        <input
+                          type="number"
+                          value={finances.equipment_budget}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'equipment_budget', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Fahrtkosten / Turniere (€)</label>
+                        <input
+                          type="number"
+                          value={finances.travel_costs}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'travel_costs', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Trainingsmaterialien (€)</label>
+                        <input
+                          type="number"
+                          value={finances.materials}
+                          onChange={(e) => dispatchAction('UPDATE_NLZ_FINANCE', { key: 'materials', value: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-navy font-mono font-black focus:border-gold outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* === CHARACTER MATRIX (Psycho Profiling) === */}
           {activeNlzView === "character" && (
@@ -10058,6 +10364,7 @@ Sende NUR das JSON Objekt!`;
           <div className="w-16 border-r border-white/10 bg-black/60 flex flex-col items-center py-6 gap-6 shrink-0 z-20">
             {[
               { id: "ai-writer", icon: "pen-tool", label: "Investigative Reporter" },
+              { id: "nlz-writer", icon: "shield", label: "NLZ Reporter" },
               { id: "brand-kit", icon: "droplet", label: "Art Director" },
               { id: "components", icon: "grid", label: "Magazin-Raster" },
               { id: "assets", icon: "image", label: "Hero Shots" }
@@ -10163,6 +10470,47 @@ Sende NUR das JSON Objekt!`;
                   >
                     Absatz Generieren & Einfügen
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* NLZ Writer Panel (Phase 30) */}
+            {mediaSuiteTool === "nlz-writer" && (
+              <div className="p-6 h-full flex flex-col animate-fade-in">
+                <h3 className="font-black uppercase tracking-widest text-xs mb-6 flex items-center gap-2">
+                  <Icon name="shield" size={14} className="text-redbull" /> NLZ Reporter
+                </h3>
+                <div className="space-y-8 flex-1 overflow-y-auto custom-scrollbar pr-2">
+                  <div>
+                    <label className="text-[10px] text-white/50 uppercase tracking-widest mb-3 block">Reporting Fokus</label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {["U19 Match Report", "Top Talent Spotlight", "NLZ Saison-Update"].map(f => (
+                        <button
+                          key={f}
+                          className="p-3 border border-redbull/30 bg-redbull/5 text-left text-[10px] font-black uppercase tracking-widest hover:bg-redbull/20 transition-all text-white/80"
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-white/10">
+                    <label className="text-[10px] font-black text-neon uppercase tracking-widest flex items-center gap-2 mb-3">
+                      <Icon name="zap" size={12} /> Auto-Generate Draft
+                    </label>
+                    <p className="text-[9px] text-white/40 mb-6 uppercase tracking-widest leading-relaxed">
+                       Gerd analysiert die neuesten NLZ-Scouting-Daten und generiert einen 'Red Bulletin'-würdigen Report über die Nachwuchsarbeit.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setMediaCanvasBlocks([...mediaCanvasBlocks, { id: Date.now(), type: "text", content: "[NLZ Report Draft] Starke Leistung der U19 im Gegenpressing. Das Talent " + (youthPlayers.length > 0 ? youthPlayers[0].name : "MAX") + " brillierte mit herausragenden Werten in PAC und DRI." }]);
+                        gerdSpeak("NLZ Entwicklungsbericht und Spieltags-Insights wurden in den Magazin-Draft geladen.", "System");
+                      }}
+                      className="w-full bg-redbull text-white font-black uppercase text-[10px] tracking-widest py-3 rounded-xl hover:bg-white hover:text-redbull transition-colors shadow-[0_0_15px_rgba(226,27,77,0.3)] flex items-center justify-center gap-2"
+                    >
+                      <Icon name="pen-tool" size={14} /> KI-Draft Generieren
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
