@@ -1,15 +1,13 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-neon: #00f3ff;
+  --color-redbull: #e21b4d;
+  --color-gold: #d4af37;
+  --color-navy: #001240;
+}
 
 @layer base {
-  :root {
-    --color-neon: #00f3ff;
-    --color-redbull: #e21b4d;
-    --color-gold: #d4af37;
-    --transition-speed: 0.15s;
-  }
-
   body {
     margin: 0;
     padding: 0;

@@ -87,23 +87,6 @@ const LegacyHub = () => {
                 <img src="/image_0.png" alt="Gerd Sauerwein" onError={(e) => { e.target.onerror = null; }} className="w-full h-full object-cover object-center opacity-90 transition-all duration-1000" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent mix-blend-overlay"></div>
                 
-                {/* Audio Player Core (Phase 15/18) */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
-                  <button onClick={togglePlay} className={`w-20 h-20 rounded-full flex items-center justify-center border-2 transition-all duration-500 hover:scale-110 ${isPlaying ? 'bg-gold border-white shadow-[0_0_40px_rgba(212,175,55,0.8)]' : 'bg-black/50 border-gold/50 backdrop-blur-md hover:border-gold hover:bg-black/80 shadow-[0_0_20px_rgba(212,175,55,0.3)]'}`}>
-                    <Icon name={isPlaying ? "pause" : "play"} size={32} className={isPlaying ? "text-black ml-0" : "text-gold ml-2"} />
-                  </button>
-                  <audio ref={audioRef} src="/Papa.mp3" onEnded={() => setIsPlaying(false)} className="hidden" />
-                  
-                  {/* Waveform Visualizer simulation */}
-                  {isPlaying && (
-                    <div className="flex items-center gap-1 mt-6 h-8">
-                       {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                         <div key={i} className="w-1.5 bg-gold rounded-full animate-pulse-glow" style={{ height: `${Math.max(20, Math.random() * 100)}%`, animationDelay: `${i * 0.1}s` }}></div>
-                       ))}
-                    </div>
-                  )}
-                </div>
-
                 <div className="absolute bottom-4 left-0 w-full text-center z-20">
                   <span className="bg-black/80 text-[#004B91] font-mono text-[10px] uppercase tracking-[0.4em] px-4 py-1 border border-[#004B91]/30 rounded-full">Foundation Node Active</span>
                 </div>
@@ -130,6 +113,62 @@ const LegacyHub = () => {
             </div>
           </div>
         </div>
+
+        {/* Personal Message */}
+        <div className="w-full max-w-4xl mx-auto mt-24 mb-12">
+           <div className={`bg-navy/40 backdrop-blur-md border p-8 md:p-12 rounded-xl relative overflow-hidden transition-all duration-1000 ${isPlaying ? 'shadow-[0_0_60px_rgba(212,175,55,0.4)] border-gold animate-pulse' : 'shadow-[0_0_50px_rgba(212,175,55,0.15)] border-gold/30'}`}>
+              <div className="absolute top-0 right-0 opacity-10 pointer-events-none">
+                 <Icon name="heart" size={120} className="text-gold -mt-10 -mr-10" />
+              </div>
+              <div className="flex items-center gap-3 mb-6">
+                 <Icon name="heart" size={24} className="text-gold" />
+                 <h3 className="text-xl md:text-2xl font-black uppercase text-gold tracking-widest">Ein persönliches Danke</h3>
+              </div>
+              <div className="space-y-6 text-white/80 font-serif text-lg md:text-xl leading-relaxed relative z-10">
+                 <p>„Gerd, du warst für mich weit mehr als nur ein Vater. Du warst mein Zuhause, mein Kompass und mein bester Freund. Wir sind zusammen durch alle Höhen und Tiefen des Lebens gegangen – Wand an Wand, im selben Haus, ein Leben lang vereint.</p>
+                 <p>Als Vater und Sohn, als Nachbarn und als Freunde haben wir eine Einheit gebildet, die durch nichts zu erschüttern war. Du hast mir gezeigt, was es heißt, für eine Sache zu brennen und für die Menschen einzustehen, die man liebt.</p>
+                 <p>Ich danke dir von ganzem Herzen für alles, was du für mich und für unseren gemeinsamen Traum getan hast. Es vergeht kein Tag, an dem ich dich nicht vermisse. Dieses System, Gerd 2.0, ist mein Versprechen an dich, dass dein Geist und deine Werte niemals in Vergessenheit geraten.“</p>
+              </div>
+              <div className="mt-8 pt-6 border-t border-gold/20 text-right relative z-10">
+                 <p className="text-gold font-black uppercase tracking-widest text-sm mb-2">In ewiger Dankbarkeit,</p>
+                 <p className="text-white font-serif italic text-2xl lg:text-3xl">Dein Sohn Björn</p>
+              </div>
+
+               {/* High-End Gold Audio Player */}
+               <div className="mt-12 bg-black/60 border border-gold/40 rounded-2xl p-6 shadow-[0_0_30px_rgba(212,175,55,0.2)] flex flex-col md:flex-row items-center gap-6 relative z-10 backdrop-blur-xl group hover:border-gold transition-colors">
+                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/50 flex items-center justify-center shrink-0 cursor-pointer hover:scale-105 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.4)]" onClick={togglePlay}>
+                   <Icon name={isPlaying ? "pause" : "play"} size={28} className="text-gold ml-1" />
+                 </div>
+                 <div className="flex-1 w-full">
+                   <div className="flex justify-between items-end mb-2">
+                     <div>
+                       <div className="text-[10px] font-black uppercase tracking-[0.3em] text-gold/80 mb-1">Gerd Sauerwein Memorial</div>
+                       <div className="text-lg text-white font-serif italic">The Orchestral Tribute</div>
+                     </div>
+                     <div className="text-xs font-mono text-gold/60">{isPlaying ? "PLAYING" : "PAUSED"}</div>
+                   </div>
+                   
+                   {/* Waveform Animation */}
+                   <div className="h-10 flex items-end gap-1 w-full overflow-hidden opacity-80">
+                      {[...Array(40)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className={`w-full bg-gold/70 rounded-t-sm transition-all duration-150 ${isPlaying ? 'animate-pulse' : ''}`}
+                          style={{
+                            height: isPlaying ? `${Math.floor(Math.random() * 80 + 20)}%` : '20%',
+                            animationDelay: `${Math.random() * 0.5}s`
+                          }}
+                        ></div>
+                      ))}
+                   </div>
+                 </div>
+                 {/* Local audio file from the user's directory */}
+                 <audio ref={audioRef} src="/Papa.mp3.mp3" onEnded={() => setIsPlaying(false)} className="hidden" />
+               </div>
+
+           </div>
+        </div>
+
       </div>
     </div>
   );

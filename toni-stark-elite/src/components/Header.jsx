@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import Icon from './Icon';
 
-const Header = ({ activeTab, activeRole, setActiveRole }) => {
+const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }) => {
   const [globalAiInput, setGlobalAiInput] = useState('');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  
+  // Inbox State
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+  const [interviewStep, setInterviewStep] = useState(0);
+  const [interviewAnswer, setInterviewAnswer] = useState('');
+
+  const notifications = truthObject?.notifications || [];
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleGlobalAiSubmit = async () => {
     if (!globalAiInput.trim()) return;
     setIsAiProcessing(true);
-    
-    // Simulate AI Processing delay
     setTimeout(() => {
       console.log(`Global AI commanded: ${globalAiInput} via ${activeRole}`);
       setIsAiProcessing(false);
@@ -17,45 +24,112 @@ const Header = ({ activeTab, activeRole, setActiveRole }) => {
     }, 1500);
   };
 
-  const roles = [
-    { id: "Trainer", icon: "user-check", bg: "bg-neon/20", border: "border-neon/50", text: "text-neon" },
-    { id: "Manager", icon: "briefcase", bg: "bg-gold/20", border: "border-gold/50", text: "text-gold" },
-    { id: "Presse / Scouting", icon: "camera", bg: "bg-white/20", border: "border-white/50", text: "text-white" },
-    { id: "Jugendtrainer (NLZ)", icon: "graduation-cap", bg: "bg-cyan-500/20", border: "border-cyan-500/50", text: "text-cyan-400" },
-    { id: "Admin", icon: "shield", bg: "bg-redbull/20", border: "border-redbull/50", text: "text-redbull" }
-  ];
+  const markAsRead = (id) => {
+    if (!setTruthObject) return;
+    setTruthObject(prev => ({
+      ...prev,
+      notifications: prev.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+    }));
+  };
+
+  const handleNotificationClick = (notif) => {
+    if (notif.type === 'press_interview') {
+      setShowInterviewModal(true);
+      setIsInboxOpen(false);
+    }
+    markAsRead(notif.id);
+  };
+
+  const submitInterview = () => {
+    if (!setTruthObject) return;
+    // Save answer to truthObject
+    setTruthObject(prev => ({
+      ...prev,
+      latest_interview: `Trainer-Statement zur Aufstellung: "${interviewAnswer}"`
+    }));
+    setShowInterviewModal(false);
+    setInterviewAnswer('');
+    setInterviewStep(0);
+  };
 
   return (
-    <header className="w-full flex flex-col md:flex-row justify-between items-stretch gap-4 p-4 md:p-8 bg-black/40 backdrop-blur-md border-b border-white/5 relative z-50">
+    <header className="w-full flex flex-col md:flex-row justify-between items-stretch gap-4 p-4 md:p-8 bg-black/40 backdrop-blur-md border-b border-white/5 relative z-[60]">
       
-      {/* LEFT: Branding & Role Switcher */}
+      {/* LEFT: Branding & Role Display */}
       <div className="flex flex-col gap-2 relative z-10 w-full md:w-auto">
         <h1 className="text-xl md:text-2xl font-black text-white leading-none uppercase tracking-tighter italic flex items-center gap-2">
           <Icon name="activity" className="text-neon" size={24} /> GERD 2.0 <span className="text-[#e21b4d]">PRO</span>
         </h1>
         
-        {/* Role Switcher */}
-        <div className="flex flex-wrap items-center gap-2 mt-2">
-          {roles.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => setActiveRole(r.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded border text-[9px] font-black uppercase tracking-widest transition-all ${
-                activeRole === r.id 
-                  ? `${r.bg} ${r.border} ${r.text} shadow-[0_0_15px_rgba(255,255,255,0.1)]` 
-                  : "bg-black/40 border-white/10 text-white/40 hover:border-white/30"
-              }`}
-            >
-              <Icon name={r.icon} size={12} />
-              {r.id.split(" ")[0]} 
-            </button>
-          ))}
+        <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-white/20 bg-white/5 text-[10px] font-black uppercase tracking-widest text-white">
+            <Icon name="user-check" size={12} className="text-neon" />
+            Eingeloggt als: {activeRole} 
+          </div>
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-red-500/30 bg-red-500/10 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+          >
+            <Icon name="log-out" size={12} />
+            Logout
+          </button>
         </div>
       </div>
 
-      {/* RIGHT: Global Intelligence Input */}
-      <div className="flex-1 w-full md:max-w-xl flex items-center relative z-10">
-        <div className={`w-full bg-black/60 border rounded-xl overflow-hidden flex transition-colors shadow-inner ${isAiProcessing ? 'border-neon shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'border-white/20 focus-within:border-white/50'}`}>
+      {/* RIGHT: Notifications & Global Intelligence */}
+      <div className="flex-1 w-full md:max-w-2xl flex flex-col md:flex-row items-end md:items-center justify-end gap-4 relative z-10">
+        
+        {/* Inbox Bell */}
+        <div className="relative">
+          <button 
+            onClick={() => setIsInboxOpen(!isInboxOpen)}
+            className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors relative"
+          >
+            <Icon name="bell" size={20} className={unreadCount > 0 ? "text-neon" : "text-white/40"} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-redbull text-white text-[9px] font-black flex items-center justify-center shadow-[0_0_10px_#e21b4d] animate-pulse">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
+          {/* Inbox Dropdown */}
+          {isInboxOpen && (
+            <div className="absolute top-14 right-0 w-80 bg-navy/95 backdrop-blur-xl border border-neon/30 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-[100] animate-fade-in">
+              <div className="p-3 bg-white/5 border-b border-white/10 text-xs font-black uppercase tracking-widest text-white flex justify-between items-center">
+                System Inbox
+                <button onClick={() => setIsInboxOpen(false)}><Icon name="x" size={14} className="text-white/40 hover:text-white" /></button>
+              </div>
+              <div className="max-h-64 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-white/40 font-mono">Keine Nachrichten vorhanden.</div>
+                ) : (
+                  notifications.map(n => (
+                    <button 
+                      key={n.id}
+                      onClick={() => handleNotificationClick(n)}
+                      className={`w-full text-left p-4 border-b border-white/5 hover:bg-white/5 transition-colors flex gap-3 items-start ${!n.read ? 'bg-neon/5' : ''}`}
+                    >
+                      <div className={`mt-0.5 ${n.type === 'press_interview' ? 'text-gold' : 'text-neon'}`}>
+                        <Icon name={n.type === 'press_interview' ? "mic" : "info"} size={16} />
+                      </div>
+                      <div>
+                        <div className={`text-xs font-bold leading-snug ${!n.read ? 'text-white' : 'text-white/60'}`}>{n.message}</div>
+                        <div className="text-[9px] text-white/30 uppercase mt-1 font-mono tracking-widest">
+                          {n.type === 'press_interview' ? 'Presseabteilung' : 'System'}
+                        </div>
+                      </div>
+                      {!n.read && <div className="w-2 h-2 rounded-full bg-neon shrink-0 mt-1"></div>}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Global Intelligence Input */}
+        <div className={`w-full md:w-96 bg-black/60 border rounded-xl overflow-hidden flex transition-colors shadow-inner ${isAiProcessing ? 'border-neon shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'border-white/20 focus-within:border-white/50'}`}>
           <div className="pl-4 py-3 flex items-center justify-center border-r border-white/10 bg-black/40">
             <Icon name="zap" className={isAiProcessing ? "text-neon animate-pulse" : "text-white/40"} size={18} />
           </div>
@@ -65,23 +139,64 @@ const Header = ({ activeTab, activeRole, setActiveRole }) => {
             onChange={(e) => setGlobalAiInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleGlobalAiSubmit()}
             placeholder={`Befehl an GERD als ${activeRole}...`}
-            className="flex-1 bg-transparent border-none text-white text-sm font-mono px-4 outline-none placeholder:text-white/30"
+            className="flex-1 w-full bg-transparent border-none text-white text-sm font-mono px-4 outline-none placeholder:text-white/30"
             disabled={isAiProcessing}
           />
           <button
             onClick={handleGlobalAiSubmit}
             disabled={!globalAiInput.trim() || isAiProcessing}
-            className={`px-6 py-3 font-black text-[10px] uppercase tracking-widest transition-colors ${
+            className={`px-4 py-3 font-black text-[10px] uppercase tracking-widest transition-colors ${
               globalAiInput.trim() 
                 ? 'bg-neon text-black hover:bg-white' 
                 : 'bg-white/5 text-white/20'
             }`}
           >
-            {isAiProcessing ? '...' : 'Execute'}
+            {isAiProcessing ? '...' : 'Go'}
           </button>
         </div>
       </div>
       
+      {/* AI INTERVIEW MODAL */}
+      {showInterviewModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-navy border border-gold/40 rounded-2xl p-8 max-w-xl w-full shadow-[0_0_50px_rgba(212,175,55,0.15)] relative">
+            <button onClick={() => setShowInterviewModal(false)} className="absolute top-4 right-4 text-white/40 hover:text-white">
+              <Icon name="x" size={24} />
+            </button>
+            <div className="flex items-center gap-4 mb-6 border-b border-white/10 pb-4">
+              <div className="w-12 h-12 bg-gold/20 rounded-full flex items-center justify-center border border-gold/50">
+                <Icon name="mic" size={24} className="text-gold" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black uppercase tracking-widest text-white">Pressetermin</h3>
+                <p className="text-[10px] font-mono text-gold uppercase tracking-[0.2em]">GERD Journalist AI</p>
+              </div>
+            </div>
+            
+            <div className="bg-black/50 rounded-xl p-5 mb-6 border border-white/5">
+              <p className="text-sm font-serif italic text-white/90 leading-relaxed">
+                 "Hallo Coach! Die Aufstellung für das Wochenende ist übermittelt via Command Center. Wir sehen eine kompakte {truthObject?.tactical_setup?.formation_home || 'Formation'}, bei der voll auf Athletik gesetzt wird. Was erhoffen Sie sich von dieser Marschroute und wie lautet die finale Ansage an die Fans?"
+              </p>
+            </div>
+
+            <textarea 
+              className="w-full bg-white/5 border border-white/20 rounded-xl p-4 text-white font-mono text-sm leading-relaxed outline-none focus:border-gold transition-colors min-h-[120px] mb-6"
+              placeholder="Ihre Antwort als Trainer eingeben..."
+              value={interviewAnswer}
+              onChange={(e) => setInterviewAnswer(e.target.value)}
+            ></textarea>
+
+            <button 
+              onClick={submitInterview}
+              disabled={!interviewAnswer.trim()}
+              className="w-full py-4 bg-gold rounded-xl text-black font-black uppercase tracking-widest hover:bg-white transition-all disabled:opacity-50"
+            >
+              Antwort in Stadion-Kurier publizieren
+            </button>
+          </div>
+        </div>
+      )}
+
     </header>
   );
 };

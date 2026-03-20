@@ -3,12 +3,14 @@ import Icon from './Icon';
 
 const Sidebar = ({ activeTab, setActiveTab, activeRole }) => {
   const navItems = [
-    { id: "home", label: "Executive", icon: "home", color: "neon", roles: ["Trainer", "Admin"] },
-    { id: "tactical", label: "Board", icon: "shield", color: "neon", roles: ["Trainer", "Admin"] },
-    { id: "training_lab", label: "Lab", icon: "activity", color: "redbull", roles: ["Trainer", "Admin"] },
-    { id: "cfo", label: "CFO Büro", icon: "pie-chart", color: "gold", roles: ["Manager", "Admin"] },
+    { id: "home", label: activeRole === 'Trainer' ? 'Trainer-Büro' : 'Executive Board', icon: "home", color: "neon", roles: ["Trainer", "Admin", "Manager"] },
+    { id: "tactical", label: "Taktik", icon: "shield", color: "neon", roles: ["Trainer", "Admin"] },
+    { id: "roster", label: "Mannschaftskader", icon: "users", color: "gold", roles: ["Trainer", "Admin"] },
+    { id: "training_lab", label: "Training", icon: "activity", color: "redbull", roles: ["Trainer", "Admin"] },
+    { id: "cfo", label: "Transfermarkt", icon: "pie-chart", color: "gold", roles: ["Manager", "Admin"] },
     { id: "nlz", label: "NLZ Hub", icon: "layout-grid", color: "neon", roles: ["Jugendtrainer (NLZ)", "Admin"] },
-    { id: "medical", label: "Medical", icon: "heart-pulse", color: "redbull", roles: ["Trainer", "Admin"] },
+    { id: "medical", label: "Medizin", icon: "heart-pulse", color: "redbull", roles: ["Trainer", "Admin"] },
+    { id: "calendar", label: "Kalender", icon: "calendar", color: "neon", roles: ["Trainer", "Manager", "Admin", "Jugendtrainer (NLZ)"] },
     { id: "stadion-kurier", label: "Kurier", icon: "newspaper", color: "gold", roles: ["Presse / Scouting", "Admin"] },
     { id: "legacy", label: "Legacy", icon: "heart", color: "gold", roles: ["Trainer", "Manager", "Admin"] }
   ];
@@ -18,27 +20,27 @@ const Sidebar = ({ activeTab, setActiveTab, activeRole }) => {
   return (
     <>
       {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex flex-col w-20 fixed left-0 top-0 h-full border-r border-white/5 bg-black/80 backdrop-blur-xl z-[100] transition-all pt-24 pb-8 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-        <nav className="flex-1 flex flex-col items-center gap-6">
+      <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 h-full border-r border-[#e21b4d]/20 bg-[#060a12] z-[100] transition-all pt-28 pb-8 shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-y-auto">
+        <nav className="flex-1 flex flex-col items-stretch gap-2 px-4">
           {visibleNav.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`relative flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-all group ${activeTab === item.id ? "bg-white/10" : "hover:bg-white/5"}`}
+              className={`relative flex items-center gap-4 px-4 py-4 rounded-lg transition-all group overflow-hidden ${activeTab === item.id ? "bg-[#0a1120] border border-[#00f3ff]/20" : "hover:bg-white/5 border border-transparent"}`}
             >
-              <Icon 
-                name={item.icon} 
-                size={22} 
-                className={`transition-colors duration-300 ${activeTab === item.id ? (item.color === 'neon' ? 'text-[#00f3ff]' : item.color === 'redbull' ? 'text-[#e21b4d]' : 'text-[#d4af37]') : "text-white/40 group-hover:text-white"}`} 
-              />
-              <span className={`text-[8px] mt-1 font-black uppercase tracking-widest transition-colors duration-300 ${activeTab === item.id ? 'text-white' : 'text-transparent group-hover:text-white/50'}`}>
-                {item.label}
-              </span>
-              
               {/* Active Indicator Line */}
               {activeTab === item.id && (
-                <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full shadow-[0_0_10px_currentColor] ${item.color === 'neon' ? 'bg-[#00f3ff]' : item.color === 'redbull' ? 'bg-[#e21b4d]' : 'bg-[#d4af37]'}`}></div>
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${item.color === 'neon' ? 'bg-[#00f3ff]' : item.color === 'redbull' ? 'bg-[#e21b4d]' : 'bg-[#d4af37]'}`}></div>
               )}
+            
+              <Icon 
+                name={item.icon} 
+                size={20} 
+                className={`transition-colors duration-300 ${activeTab === item.id ? (item.color === 'neon' ? 'text-[#00f3ff]' : item.color === 'redbull' ? 'text-[#e21b4d]' : 'text-[#d4af37]') : "text-white/40 group-hover:text-white/80"}`} 
+              />
+              <span className={`text-xs font-black uppercase tracking-widest transition-colors duration-300 text-left ${activeTab === item.id ? 'text-white' : 'text-white/60 group-hover:text-white'}`}>
+                {item.label}
+              </span>
             </button>
           ))}
         </nav>
