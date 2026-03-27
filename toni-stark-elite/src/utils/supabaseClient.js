@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js/dist/index.mjs';
 
 // SETUP: Replace these with your actual Supabase project credentials
 const supabaseUrl = 'https://zdqfqmylltghlzlnpclw.supabase.co';

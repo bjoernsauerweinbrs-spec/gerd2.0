@@ -111,15 +111,22 @@ const App = () => {
     if (initScraping) {
        try {
           const data = JSON.parse(initScraping);
+          const sanitizedLiveIntel = data.liveIntelligence ? {
+             ...data.liveIntelligence,
+             lastMatch: data.liveIntelligence.lastMatch?.includes("Suche") ? "Wird aktualisiert..." : data.liveIntelligence.lastMatch,
+             nextMatch: data.liveIntelligence.nextMatch?.includes("Suche") ? "Wird ermittelt..." : data.liveIntelligence.nextMatch,
+             tacticalNotes: data.liveIntelligence.tacticalNotes?.includes("Suche") ? "KI-Analyse läuft..." : data.liveIntelligence.tacticalNotes,
+          } : prev.club_info?.liveIntelligence;
+
           setTruthObject(prev => ({
              ...prev,
-             setup_complete: true, // Mark as complete if we got data at login
+             setup_complete: true, 
              players: data.players && data.players.length > 0 ? data.players : prev.players,
              club_info: {
                 ...prev.club_info,
                 name: data.officialClubName,
                 found_players: data.players?.length || 0,
-                liveIntelligence: data.liveIntelligence
+                liveIntelligence: sanitizedLiveIntel
              },
              manualSetupAdvice: data.manualSetupAdvice
           }));

@@ -500,26 +500,29 @@ app.get('/api/scrape', async (req, res) => {
                 const hasPlayers = players.length > 0;
                 const aiPrompt = `Du bist GERD 2.0, der High-Performance Director.
                 VEREIN: ${officialClubName}
+                LIGA: ${league || "Profi-Bereich"}
                 SPIELER GEFUNDEN: ${players.length}
                 
                 AUFGABE (RECHERCHE & ANALYSE):
-                1. Identifiziere das LETZTE SPIEL von ${officialClubName} (Ergebnis, Gegner, kurzes Fazit). Nutze deine interne Wissensdatenbank.
-                2. Identifiziere das NÄCHSTE SPIEL (Gegner, Datum/Zeitraum).
-                3. Erstelle eine detaillierte GEGNER-ANALYSE für das nächste Spiel (Stärken, Schwächen, Taktik vs. ${officialClubName}).
+                1. Suche das absolut aktuellste LETZTE SPIEL von ${officialClubName} (Ergebnis, Gegner, Fazit).
+                2. Suche das nächste anstehende PFLICHTSPIEL (Gegner, Datum, Wettbewerb). Wenn kein Spiel bekannt ist, nenne den wahrscheinlichsten nächsten Testspiel-Gegner oder "Saisonvorbereitung".
+                3. Erstelle eine GEGNER-ANALYSE für diesen nächsten Gegner (Stärken, Schwächen, taktische Marschroute).
+                
+                WICHTIG: Sei präzise. Wenn du ${officialClubName} nicht kennst, nutze die Spieler-Liste (${players.slice(0, 5).map(p => p.name).join(", ")}) als Kontext, um den Verein zu identifizieren.
                 
                 Antworte ZWINGEND als valides JSON-Objekt in diesem Format:
                 {
                   "liveIntelligence": {
-                     "lastMatch": "Resultat + Gegner + Fazit (Max 15 Wörter)",
-                     "nextMatch": "Nächster Gegner + Kontext",
+                     "lastMatch": "Gegner + Ergebnis (z.B. 2:1 gegen FC X) + kurzer Kommentar",
+                     "nextMatch": "Nächster Gegner (Name) + Datum/Uhrzeit",
                      "form": "S-S-U-S-N",
                      "tacticalNotes": "Brutale taktische Analyse (Max 40 Wörter)",
-                     "opponentStrengths": ["...", "..."],
-                     "opponentWeaknesses": ["...", "..."],
-                     "dataSource": "${hasPlayers ? 'Transfermarkt + News-Scan' : 'Synthetic Data'} (Gerd 2.0)",
-                     "confidence": ${hasPlayers ? 95 : 30}
+                     "opponentStrengths": ["Punkt 1", "Punkt 2"],
+                     "opponentWeaknesses": ["Punkt 1", "Punkt 2"],
+                     "dataSource": "Gerd 2.0 Engine",
+                     "confidence": 95
                   },
-                  "manualSetupAdvice": ${!hasPlayers ? '"Drei konkrete Tipps zur manuellen System-Hydrierung..."' : 'null'}
+                  "manualSetupAdvice": null
                 }`;
 
                 const localGenAI = new GoogleGenerativeAI(apiKey);

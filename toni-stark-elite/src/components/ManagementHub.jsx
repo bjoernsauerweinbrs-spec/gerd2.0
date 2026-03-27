@@ -63,7 +63,7 @@ AUFGABE:
 Schreibe eine extrem beeindruckende, präzise Taktik-Analyse. 
 1. Gehe detailliert auf das letzte Ergebnis ein.
 2. Erwähne den Abgleich der GPS-Laufwege/Spieldaten mit TV/Scouting-Daten (Bild/Kicker/Transfermarkt).
-3. Leite brutal fokussiert auf das anstehende nächste Spiel über.
+3. Leite brutal fokussiert auf das anstehende Spiel gegen ${liveData.nextMatch} über. Analysiere kurz, warum wir gegen diesen Gegner dominieren werden.
 
 Tonfall: Mix aus Klopp (Motivation) und Nagelsmann (Taktik-Nerd). 
 Direkte Ansprache "Coach/Commander", keine Emojis.
@@ -453,7 +453,7 @@ CONTENT: [Der vollständige Artikel in 2-4 Absätzen, gespickt mit Zahlen und Zi
                               </div>
                            </div>
 
-                           <div className="font-serif text-sm leading-loose text-white/90 bg-black/20 p-6 rounded-xl border border-white/5">
+                           <div className="font-sans text-sm leading-relaxed text-white bg-black/40 p-6 rounded-xl border border-white/10 shadow-inner">
                               {isGeneratingBriefing ? (
                                   <div className="flex items-center gap-3 text-white/50 animate-pulse">
                                       <Icon name="refresh-cw" size={16} className="animate-spin" /> 
@@ -465,7 +465,7 @@ CONTENT: [Der vollständige Artikel in 2-4 Absätzen, gespickt mit Zahlen und Zi
                                         <Icon name="zap" size={14} className="text-gold" />
                                         <span className="text-[10px] font-black uppercase tracking-widest text-gold italic">Gerd's Taktik-Quick-Check</span>
                                      </div>
-                                     <p className="italic">{liveBriefing || truthObject?.club_info?.liveIntelligence?.tacticalNotes}</p>
+                                     <p className="leading-relaxed">{liveBriefing || truthObject?.club_info?.liveIntelligence?.tacticalNotes}</p>
                                      {truthObject?.manualSetupAdvice && (
                                        <div className="mt-4 p-4 rounded-xl bg-orange-500/10 border border-orange-500/30">
                                           <div className="flex items-center gap-2 mb-2">
