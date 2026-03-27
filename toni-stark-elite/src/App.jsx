@@ -13,14 +13,31 @@ import Login from './components/Login';
 import TrainerSetupWizard from './components/TrainerSetupWizard';
 import RosterHub from './components/RosterHub';
 import CalendarHub from './components/CalendarHub';
+import ParentPortal from './components/ParentPortal';
 
 // ---- MAGIC FILL INITIAL DATA ----
 const INITIAL_TRUTH = {
   club_identity: { name: "Stark Elite", league: "Regionalliga", philosophy: "Ballbesitz & Pressing", identity_score: 85 },
   financials: { current_budget: 25000000, active_targets: 3 },
   tactical_setup: { formation_home: "4-4-2", formation_away: "3-4-3" },
-  training_lab: { schedule: [], intensity: 80 },
+  training_lab: { 
+    schedule: [
+      { id: 1, day: "Montag", type: "Regeneration", intensity: 30, time: "10:00 - 11:30", completed: true, hasSim: false },
+      { id: 2, day: "Dienstag", type: "Athletik & Kraft", intensity: 85, time: "10:00 - 12:00", completed: true, hasSim: false },
+      { id: 3, day: "Mittwoch", type: "Taktik (Defensive)", intensity: 60, time: "14:00 - 16:00", completed: false, hasSim: false },
+      { id: 4, day: "Donnerstag", type: "Rondo (5v2)", intensity: 75, time: "10:00 - 12:00", completed: false, hasSim: true, simData: { name: "Rondo (5v2)", type: "rondo", focus: "Passspiel & Pressingresistenz" } },
+      { id: 5, day: "Freitag", type: "Abschlusstraining", intensity: 50, time: "15:00 - 16:30", completed: false, hasSim: false },
+      { id: 6, day: "Samstag", type: "MATCHDAY (Bundesliga)", intensity: 100, time: "15:30 Anpfiff", completed: false, hasSim: false, isMatchday: true },
+      { id: 7, day: "Sonntag", type: "Spielersatz-Training & REHA", intensity: 40, time: "10:00 - 11:30", completed: false, hasSim: false }
+    ], 
+    intensity: 80 
+  },
   match_day_manifesto: { strategy: "Offensive Power", intensity_level: 95 },
+  nlz_squad: [
+    { id: '1', name: 'WUNDERKIND', position: 'ZOM', group: 'u19', dob: '14.05.2008', pac: 85, dri: 92, sho: 78, def: 40, pas: 88, phy: 65, pot: 95, focus: 8, frustration: 2 },
+    { id: '2', name: 'TORMINATOR', position: 'ST', group: 'u17', dob: '03.11.2009', pac: 90, dri: 80, sho: 85, def: 30, pas: 70, phy: 80, pot: 89, focus: 6, frustration: 4 },
+    { id: '3', name: 'FELS', position: 'IV', group: 'u19', dob: '22.01.2008', pac: 70, dri: 50, sho: 40, def: 88, pas: 65, phy: 90, pot: 86, focus: 9, frustration: 1 }
+  ],
   players: [
     { id: 99, name: "Lukas Berg (C)", position: "IV", ovr: 89, readiness: 94, isInjured: false, pac: 84, sho: 60, pas: 85, dri: 75, def: 92, phy: 90, inSquad: true },
     { id: 1, name: "Muster-TW", position: "GK", ovr: 85, readiness: 95, isInjured: false, pac: 80, sho: 40, pas: 75, dri: 60, def: 85, phy: 80, inSquad: true },
@@ -46,6 +63,7 @@ const INITIAL_TRUTH = {
   ],
   matchday_roster: null,
   latest_interview: null,
+  training_handbuch: [],
   setup_complete: false
 };
 
@@ -54,48 +72,77 @@ const App = () => {
   const [activeRole, setActiveRole] = useState(null);
   const [activeTab, setActiveTab] = useState("home"); // Will auto-route if needed
 
-  // Global Truth Object (Magic Fill Data integration)
   const [truthObject, setTruthObject] = useState(() => {
-    localStorage.removeItem("gerd_truthObject"); // Force purge for testing
-    return INITIAL_TRUTH;
+    const stored = localStorage.getItem("gerd_truthObject");
+    return stored ? JSON.parse(stored) : INITIAL_TRUTH;
   });
 
-  const [playbooks, setPlaybooks] = useState([
-    {
-      id: 1,
-      type: "match",
-      date: "Heute Abend, 20:30 Uhr",
-      title: "Matchday: RB Leipzig vs TSG Hoffenheim",
-      opponent: "TSG HOFFENHEIM",
-      formation: "4-3-3",
-      notes: "Hohes Gegenpressing. Willi Orban als direkter Manndecker gegen Kramaric angesetzt.",
-      players: []
-    }
-  ]);
+  const [playbooks, setPlaybooks] = useState([]);
+
+  const [activeChildId, setActiveChildId] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("gerd_truthObject", JSON.stringify(truthObject));
   }, [truthObject]);
 
-  const handleLogin = (role) => {
+  // Force upgrade legacy names in local storage for a better 2FA mock experience
+  useEffect(() => {
+    let hasUpdates = false;
+    const patchedSquad = truthObject.nlz_squad?.map(p => {
+      let newName = p.name;
+      if (p.name === 'WUNDERKIND') { newName = 'Lennox WUNDERKIND'; hasUpdates = true; }
+      else if (p.name === 'TORMINATOR') { newName = 'Milan TORMINATOR'; hasUpdates = true; }
+      else if (p.name === 'FELS') { newName = 'Lukas FELS'; hasUpdates = true; }
+      return { ...p, name: newName };
+    }) || [];
+    
+    if (hasUpdates) {
+      setTruthObject(prev => ({ ...prev, nlz_squad: patchedSquad }));
+    }
+  }, []);
+
+  const handleLogin = (role, childId = null) => {
     setActiveRole(role);
     setIsAuthenticated(true);
+    if(childId) setActiveChildId(childId);
     
+    // HYDRATION: Check for pre-scraped data from Login screen
+    const initScraping = localStorage.getItem('gerd_init_scraping');
+    if (initScraping) {
+       try {
+          const data = JSON.parse(initScraping);
+          setTruthObject(prev => ({
+             ...prev,
+             setup_complete: true, // Mark as complete if we got data at login
+             players: data.players && data.players.length > 0 ? data.players : prev.players,
+             club_info: {
+                ...prev.club_info,
+                name: data.officialClubName,
+                found_players: data.players?.length || 0,
+                liveIntelligence: data.liveIntelligence
+             },
+             manualSetupAdvice: data.manualSetupAdvice
+          }));
+          localStorage.removeItem('gerd_init_scraping'); // Clean up
+       } catch (e) { console.error("Hydration failed", e); }
+    }
+
     // Auto-route based on role
     if (role === 'Jugendtrainer') setActiveTab("nlz");
     else if (role === 'Presse') setActiveTab("stadion-kurier");
+    else if (role === 'Eltern') setActiveTab("parent_app");
     else setActiveTab("home"); // Manager and Trainer default to home/management
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setActiveRole(null);
-    localStorage.removeItem("gerd_truthObject");
-    setTruthObject(INITIAL_TRUTH);
+    setActiveChildId(null);
+    // Removed truthObject purging to allow persistent PINs and simulation state
   };
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
+    return <Login onLogin={handleLogin} truthObject={truthObject} />;
   }
 
   // INTERCEPT ROUTE: Trainer Setup Wizard
@@ -103,42 +150,24 @@ const App = () => {
     return <TrainerSetupWizard setTruthObject={setTruthObject} onLogout={handleLogout} />;
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "home":
-        return <ManagementHub truthObject={truthObject} setActiveTab={setActiveTab} />;
-      case "tactical":
-        return <TacticalHub truthObject={truthObject} activeRole={activeRole} />;
-      case "training_lab":
-        return <TrainingLab truthObject={truthObject} activeRole={activeRole} />;
-      case "roster":
-        return <RosterHub truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-      case "stadion-kurier":
-        return <StadionKurier truthObject={truthObject} activeRole={activeRole} />;
-      case "medical":
-        return <MedicalLab truthObject={truthObject} activeRole={activeRole} />;
-      case "cfo":
-        return <CfoBoard truthObject={truthObject} activeRole={activeRole} />;
-      case "nlz":
-        return <NlzAcademy truthObject={truthObject} activeRole={activeRole} />;
-      case "legacy":
-        return <LegacyHub />;
-      default:
-        return <ManagementHub truthObject={truthObject} setActiveTab={setActiveTab} />;
-    }
-  };
+  // Unified renderContent is handled inside the main return block now
+  // but keeping it for potential future structural needs if preferred, 
+  // however App currently uses the inline switch below.
+  // We'll clean this up to avoid confusion.
 
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden relative font-sans">
       <div id="neural-canvas"></div>
       
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        activeRole={activeRole} 
-      />
+      {activeRole !== 'Eltern' && (
+         <Sidebar 
+           activeTab={activeTab} 
+           setActiveTab={setActiveTab} 
+           activeRole={activeRole} 
+         />
+      )}
       
-      <main className="flex-1 flex flex-col h-full overflow-hidden relative z-10 w-full ml-0 md:ml-64 transition-all duration-300">
+      <main className={`flex-1 flex flex-col h-full overflow-hidden relative z-10 w-full transition-all duration-300 ${activeRole !== 'Eltern' ? 'ml-0 md:ml-64' : 'ml-0'}`}>
           {/* Header will get the logout function so users can switch roles */}
         <Header 
           activeTab={activeTab} 
@@ -161,6 +190,7 @@ const App = () => {
               case "nlz": return <NlzAcademy truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
               case "legacy": return <LegacyHub />;
               case "calendar": return <CalendarHub playbooks={playbooks} activeRole={activeRole} />;
+              case "parent_app": return <ParentPortal truthObject={truthObject} setTruthObject={setTruthObject} activeChildId={activeChildId} />;
               default: return <ManagementHub truthObject={truthObject} setTruthObject={setTruthObject} setActiveTab={setActiveTab} activeRole={activeRole} />;
             }
           })()}

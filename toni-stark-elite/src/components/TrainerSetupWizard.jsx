@@ -11,6 +11,55 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
   const [statusMessage, setStatusMessage] = useState("");
   const [scrapedData, setScrapedData] = useState(null);
 
+  // Youth Club Toggle
+  const [isYouthClub, setIsYouthClub] = useState(false);
+
+  // --- YOUTH GENERATOR ---
+  const generateFullYouthAcademy = () => {
+    const ageGroups = [
+      { id: 'u19', name: 'A-Jugend (U19)', minLvl: 60, maxLvl: 75, posList: ['TW','IV','LV','RV','ZDM','ZM','ZOM','LM','RM','ST'] },
+      { id: 'u17', name: 'B-Jugend (U17)', minLvl: 50, maxLvl: 68, posList: ['TW','IV','LV','RV','ZDM','ZM','ZOM','LM','RM','ST'] },
+      { id: 'u15', name: 'C-Jugend (U15)', minLvl: 40, maxLvl: 60, posList: ['TW','ABW','MIT','ANG'] },
+      { id: 'u13', name: 'D-Jugend (U13)', minLvl: 30, maxLvl: 50, posList: ['TW','ABW','MIT','ANG'] },
+      { id: 'u11', name: 'E-Jugend (U11)', minLvl: 20, maxLvl: 40, posList: ['TW','FELD'] },
+      { id: 'u9',  name: 'F-Jugend (U9)',  minLvl: 10, maxLvl: 30, posList: ['TW','FELD'] },
+      { id: 'u7',  name: 'G-Jugend (U7)',  minLvl: 5,  maxLvl: 20, posList: ['FELD'] },
+    ];
+
+    const firstNames = ["Leon", "Ben", "Elias", "Finn", "Noah", "Paul", "Luis", "Lukas", "Felix", "Maximilian", "Julian", "Tim", "Jonas", "David", "Emil", "Lennox", "Toni", "Jamal", "Leroy", "Joshua"];
+    const lastNames = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Neumann", "Sauerwein", "Musiala"];
+
+    let allYouthPlayers = [];
+
+    ageGroups.forEach(group => {
+      // Generate 15-20 players per group
+      const playerCount = Math.floor(Math.random() * 6) + 15; 
+      for(let i=0; i<playerCount; i++) {
+         const pos = group.posList[Math.floor(Math.random() * group.posList.length)];
+         const rating = Math.floor(Math.random() * (group.maxLvl - group.minLvl + 1)) + group.minLvl;
+         
+         allYouthPlayers.push({
+            id: `youth_${group.id}_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            name: `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`,
+            position: pos,
+            group: group.id,
+            groupName: group.name,
+            pac: rating + (Math.random()*10 - 5),
+            dri: rating + (Math.random()*10 - 5),
+            sho: rating + (Math.random()*10 - 5),
+            def: rating + (Math.random()*10 - 5),
+            pas: rating + (Math.random()*10 - 5),
+            phy: rating + (Math.random()*10 - 5),
+            pot: rating + 15 > 99 ? 99 : rating + 15, // Potential is higher
+            focus: Math.floor(Math.random() * 5) + 5,
+            frustration: Math.floor(Math.random() * 4) + 1
+         });
+      }
+    });
+
+    return allYouthPlayers;
+  };
+
   const handleNext = () => {
     if (step === 0 && clubName.trim()) setStep(1);
     else if (step === 1 && leagueName.trim()) startScraping();
@@ -22,7 +71,8 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
     setStatusMessage(`Verbinde mit Transfermarkt.de API für '${clubName}'...`);
     
     try {
-        const response = await fetch(`http://localhost:3001/api/scrape?team=${encodeURIComponent(clubName)}`);
+        const apiKey = localStorage.getItem('stark_gemini_key') || "";
+        const response = await fetch(`http://localhost:3001/api/scrape?team=${encodeURIComponent(clubName)}&apiKey=${apiKey}`);
         const data = await response.json();
         
         if (data.success && data.players && data.players.length > 0) {
@@ -54,15 +104,29 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
   };
 
   const confirmSetup = () => {
+    let finalLiveIntel = scrapedData.liveIntelligence || null;
+    
+    // GUARANTEED FALLBACK FOR DEMOS
+    if (!finalLiveIntel) {
+        finalLiveIntel = {
+            lastMatch: `Letztes Spiel von ${scrapedData.officialClubName || clubName}`,
+            nextMatch: "Wird vom KI-Scout ermittelt...",
+            form: "N/A",
+            tacticalNotes: `Das System analysiert aktuell die taktischen Muster von ${scrapedData.officialClubName || clubName}. Starte die Trainingseinheit, um tiefergehende Analysen zu erhalten.`
+        };
+    }
+
     setTruthObject(prev => ({
         ...prev,
         setup_complete: true,
         players: scrapedData.players.length > 0 ? scrapedData.players : prev.players,
+        nlz_squad: isYouthClub ? generateFullYouthAcademy() : prev.nlz_squad,
         club_info: {
           name: scrapedData.officialClubName || clubName,
           league: leagueName,
           found_players: scrapedData.players.length,
-          table_position: 4
+          table_position: 4,
+          liveIntelligence: finalLiveIntel
         }
     }));
   };
@@ -71,6 +135,7 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
     setStep(0);
     setClubName("");
     setLeagueName("");
+    setIsYouthClub(false);
     setScrapedData(null);
   };
 
@@ -128,7 +193,7 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
           <div className="animate-fade-in">
              <h2 className="text-xl font-bold text-white mb-2">Der Wettbewerb.</h2>
              <p className="text-white/60 text-sm mb-8 font-serif leading-relaxed">
-                Wo in der Pyramide befindet sich der '{clubName}' heute?
+                {(clubName || truthObject?.club_info?.name)} ist bereit. In welcher Liga spielt Ihr Team?
              </p>
              <input
                type="text"
@@ -139,6 +204,20 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
                placeholder="Liga (z.B. Bezirksliga Staffel 3)"
                className="w-full bg-black/50 border border-white/20 focus:border-neon focus:shadow-[0_0_20px_rgba(0,243,255,0.2)] rounded-xl py-4 px-6 text-white font-black text-lg outline-none transition-all mb-6"
              />
+
+             <label className="flex items-center gap-3 mb-8 cursor-pointer group bg-black/30 p-4 rounded-xl border border-white/10 hover:border-gold transition-colors">
+                <input 
+                   type="checkbox" 
+                   checked={isYouthClub} 
+                   onChange={(e) => setIsYouthClub(e.target.checked)}
+                   className="w-5 h-5 accent-gold"
+                />
+                <div className="flex flex-col">
+                   <span className="text-white font-black uppercase text-sm group-hover:text-gold transition-colors">Jugendabteilung generieren</span>
+                   <span className="text-white/50 text-[10px] uppercase font-mono tracking-widest mt-1">G-Jugend (U7) bis A-Jugend (U19) komplett mit Spielern füllen</span>
+                </div>
+             </label>
+
              <div className="flex justify-between items-center">
                 <button onClick={() => setStep(0)} className="text-white/40 hover:text-white text-sm font-bold uppercase">Zurück</button>
                 <button 

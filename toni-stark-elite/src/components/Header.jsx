@@ -1,15 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
+import AiSettingsWidget from './AiSettingsWidget';
 
 const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }) => {
   const [globalAiInput, setGlobalAiInput] = useState('');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [showAiSettings, setShowAiSettings] = useState(false);
   
-  // Inbox State
   const [isInboxOpen, setIsInboxOpen] = useState(false);
   const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [interviewStep, setInterviewStep] = useState(0);
   const [interviewAnswer, setInterviewAnswer] = useState('');
+
+  // AI Global Status Ping
+  const [currentAi, setCurrentAi] = useState('openai');
+  const [aiPingStatus, setAiPingStatus] = useState('yellow'); // green, red, yellow
+
+  useEffect(() => {
+    const checkAiStatus = async () => {
+      const p = localStorage.getItem('stark_ai_provider') || 'openai';
+      setCurrentAi(p);
+
+      if (p === 'ollama') {
+        try {
+          // Rapid silent ping to local Ollama daemon
+          await fetch('http://localhost:11434/', { method: 'GET', mode: 'no-cors' });
+          setAiPingStatus('green');
+        } catch (e) {
+          setAiPingStatus('red');
+        }
+      } else {
+        // Cloud APIs: Validate if a key exists
+        const key = localStorage.getItem(`stark_${p}_key`);
+        const fallback = localStorage.getItem('stark_groq_key');
+        if (key || (p === 'gemini' && fallback)) {
+          setAiPingStatus('green');
+        } else {
+          setAiPingStatus('red');
+        }
+      }
+    };
+    checkAiStatus();
+    const interval = setInterval(checkAiStatus, 3000); // Check every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const notifications = truthObject?.notifications || [];
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -126,6 +160,36 @@ const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }
               </div>
             </div>
           )}
+        </div>
+
+        {/* AI Settings Widget */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowAiSettings(!showAiSettings)}
+            className={`w-12 h-12 rounded-xl border flex items-center justify-center transition-colors relative ${showAiSettings ? 'bg-white/10 border-neon text-neon' : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/40 hover:text-white'}`}
+          >
+            <Icon name="settings" size={20} />
+          </button>
+          
+          {showAiSettings && (
+             <div className="absolute top-14 right-0 w-80 bg-[#0a1120]/95 backdrop-blur-xl border border-neon/30 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-[100] animate-fade-in text-left">
+                <AiSettingsWidget context={activeRole === 'Manager' ? 'management' : 'trainer'} onClose={() => setShowAiSettings(false)} />
+             </div>
+          )}
+        </div>
+
+        {/* Global AI Traffic Light Indicator */}
+        <div className="flex items-center gap-2 px-3 py-2 bg-black/40 border border-white/10 rounded-xl">
+           <div className={`w-2.5 h-2.5 rounded-full shadow-[0_0_10px_currentColor] animate-pulse ${
+               aiPingStatus === 'green' ? 'bg-green-500 text-green-500' : 
+               aiPingStatus === 'red' ? 'bg-red-500 text-red-500' : 'bg-yellow-500 text-yellow-500'
+           }`}></div>
+           <div className="flex flex-col">
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/40 leading-none">Netzwerk</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white leading-tight">
+                 {currentAi === 'ollama' ? 'Lokal (Ollama)' : currentAi}
+              </span>
+           </div>
         </div>
 
         {/* Global Intelligence Input */}

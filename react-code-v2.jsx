@@ -1192,74 +1192,80 @@ const SetupWizard = ({ onComplete, askAI, addAiLog, gerdSpeak }) => {
 
           </div>
 
-          {/* === TRAINER IDENTIFIKATION === */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 drop-shadow-sm">
-              <Icon name="user" size={12} className="text-neon" /> Trainer Name
-            </label>
-            <input
-              type="text"
-              value={trainerName}
-              onChange={(e) => setTrainerName(e.target.value)}
-              placeholder="z.B. Gerd S."
-              className="w-full bg-white/20 border border-white/30 rounded-xl p-4 text-white font-bold text-lg shadow-inner outline-none focus:bg-white/30 focus:border-white focus:ring-2 focus:ring-white/50 transition-all placeholder:text-white/50"
-            />
-          </div>
-
-          {/* === VEREINSNAME === */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-white uppercase tracking-wider block drop-shadow-sm">
-              Vereinsname
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={clubName}
-                onChange={(e) => setClubName(e.target.value)}
-                placeholder="z.B. FC Schalke 04"
-                className="flex-1 bg-white/20 border border-white/30 rounded-xl p-4 text-white font-bold text-lg shadow-inner outline-none focus:bg-white/30 focus:border-white focus:ring-2 focus:ring-white/50 transition-all placeholder:text-white/50"
-              />
-            </div>
-          </div>
-
-          {/* === UNIVERSAL KI-HYDRATION LINK === */}
-          <div className="space-y-2 bg-black/20 border border-white/10 p-5 rounded-2xl backdrop-blur-md">
-            <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 drop-shadow-sm">
-              <Icon name="link" size={12} className="text-neon" /> Vereinsname oder Link <span className="text-white/60 font-normal normal-case italic">(Profis & Amateure)</span>
-            </label>
-            <div className="flex gap-3 mt-2">
-              <input
-                type="text"
-                value={fussballDeUrl}
-                onChange={(e) => setFussballDeUrl(e.target.value)}
-                placeholder="z.B. https://transfermarkt.de/... oder fussball.de/..."
-                className="flex-1 bg-white/10 border border-white/20 rounded-xl p-3 text-white font-mono text-xs shadow-inner outline-none focus:bg-white/20 focus:border-white focus:ring-1 focus:ring-white/50 transition-all placeholder:text-white/40"
-              />
-              <button
-                onClick={handleMagicFill}
-                disabled={isMagicFilling || !epicKey}
-                title={!epicKey ? "Bitte zuerst Ihren Epic Key eingeben" : ""}
-                className={`px-6 font-bold uppercase text-[11px] tracking-wider rounded-xl flex items-center gap-2 transition-all shadow-md ${!epicKey
-                  ? 'bg-white/10 text-white/30 border border-white/10 cursor-not-allowed'
-                  : 'bg-white/30 text-white border border-white/50 hover:bg-white hover:text-black hover:scale-105 active:scale-95 disabled:opacity-50'
-                  }`}
-              >
-                <Icon
-                  name="sparkles"
-                  size={14}
-                  className={isMagicFilling ? "animate-spin text-neon" : "text-neon"}
+          {/* === CORE IDENTITY & MAGIC FILL === */}
+          <div className="space-y-4 bg-black/20 border border-white/10 p-5 rounded-2xl backdrop-blur-md">
+            
+            {/* Trainer Name & Club Name Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 drop-shadow-sm">
+                  <Icon name="user" size={12} className="text-neon" /> Trainer Name
+                </label>
+                <input
+                  type="text"
+                  value={trainerName}
+                  onChange={(e) => setTrainerName(e.target.value)}
+                  placeholder="z.B. Gerd S."
+                  className="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white font-bold shadow-inner outline-none focus:bg-white/20 focus:border-neon focus:ring-1 focus:ring-neon/50 transition-all placeholder:text-white/40"
                 />
-                {isMagicFilling ? "Analysiere..." : "Magic Fill"}
-              </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 drop-shadow-sm">
+                  <Icon name="shield" size={12} className="text-gold" /> Vereinsname
+                </label>
+                <input
+                  type="text"
+                  value={clubName}
+                  onChange={(e) => setClubName(e.target.value)}
+                  placeholder="z.B. FC Schalke 04"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white font-bold shadow-inner outline-none focus:bg-white/20 focus:border-gold focus:ring-1 focus:ring-gold/50 transition-all placeholder:text-white/40"
+                />
+              </div>
             </div>
-            <p className="text-[11px] text-white/60 italic mt-2">
-              Fügt reale Spielerdaten von Fussball.de oder Transfermarkt.de in das System ein.
-            </p>
+
+            {/* Magic Fill Integration */}
+            <div className="space-y-2 pt-2 border-t border-white/10">
+               <label className="text-xs font-bold text-white/80 uppercase tracking-wider flex items-center justify-between drop-shadow-sm">
+                <span className="flex items-center gap-2">
+                  <Icon name="sparkles" size={12} className="text-neon" /> KI Magic Fill <span className="text-white/40 normal-case italic font-normal">(Daten automatisch laden)</span>
+                </span>
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={fussballDeUrl}
+                  onChange={(e) => setFussballDeUrl(e.target.value)}
+                  placeholder="z.B. Link von fussball.de oder transfermarkt.de"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-white font-mono text-xs shadow-inner outline-none focus:bg-white/10 focus:border-white/30 transition-all placeholder:text-white/30"
+                />
+                <button
+                  onClick={handleMagicFill}
+                  disabled={isMagicFilling || !epicKey}
+                  title={!epicKey ? "Bitte zuerst Ihren Epic Key (Gemini) eingeben" : ""}
+                  className={`px-6 py-3 font-bold uppercase text-[11px] tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-md whitespace-nowrap ${!epicKey
+                    ? 'bg-white/5 text-white/30 border border-white/5 cursor-not-allowed'
+                    : 'bg-white/20 text-white border border-white/30 hover:bg-white/30 hover:shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:scale-105 active:scale-95 disabled:opacity-50'
+                    }`}
+                >
+                  <Icon
+                    name="sparkles"
+                    size={14}
+                    className={isMagicFilling ? "animate-spin text-neon" : "text-neon"}
+                  />
+                  {isMagicFilling ? "Lädt..." : "Magic Fill Starten"}
+                </button>
+              </div>
+              <p className="text-[10px] text-white/50 italic">
+                *Nutzt den Gemini-Key, um Live-Daten für den eingegebenen Link (oder Vereinsnamen) zu scrapen.
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* === DESIGN & LIGA SETTINGS === */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/10 border border-white/5 p-5 rounded-2xl">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white uppercase tracking-wider block drop-shadow-sm">
+              <label className="text-xs font-bold text-white/80 uppercase tracking-wider block drop-shadow-sm">
                 Wettbewerb / Liga
               </label>
               <input
@@ -1267,26 +1273,26 @@ const SetupWizard = ({ onComplete, askAI, addAiLog, gerdSpeak }) => {
                 value={league}
                 onChange={(e) => setLeague(e.target.value)}
                 placeholder="z.B. 2. Bundesliga"
-                className="w-full bg-white/20 border border-white/30 rounded-xl p-4 text-white font-bold text-lg shadow-inner outline-none focus:bg-white/30 focus:border-white focus:ring-2 focus:ring-white/50 transition-all placeholder:text-white/50"
+                className="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white font-bold text-sm shadow-inner outline-none focus:bg-white/20 focus:border-white/50 transition-all placeholder:text-white/40"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-white uppercase tracking-wider block drop-shadow-sm flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white shadow-[0_0_5px_white]"></div> Primärfarbe</label>
+                <label className="text-[10px] font-bold text-white uppercase tracking-wider block drop-shadow-sm flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white shadow-[0_0_5px_white]"></div> Primärfarbe</label>
                 <input
                   type="color"
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="w-full h-[60px] bg-white/10 p-1 border border-white/30 rounded-xl cursor-pointer shadow-inner hover:scale-105 transition-transform"
+                  className="w-full h-10 bg-white/5 p-1 border border-white/20 rounded-lg cursor-pointer shadow-inner hover:scale-105 transition-transform"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-white uppercase tracking-wider block drop-shadow-sm flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white/50"></div> Sekundärfarbe</label>
+                <label className="text-[10px] font-bold text-white uppercase tracking-wider block drop-shadow-sm flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-white/50"></div> Sekundärfarbe</label>
                 <input
                   type="color"
                   value={secondaryColor}
                   onChange={(e) => setSecondaryColor(e.target.value)}
-                  className="w-full h-[60px] bg-white/10 p-1 border border-white/30 rounded-xl cursor-pointer shadow-inner hover:scale-105 transition-transform"
+                  className="w-full h-10 bg-white/5 p-1 border border-white/20 rounded-lg cursor-pointer shadow-inner hover:scale-105 transition-transform"
                 />
               </div>
             </div>
@@ -2765,10 +2771,16 @@ const STARK_ELITE_PRESETS = [
                 <Icon name="users" size={16} className={activeNlzView === "squad" ? "text-redbull" : ""} /> Youth Squad
               </button>
               <button
-                onClick={() => setActiveNlzView("tactics")}
-                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "tactics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+                onClick={() => setActiveNlzView("training")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "training" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
               >
-                <Icon name="layout" size={16} className={activeNlzView === "tactics" ? "text-neon" : ""} /> Tactics & Training
+                <Icon name="cpu" size={16} className={activeNlzView === "training" ? "text-neon" : ""} /> Training Protocol
+              </button>
+              <button
+                onClick={() => setActiveNlzView("board")}
+                className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "board" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
+              >
+                <Icon name="layout" size={16} className={activeNlzView === "board" ? "text-neon" : ""} /> Taktik Board
               </button>
               <button
                 onClick={() => setActiveNlzView("pipeline")}
@@ -2779,12 +2791,19 @@ const STARK_ELITE_PRESETS = [
             </div>
           </div>
 
-          {/* === TACTICS & TRAINING (Phase 30) === */}
-          {activeNlzView === "tactics" && (
+          {/* === NLZ TAKTIK BOARD === */}
+          {activeNlzView === "board" && (
+            <div className="space-y-6 animate-fade-in -mx-6 -my-6">
+              {renderTactical({ targetPlayers: youthPlayers, targetPositions: nlzPlayerPositions, setTargetPositions: setNlzPlayerPositions, isNlzTheme: true })}
+            </div>
+          )}
+
+          {/* === TRAINING PROTOCOL === */}
+          {activeNlzView === "training" && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
-                  <Icon name="layout" size={28} className="text-neon" /> NLZ Taktik Board
+                  <Icon name="layout" size={28} className="text-neon" /> NLZ Training Generator
                 </h2>
               </div>
               
@@ -3980,6 +3999,10 @@ const App = () => {
   const [showExportCenter, setShowExportCenter] = useState(false);
   const [exportTarget, setExportTarget] = useState("print"); // print, post, story
 
+
+
+  const [tacticalFilter, setTacticalFilter] = useState("all");
+
   const handleMediaAdvisor = async () => {
     setIsMediaAdvisorLoading(true);
     const epicKey = localStorage.getItem("gerd_epicKey");
@@ -4234,6 +4257,10 @@ const App = () => {
   const [ytPlaylistId, setYtPlaylistId] = useState("");
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // Mock Google OAuth removed
+
+  // NEW: Playbook Feature State
+
   // Tactical Hub State
   const [playerPositions, setPlayerPositions] = useState(() => {
     try {
@@ -4357,29 +4384,28 @@ const App = () => {
   // Tactical Playlist (Stark Elite Tactical Selection)
   const [playlist, setPlaylist] = useState([
     {
-      title: "Pep Guardiola Masterclass",
-      url: "_G9I2N_XG_Q",
+      title: "Man City vs Chelsea | Final VIP Tactical",
+      url: "JA0p0Bg9N1w",
       isYouTube: true,
-      analysis:
-        "Pep erklärt seine Raumaufteilung und das Positionsspiel.",
+      analysis: "Champions League Halbfinale: Analyse des tiefen Aufbauspiels unter Druck.",
     },
     {
-      title: "Oliver Glasner: System-Analyse",
-      url: "q_G2bMvY89E",
+      title: "Man City v Tottenham | Tactical Camera",
+      url: "9x02ovOrZmM",
       isYouTube: true,
-      analysis: "Glasner über die Relevanz von Systemen vs. Prinzipien.",
+      analysis: "Positionsspiel in der gegnerischen Hälfte und Gegenpressing-Struktur.",
     },
     {
-      title: "Arsenal vs Bayern: Taktik-Feed",
-      url: "rV_3pE2S_6w",
+      title: "PSG vs Inter Milan | Tactical Cam",
+      url: "gzNLfgbxsLk",
       isYouTube: true,
-      analysis: "Detaillierte Analyse der Halbraumbesetzung.",
+      analysis: "Taktische Analyse der Flügelüberladungen und Umschaltmomente.",
     },
     {
-      title: "Jesse Marsch: Coaching Clinic",
-      url: "27tWzN9d7Dk",
+      title: "Croatia 1-1 Czechia | EURO 2020 Tactical",
+      url: "KgQquW68E-Q",
       isYouTube: true,
-      analysis: "Umschaltspiel und Vertikalität im modernen Fußball.",
+      analysis: "Kompakte Defensivreihen und tief stehende Blöcke analysieren.",
     },
   ]);
 
@@ -4660,8 +4686,8 @@ const App = () => {
 
     const initPlayer = () => {
       // Wenn das DOM Element von React noch nicht gerendert wurde, abbrechen
-      const playerDiv = document.getElementById("youtubepayer");
-      if (!playerDiv) return;
+      const playerContainer = document.getElementById("youtubepayer-container");
+      if (!playerContainer) return;
 
       const clip = playlist[activeClipIndex];
       // Wir haben bereits eine gültige Player-Instanz und laden nur das Video neu
@@ -4697,7 +4723,8 @@ const App = () => {
           loop: 1,
           modestbranding: 1,
           playlist: clip.url,
-          enablejsapi: 1
+          enablejsapi: 1,
+          origin: window.location.origin
         },
         events: {
           onReady: (event) => event.target.playVideo(),
@@ -4720,6 +4747,48 @@ const App = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPos, setStartPos] = useState(null);
 
+  // --- AUTO ANALYSIS ENGINE ---
+  const [autoAnalyzeEnabled, setAutoAnalyzeEnabled] = useState(false);
+  const autoAnalyzeRef = useRef(null);
+
+  useEffect(() => {
+    if (!autoAnalyzeEnabled || activeTab !== "video") {
+      if (autoAnalyzeRef.current) clearInterval(autoAnalyzeRef.current);
+      return;
+    }
+
+    autoAnalyzeRef.current = setInterval(() => {
+      try {
+        // For YouTube:
+        if (playlist[activeClipIndex]?.isYouTube && playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
+          if (playerRef.current.getPlayerState() === window.YT.PlayerState.PLAYING) {
+             const currentTime = playerRef.current.getCurrentTime();
+             if (!window.lastAutoAnalyzeTime) window.lastAutoAnalyzeTime = 0;
+             if (currentTime - window.lastAutoAnalyzeTime >= 15) {
+               window.lastAutoAnalyzeTime = currentTime;
+               triggerAiTelestrator();
+             }
+          }
+        }
+        // For Local HTML5 Video:
+        else if (!playlist[activeClipIndex]?.isYouTube && videoRef.current && !videoRef.current.paused) {
+           const currentTime = videoRef.current.currentTime;
+           if (!window.lastAutoAnalyzeTime) window.lastAutoAnalyzeTime = 0;
+           if (currentTime - window.lastAutoAnalyzeTime >= 15) {
+             window.lastAutoAnalyzeTime = currentTime;
+             triggerAiTelestrator();
+           }
+        }
+      } catch (e) {
+        // Player not fully ready
+      }
+    }, 1000);
+
+    return () => {
+      if (autoAnalyzeRef.current) clearInterval(autoAnalyzeRef.current);
+    };
+  }, [autoAnalyzeEnabled, activeTab, activeClipIndex, playlist]);
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -4739,9 +4808,11 @@ const App = () => {
 
   // --- ERIK MEIJER AI TELESTRATOR ---
   const triggerAiTelestrator = async () => {
-    gerdSpeak("Bild analyse läuft. Suche nach Passwegen und Räumen...", "System");
+    if (isDrawing) return; // Prevent overlapping triggers
+    
+    gerdSpeak("Bildanalyse läuft. Kenne Ballbesitz und analysiere tiefgreifend...", "System");
     setIsDrawing(true);
-    addAiLog("AI Telestrator: Interpreting visual frame for tactical overlays...", "process");
+    addAiLog("AI Telestrator (Auto/Manual): Interpreting visual frame for tactical overlays...", "process");
     
     // Pause video if we can
     if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
@@ -4752,56 +4823,91 @@ const App = () => {
     }
 
     try {
+      const currentVideoTitle = playlist[activeClipIndex]?.title || "Unbekanntes Match";
+      
       const prompt = `[STRICT JSON PROTOCOL]
-Du bist der taktische Video-Analyst der Stark Elite Akademie (wie Erik Meijer bei Sky).
-Analysiere die fiktive aktuelle Spielszene und generiere 2-3 taktische Vektoren, die direkt auf den Bildschirm (Canvas 1280x720) gezeichnet werden sollen.
-Erzeuge ein JSON Array mit Zeichenobjekten.
-Format:
-[
-  { "mode": "pass", "points": [{"x": 400, "y": 600}, {"x": 800, "y": 300}] },
-  { "mode": "run", "points": [{"x": 300, "y": 550}, {"x": 350, "y": 250}] }
-]
-Nur das JSON zurückgeben.`;
+Du bist der ultimative taktische TV-Experte (eine Mischung aus Julian Nagelsmanns taktischer Präzision und Jürgen Klopps grenzenloser Energie und Leidenschaft wie Erik Meijer am Touchscreen).
+Das aktuelle Spiel ist: "${currentVideoTitle}"
+Analysiere die aktuelle Spielszene und generiere taktische Vektoren, die direkt auf den Bildschirm gezeichnet werden sollen (Canvas 1280x720).
+Erzeuge ein JSON Objekt mit folgender Struktur:
+{
+  "possession": "Wer hat den Ball (z.B. Blaues Team - Offensive)",
+  "explanation": "Eine sehr leidenschaftliche, energiegeladene und hoch-taktische 2-3 Satz Erklärung auf Deutsch. Nutze Wörter wie 'Wahnsinn!', 'Brutal!', 'Schau mal hier auf den Halbraum!'.",
+  "vectors": [
+    { "mode": "pass", "points": [{"x": 400, "y": 600}, {"x": 800, "y": 300}] },
+    { "mode": "run", "points": [{"x": 300, "y": 550}, {"x": 350, "y": 250}] }
+  ]
+}
+Gib nur das reine JSON zurück. Nichts anderes.`;
 
       const res = await askAI(prompt, "System", true);
-      const jsonMatch = res.match(/\[[\s\S]*\]/);
+      const jsonMatch = res.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
       if (jsonMatch) {
-         const vectors = JSON.parse(jsonMatch[0]);
+         let parsedData = JSON.parse(jsonMatch[0]);
+         let vectors = [];
+         let explanation = "Der Raum ist offen. Der Lauf in die Tiefe muss jetzt kommen.";
+         let possession = "Offensive am Zug";
+
+         if (Array.isArray(parsedData)) {
+             vectors = parsedData;
+         } else {
+             vectors = parsedData.vectors || [];
+             explanation = parsedData.explanation || explanation;
+             possession = parsedData.possession || possession;
+         }
+
          const canvas = canvasRef.current;
          if (!canvas) return;
          const ctx = canvas.getContext("2d");
          ctx.clearRect(0, 0, canvas.width, canvas.height);
          
-         // Helper to animate lines and pause
-         vectors.forEach((v, index) => {
-             setTimeout(() => {
+         addAiLog(`Team in Possession: ${possession}`, "process");
+         setVideoFeedback(`Ballbesitz: ${possession}\nAnalyse: ${explanation}`);
+
+         // Draw vectors sequentially
+         for (let index = 0; index < vectors.length; index++) {
+             const v = vectors[index];
+             await new Promise(r => setTimeout(r, 800)); // Delay between drawing lines
+             ctx.beginPath();
+             ctx.strokeStyle = v.mode === "pass" ? "#00f3ff" : "#e21b4d";
+             ctx.lineWidth = 4;
+             ctx.lineCap = "round";
+             ctx.setLineDash(v.mode === "run" ? [15, 15] : []);
+               
+             const pts = v.points;
+             if (pts.length >= 2) {
+                 ctx.moveTo(pts[0].x, pts[0].y);
+                 ctx.lineTo(pts[1].x, pts[1].y);
+                 ctx.stroke();
+                 
+                 // Draw Arrowhead
+                 const angle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
                  ctx.beginPath();
-                 ctx.strokeStyle = v.mode === "pass" ? "#00f3ff" : "#e21b4d";
-                 ctx.lineWidth = 4;
-                 ctx.lineCap = "round";
-                 ctx.setLineDash(v.mode === "run" ? [15, 15] : []);
-                   
-                 const pts = v.points;
-                 if (pts.length >= 2) {
-                     ctx.moveTo(pts[0].x, pts[0].y);
-                     ctx.lineTo(pts[1].x, pts[1].y);
-                     ctx.stroke();
-                     
-                     // Draw Arrowhead
-                     const angle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
-                     ctx.beginPath();
-                     ctx.moveTo(pts[1].x, pts[1].y);
-                     ctx.lineTo(pts[1].x - 20 * Math.cos(angle - Math.PI / 6), pts[1].y - 20 * Math.sin(angle - Math.PI / 6));
-                     ctx.lineTo(pts[1].x - 20 * Math.cos(angle + Math.PI / 6), pts[1].y - 20 * Math.sin(angle + Math.PI / 6));
-                     ctx.lineTo(pts[1].x, pts[1].y);
-                     ctx.fillStyle = v.mode === "pass" ? "#00f3ff" : "#e21b4d";
-                     ctx.fill();
-                 }
-                 gerdSpeak("Siehst du hier den Laufweg? Genau da muss der Ball in die Tiefe gespielt werden.", "Trainer-Gerd");
-                 addAiLog("AI Telestrator vectors rendered", "success");
-                 setIsDrawing(false);
-             }, index * 1000);
-         });
+                 ctx.moveTo(pts[1].x, pts[1].y);
+                 ctx.lineTo(pts[1].x - 20 * Math.cos(angle - Math.PI / 6), pts[1].y - 20 * Math.sin(angle - Math.PI / 6));
+                 ctx.lineTo(pts[1].x - 20 * Math.cos(angle + Math.PI / 6), pts[1].y - 20 * Math.sin(angle + Math.PI / 6));
+                 ctx.lineTo(pts[1].x, pts[1].y);
+                 ctx.fillStyle = v.mode === "pass" ? "#00f3ff" : "#e21b4d";
+                 ctx.fill();
+             }
+         }
+         
+         setIsDrawing(false);
+         addAiLog("AI Telestrator vectors rendered", "success");
+         
+         // Speak the explanation and wait until finished
+         await gerdSpeak(explanation, "Trainer-Gerd");
+         
+         // Automatically clear and resume playback
+         ctx.clearRect(0, 0, canvas.width, canvas.height);
+         setVideoFeedback("");
+         if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+             playerRef.current.playVideo();
+         }
+         if (videoRef.current) {
+            videoRef.current.play();
+         }
+         addAiLog("Analyse beendet. Video wird fortgesetzt.", "process");
       }
     } catch (e) {
        console.error(e);
@@ -4812,34 +4918,55 @@ Nur das JSON zurückgeben.`;
 
   // --- GERD VOICE SYSTEM ---
   const gerdSpeak = (text, persona = "Trainer-Gerd") => {
-    addAiLog(`Persona [${persona}] generating voice output.`, "voice");
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    return new Promise((resolve) => {
+      addAiLog(`Persona [${persona}] generating voice output.`, "voice");
+      if (!window.speechSynthesis) {
+        resolve();
+        return;
+      }
+      window.speechSynthesis.cancel();
 
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = "de-DE";
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = "de-DE";
 
-    // --- STARK ELITE VOICE SELECTION ---
-    const voices = window.speechSynthesis.getVoices();
-    const maleGermanVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("de") &&
-        !["Hedda", "Anna", "Katja", "Helena"].some((name) =>
-          v.name.includes(name),
-        ) &&
-        (v.name.includes("Male") ||
-          v.name.includes("Deutsch") ||
-          v.name.includes("Google")),
-    );
+      // --- STARK ELITE VOICE SELECTION ---
+      const voices = window.speechSynthesis.getVoices();
+      const maleGermanVoice = voices.find(
+        (v) =>
+          v.lang.startsWith("de") &&
+          !["Hedda", "Anna", "Katja", "Helena"].some((name) =>
+            v.name.includes(name),
+          ) &&
+          (v.name.includes("Male") ||
+            v.name.includes("Deutsch") ||
+            v.name.includes("Google")),
+      );
 
-    if (maleGermanVoice) msg.voice = maleGermanVoice;
+      if (maleGermanVoice) msg.voice = maleGermanVoice;
 
-    msg.pitch = 0.8;
-    msg.rate = 1.1;
+      msg.pitch = 0.8;
+      msg.rate = 1.1;
 
-    window.speechSynthesis.speak(msg);
-    setGerdVoiceActive(true);
-    msg.onend = () => setGerdVoiceActive(false);
+      msg.onend = () => {
+        setGerdVoiceActive(false);
+        resolve();
+      };
+      
+      msg.onerror = () => {
+        setGerdVoiceActive(false);
+        resolve();
+      };
+
+      setGerdVoiceActive(true);
+      window.speechSynthesis.speak(msg);
+      
+      // Safety timeout to resolve promise if SpeechSynthesis API hangs (common browser bug)
+      setTimeout(() => {
+         // Only resolve if it hasn't fired onend natively
+         setGerdVoiceActive(false);
+         resolve();
+      }, text.length * 150 + 2000); // rough estimate: 150ms per character + 2s base
+    });
   };
   window.gerdSpeak = gerdSpeak; // Expose for VR
 
@@ -5591,7 +5718,7 @@ Sende NUR das JSON Objekt!`;
     if (activeTab === "video") gerdSpeak(response, "Gerd Analyst");
   };
 
-  const [ytAccessToken, setYtAccessToken] = useState(null);
+  const [ytAccessToken, setYtAccessToken] = useState("active_session");
   const [players, setPlayers] = useState(initialPlayers.map(p => ({
     ...p,
     resilience: p.resilience || p.mental_resilience || 70,
@@ -6972,7 +7099,10 @@ Sende NUR das JSON Objekt!`;
     );
   };
 
-  const renderTactical = () => {
+  // Add state for NLZ Tactical Board
+  const [nlzPlayerPositions, setNlzPlayerPositions] = useState({});
+
+  const renderTactical = ({ targetPlayers = players, targetPositions = playerPositions, setTargetPositions = setPlayerPositions, isNlzTheme = false } = {}) => {
     const isMatchMode = currentMode === "match";
 
     // 4-4-2 and 3-4-3 default formation positions (% of field width/height)
@@ -7005,13 +7135,13 @@ Sende NUR das JSON Objekt!`;
       ],
     };
 
-    const squadPlayers = players.filter((p) => p.inSquad);
+    const squadPlayers = targetPlayers.filter((p) => p.inSquad || isNlzTheme);
     const FIELD_W = 420; // px interior coordinate system
     const FIELD_H = 640; // px interior coordinate system
 
     const getPlayerPos = (p, idx) => {
       if (!p || !p.id) return { x: 50, y: 300 };
-      if (playerPositions[p.id]) return playerPositions[p.id];
+      if (targetPositions[p.id]) return targetPositions[p.id];
       const fPos = formations["4-4-2"][idx % 11];
       return fPos
         ? { x: (fPos.x / 100) * FIELD_W, y: (fPos.y / 100) * FIELD_H }
@@ -7024,7 +7154,7 @@ Sende NUR das JSON Objekt!`;
 
       if (currentMode === "match") {
         // Own Team 4-4-2 (Only fit players)
-        const fitPlayers = players.filter(
+        const fitPlayers = targetPlayers.filter(
           (p) => !p.isInjured && p.readiness >= 65,
         );
         fitPlayers.slice(0, 11).forEach((p, i) => {
@@ -7057,7 +7187,7 @@ Sende NUR das JSON Objekt!`;
         );
       }
 
-      setPlayerPositions(newPos);
+      setTargetPositions(newPos);
       setOpponentPositions(opponentPos);
     };
 
@@ -7065,7 +7195,7 @@ Sende NUR das JSON Objekt!`;
       e.preventDefault();
       if (!draggedPlayerId) return;
 
-      const p = players.find((player) => player.id === draggedPlayerId);
+      const p = targetPlayers.find((player) => player.id === draggedPlayerId);
       if (p && (p.isInjured || p.readiness < 65)) {
         gerdSpeak(
           `Einsatz verweigert. ${p.name} ist nicht spielfit (Medical Lock).`,
@@ -7085,7 +7215,7 @@ Sende NUR das JSON Objekt!`;
         Math.min(FIELD_H - 10, e.clientY - rect.top),
       );
 
-      setPlayerPositions((prev) => {
+      setTargetPositions((prev) => {
         const newPos = { ...prev, [draggedPlayerId]: { x, y } };
 
         // "The Coach's Touch" Real-time Spatial Alert
@@ -7112,14 +7242,14 @@ Sende NUR das JSON Objekt!`;
     };
 
     const generateGerdFeedback = async () => {
-      const onField = players.filter((p) => playerPositions[p.id]);
+      const onField = targetPlayers.filter((p) => targetPositions[p.id]);
       const playerJson = onField.map((p) => ({
         id: p.id,
         name: p.name,
         pos: p.position,
         coords: [
-          Math.round(playerPositions[p.id].x),
-          Math.round(playerPositions[p.id].y),
+          Math.round(targetPositions[p.id].x),
+          Math.round(targetPositions[p.id].y),
         ],
       }));
 
@@ -7293,7 +7423,7 @@ Sende NUR das JSON Objekt!`;
 
                       // Initialize with base formation
                       homeBase.forEach((pos, i) => {
-                        const pId = players[i]?.id || `p-${i}`;
+                        const pId = targetPlayers[i]?.id || `p-${i}`;
                         pPos[pId] = { x: (pos.x / 100) * FIELD_W, y: (pos.y / 100) * FIELD_H };
                       });
                       awayBase.forEach((pos, i) => {
@@ -7303,7 +7433,7 @@ Sende NUR das JSON Objekt!`;
                       // Inject AI vectors if available
                       if (f.vectors?.player_ids) {
                         Object.entries(f.vectors.player_ids).forEach(([pIdx, vec]) => {
-                          const pId = players[parseInt(pIdx.replace("p", ""))]?.id;
+                          const pId = targetPlayers[parseInt(pIdx.replace("p", ""))]?.id;
                           if (pId && pPos[pId]) {
                             pPos[pId].x = (vec.x / 1000) * FIELD_W;
                             pPos[pId].y = (vec.y / 1000) * FIELD_H;
@@ -7356,7 +7486,7 @@ Sende NUR das JSON Objekt!`;
 
     // --- OVERRIDE LOGIC FOR LIVE PLAYBOOK SIMULATIONS ---
     const activeFrame = isPlayingDrill && activeDrill ? activeDrill.frames[currentFrameIndex] : null;
-    const currentPlayerPositions = activeFrame?.playerPositions || playerPositions;
+    const currentPlayerPositions = activeFrame?.playerPositions || targetPositions;
     const currentOpponentPositions = activeFrame?.opponentPositions || opponentPositions;
     const currentDrawings = activeFrame?.drawings || drawingPaths;
 
@@ -9243,42 +9373,39 @@ Sende NUR das JSON Objekt!`;
 
   // 3. Video Analyse
   const renderVideo = () => (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in relative">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-black italic tracking-tighter flex items-center gap-3 text-white uppercase">
           <Icon name="monitor-play" size={28} /> TINI 2.0 | Video Hub
         </h2>
         <div className="flex gap-4 items-center">
-          {!ytAccessToken ? (
-            <button
-              onClick={() => {
-                gerdSpeak(
-                  "Initialisiere sichere Verbindung zum Google API Gateway.",
-                  "Manager-Gerd",
-                );
-                addAiLog("Requesting OAuth Token via GIS...", "request");
-                setTimeout(() => {
-                  setYtAccessToken("DEMO_TOKEN_" + Date.now());
-                  addAiLog(
-                    "OAuth Token granted. Syncing library...",
-                    "success",
-                  );
-                  gerdSpeak(
-                    "YouTube-Zugriff gewährt. Deine privaten Playlisten werden geladen.",
-                    "Manager-Gerd",
-                  );
-                }, 1500);
-              }}
-              className="bg-white text-navy px-6 py-2 rounded font-black text-xs uppercase hover:bg-neon transition-all flex items-center gap-2"
-            >
-              <Icon name="youtube" size={14} /> Login with YouTube
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 text-[10px] font-mono text-neon bg-neon/5 px-4 py-2 rounded border border-neon/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse"></div>
-              CONNECTED
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-[10px] font-mono text-neon bg-neon/5 px-4 py-2 rounded border border-neon/20">
+            <div className="w-1.5 h-1.5 rounded-full bg-neon animate-pulse"></div>
+            YT API Connected
+          </div>
+          <input
+            type="text"
+            placeholder="Paste YouTube Link..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.target.value) {
+                try {
+                  const urlObj = new URL(e.target.value);
+                  let v = urlObj.searchParams.get("v");
+                  if (!v && urlObj.hostname === "youtu.be") {
+                    v = urlObj.pathname.slice(1);
+                  }
+                  if (v) {
+                    setPlaylist((prev) => [{ id: Date.now(), title: "Gerd Custom Video", isYouTube: true, url: v, analysis: "Custom Video Analysis" }, ...prev]);
+                    setActiveClipIndex(0);
+                    e.target.value = "";
+                  }
+                } catch (error) {
+                  console.error("Invalid URL");
+                }
+              }
+            }}
+            className="bg-black/50 border border-white/20 text-white px-3 py-2 rounded text-xs font-mono w-48 placeholder-white/30 focus:border-neon focus:outline-none focus:ring-1 focus:ring-neon transition-all"
+          />
           <input
             type="file"
             ref={fileInputRef}
@@ -9303,6 +9430,17 @@ Sende NUR das JSON Objekt!`;
             className="bg-navy text-neon border border-neon px-4 py-2 rounded font-black text-xs uppercase hover:bg-neon hover:text-navy transition-all shadow-[0_0_15px_rgba(0,243,255,0.4)]"
           >
             <Icon name="pen-tool" size={14} className="mr-2" /> AI Telestrator
+          </button>
+          <button
+            onClick={() => {
+              setAutoAnalyzeEnabled(!autoAnalyzeEnabled);
+              if (!autoAnalyzeEnabled) {
+                window.lastAutoAnalyzeTime = playerRef.current ? playerRef.current.getCurrentTime() : 0;
+              }
+            }}
+            className={`px-4 py-2 rounded font-black text-xs uppercase transition-all border ${autoAnalyzeEnabled ? "bg-redbull text-white border-redbull shadow-[0_0_15px_rgba(226,27,77,0.5)]" : "bg-transparent text-redbull border-redbull/30 hover:bg-redbull/10"}`}
+          >
+            <Icon name="activity" size={14} className="mr-2" /> Auto-Analyse
           </button>
           <button
             onClick={clearDrawings}
@@ -13203,7 +13341,12 @@ Sende NUR das JSON Objekt!`;
 
             {activeTab === "home" && renderExecutiveZentrale()}
             {activeTab === "kader" && renderKaderLab()}
-            {activeTab === "tactical" && renderTactical()}
+            {activeTab === "tactical" && renderTactical({ 
+              targetPlayers: activeRole === "Jugendtrainer (NLZ)" ? youthPlayers : players,
+              targetPositions: activeRole === "Jugendtrainer (NLZ)" ? nlzPlayerPositions : playerPositions,
+              setTargetPositions: activeRole === "Jugendtrainer (NLZ)" ? setNlzPlayerPositions : setPlayerPositions,
+              isNlzTheme: activeRole === "Jugendtrainer (NLZ)"
+            })}
             {activeTab === "training_lab" && (
               <TrainingLabView
                 truthObject={truthObject}

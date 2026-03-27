@@ -1,0 +1,589 @@
+Du bist ein Senior React Frontend Developer. Deine Aufgabe ist es, das hochkomplexe AI Tactical Dashboard ("Gerd 2.0 - The Legacy") exakt 1:1 in einer neuen Umgebung nachzubauen. 
+Es handelt sich um eine React 18 / Vite Anwendung mit Tailwind CSS. 
+Die Seite beinhaltet einen Chat-Wizard, einen asynchronen Fetch an eine lokale Ollama-KI, eine D3-ähnliche SVG-Rendering-Engine für Taktiktafeln (Data-Driven JSON) und eine Mermaid.js Live-Diagramm-Generierung.
+
+Hier ist der vollständige, funktionsfähige Code der Hauptkomponente (`TacticalHub.jsx`). 
+Bitte analysiere diesen Code strengstens und reproduziere die Komponente 1:1 – inklusive aller State-Hooks, der JSX-Rendering-Engine `SvgTacticalBoard` und dem komplexen `fallbackJSON` Objekt:
+
+```jsx
+import React, { useState, useEffect, useRef } from 'react';
+import Icon from './Icon';
+import { getAiConfig } from '../utils/aiConfig';
+import mermaid from 'mermaid';
+
+mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+const semanticImageMap = {
+    'rondo': '/assets/train_rondo.png',
+    'passing': '/assets/train_passing.png',
+    'sprint': '/assets/train_athletic.png',
+    'small_game': '/assets/train_game.png',
+    'large_game': '/assets/train_game.png',
+    'shooting': '/assets/train_passing.png',
+    'athletic': '/assets/train_athletic.png',
+};
+
+const TacticalHub = ({ isNlzTheme }) => {
+  const [isGeneratingSession, setIsGeneratingSession] = useState(false);
+  const [generatedSession, setGeneratedSession] = useState(null);
+  const [gerdFeedback, setGerdFeedback] = useState("");
+  
+  // Wizard State
+  const [wizardStep, setWizardStep] = useState(0);
+  const [answers, setAnswers] = useState({ verein: "", alter: "", schwerpunkt: "", mittel: "" });
+  const [customInput, setCustomInput] = useState("");
+  const endOfChatRef = useRef(null);
+
+  const { activeKey, endpoint, modelString } = getAiConfig();
+
+  const handleNextStep = (val) => {
+      const keys = ["verein", "alter", "schwerpunkt", "mittel"];
+      if (wizardStep < 4) {
+          setAnswers(prev => ({ ...prev, [keys[wizardStep]]: val }));
+          setCustomInput("");
+          if (wizardStep === 3) {
+              setWizardStep(4);
+          } else {
+              setWizardStep(ws => ws + 1);
+          }
+      }
+  };
+
+  useEffect(() => {
+      if (wizardStep === 4 && !isGeneratingSession && !generatedSession) {
+          handleGenerateSession();
+      }
+      setTimeout(() => {
+          endOfChatRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+  }, [wizardStep]);
+
+  const handleGenerateSession = async () => {
+      if (!activeKey) {
+          setGerdFeedback("SYSTEMWARNUNG: Du hast keinen aktiven API-Key hinterlegt!");
+          return;
+      }
+      setIsGeneratingSession(true);
+      setGeneratedSession(null);
+      setGerdFeedback("Starte Legacy (Tactical Precision) Modus: Lade Wyscout-Boards und Mermaid-Engine...");
+
+      const systemPrompt = `SYSTEM-ROLLE & IDENTITÄT:
+Du bist „Gerd 2.0“, der weltweit führende Tactical Architect. Dein Standard ist die absolute Präzision und fachliche Autorität der Weltspitze. Da wir ohne visuelle Hilfsmittel arbeiten, bist du gezwungen, „Kopfkino“ zu erzeugen. Deine Beschreibungen müssen so millimetergenau sein, dass ein Trainer das Feld blind aufbauen kann.
+
+KOMMUNIKATIONSSTIL (PFLICHT):
+Du antwortest ab sofort immer im direkten Dialog mit dem Trainer. Du bist der Mentor, der neben ihm auf dem Trainingsplatz steht. Nutze eine direkte, hochprofessionelle Ansprache (z. B. "Coach, lass uns das Halbfeld vorbereiten...").
+
+STRUKTUR-ZWANG FÜR JEDE ÜBUNG:
+Jede Antwort MUSS exakt diese Struktur aufweisen und visuelle Metaphern nutzen, um fehlende Bilder auszugleichen:
+1. 🎙️ DAS BRIEFING (Dialog-Eröffnung)
+2. 📐 KOPFKINO: DER AUFBAU (Feldmaße & Zonen)
+3. ⚙️ DER ABLAUF (Schritt-für-Schritt in 3 Phasen)
+4. 👁️ WORAUF IST ZU ACHTEN? (Der Profi-Blick, mind. 3 knallharte Micro-Coaching-Punkte)
+5. 🧠 DER NUTZEN (Neurologische/Taktische Begründung)
+6. 🔄 DIALOG-WECHSEL (Der Rückpass mit einer hochspezifischen Frage)
+
+KONFIGURATIONS-CHECK:
+- Verein & Philosophie: ${answers.verein}
+- Altersklasse: ${answers.alter}
+- Schwerpunkt: ${answers.schwerpunkt}
+- Mittel: ${answers.mittel}
+
+VISUELLE & TECHNISCHE DIREKTIVEN (STRIKTE EINHALTUNG):
+Damit das System die Benutzeroberfläche rendern kann, MUSST du am Ende jeder Übung exakt diese zwei technischen Blöcke als JSON-Felder ausgeben:
+
+Block 1: WYSCOUT LIVE ENGINE (JSON-Feld 'mermaid_code')
+Erzeuge ein technisches Diagramm der Zonen und Passwege (graph TD).
+Beispiel-Inhalt:
+graph TD
+  subgraph Trainingsfeld_20x20m
+  A((Spieler A)) --"Laser-Pass"--> B((Spieler B))
+  B -."Sprint in Zone".-> C{Abschluss}
+  end
+
+Block 2: ANTIGRAVITY DATA ENGINE (JSON-Feld 'media_trigger')
+STRIKTE VISUELLE DIREKTIVE (JSON TAKTIK-DATEN):
+Du schreibst ab sofort KEINEN SVG-Code und KEINE Bild-Prompts mehr. Du agierst als reine Data-Engine. Für jede Übung gibst du die taktischen Parameter als strukturiertes JSON-Objekt aus. Das Frontend übernimmt das Rendern.
+Ausgabe-Format (PFLICHT):
+Erzeuge am Ende deiner Text-Analyse zwingend diesen JSON-Block, um die visuelle Darstellung zu steuern:
+"media_trigger": {
+  "action": "render_tactic_board",
+  "pitch_type": "full_field",
+  "setup": {
+    "team_A": {"formation": "4-4-2", "status": "attacking"},
+    "team_B": {"formation": "3-4-3", "status": "defending"}
+  },
+  "drill": {
+    "focus_zone": "central_midfield",
+    "cones": "active",
+    "neutral_players": "active"
+  },
+  "taktiktafel": {
+    "feld_typ": "halbfeld", 
+    "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}],
+    "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}],
+    "huetchen": [{"x": 250, "y": 300}],
+    "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}]
+  },
+  "media_commands": {
+    "image_prompt": "Top-down bird's-eye view, 2D tactical football diagram on a high-contrast green pitch. Use only standard icons: Blue circles, Red circles, Yellow triangles. High-contrast white arrows: solid for passes, dashed for movement. Purely schematic style, no effects, no blur. Minimalist and clear. 8k.",
+    "video_prompt": "5-second technical 3D demonstration, side-line tracking view. Focus on a midfielder receiving a ball in an open stance, scanning over the shoulder twice, and playing a first-touch pass through a gap. High-fidelity movements, realistic player physics.",
+    "audio_file": "Papa.mp3"
+  }
+}
+
+ABSCHLUSS: 
+JSON-Feld 'legacy_statement': Beende jede Ausgabe mit einem kurzen, prägnanten "Legacy Statement", das die Philosophie der Übung in einem Satz zusammenfasst.
+
+ANTWORTE ZWINGEND als valides JSON-Objekt im exakt folgenden Format!
+{
+  "title": "Titel der Einheit",
+  "metadata": "⏳ 90 Min | 👥 Passend zu " + "${answers.mittel}",
+  "gerd_advice": "Dein hartes Intro-Feedback zur Session.",
+  "warmup": { "title": "...", "briefing": "...", "aufbau": "...", "ablauf": "...", "coaching": ["...", "..."], "nutzen": "...", "dialog_wechsel": "...", "mermaid_code": "...", "legacy_statement": "...", "media_trigger": { "action": "play_media", "taktiktafel": { "feld_typ": "halbfeld", "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}], "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}], "huetchen": [{"x": 250, "y": 300}], "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}] }, "veo_video_prompt": "...", "audio_sync": "Papa.mp3" } },
+  "technik": { ... selbe felder ... },
+  "main_drill": { ... selbe felder ... },
+  "final_game": { ... selbe felder ... },
+  "cooldown": { ... selbe felder ... }
+}
+`;
+
+      const fallbackJSON = {
+          title: "The Legacy Tactical Precision Session",
+          metadata: "⏳ 90 Min | 👥 16 Spieler",
+          gerd_advice: "Tipp: Lade im Video-Tool eigene Aufnahmen der Einheit hoch, ich (GERD KI) werte die Bewegungen und Passwinkel im Wyscout-Stil analytisch für dich aus!",
+          warmup: {
+              title: "1. Activation (England)", briefing: "[Das Briefing] Fokussiere dich vollumfänglich auf exzellente Ausführung und kompromisslose Intensität in diesem Block!", aufbau: "Spielfeld: Ganze Platzbreite als lineare Sprint-Trasse. Material: 20 hochsichtbare Markierungsteller im Parcour.", ablauf: "[Einleitung] Wir fokussieren uns auf isolierte Antrittsübungen, um den neuromuskulären Anreiz für die Beinkraft zu aktivieren. [Dynamik] Die Spieler bewältigen die Pylone im höchsten Tempo und forcieren ständige Schulterblicke zur Vororientierung. [Zielaktion] Gipfel der Phase ist ein asymmetrisches Sprintduell zur Schulung der kognitiven Last und reaktiven Schnelligkeit.", coaching: ["Die Körpervorderseite muss jederzeit in eine absolut offene Stellung ausgerichtet sein, um die Peripherie optimal abzudecken", "Permanenter Blickkontakt über die Schulter vor der Ballaufnahme garantiert ein frühzeitiges Screening des gesamten Aktionsradius"], nutzen: "Diese hochintensive neuromuskuläre Reizung fördert extrem effizient die Myelinisierung der Nervenbahnen, was antizipative Handlungsmuster nachhaltig stabilisiert.", dialog_wechsel: "Durch die bewusste Limitierung auf zwei Beinkontakte pro Zone zwingen wir das zentrale Nervensystem, den Körperschwerpunkt dauerhaft präzise und tief zu halten. Ein komplettes Verbot verbaler Kommunikation im Parcour erhöht die visuelle Auffassungsgabe under Dauerbelastung um ein Vielfaches.", mermaid_code: "graph TD\n    subgraph Übungsfeld_U15_England\n    Start((Start)) -- \"Sprint\" --> P1[Pylone 1]\n    P1 -- \"Schulterblick\" --> P2[Pylone 2]\n    P2 -- \"Abschluss\" --> Ziel{Tor}\n    end\n    style Ziel fill:#ff0000,stroke:#333", legacy_statement: "Die kompromisslose Athletik ist das betonharte Fundament, auf dem die Kathedralen unserer künftigen Titel erbaut werden.", media_trigger: { "action": "generate_media", "taktiktafel": { "feld_typ": "halbfeld", "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}], "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}], "huetchen": [{"x": 250, "y": 300}], "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}] }, "veo_video_prompt": "5-second cinematic high-tech football sequence. High-fidelity motion AI capturing a sharp 180-degree turn under high velocity. Drone-tracking shot. Visuals are intense and professional.", "audio_sync": "Papa.mp3" }
+          },
+          technik: {
+              title: "2. Juego de Posición (Elite-Diagramm)", briefing: "[Das Briefing] Fokussiere dich vollumfänglich auf exzellente Ausführung und kompromisslose Intensität in diesem Block!", aufbau: "Spielfeld: 15m x 15m Quadrat, unterteilt in 4 Quadranten, markiert durch gelbe Eck-Hütchen. Spieleranzahl: 4v4 + 3 Neutrale (Joker). Positionierung: Die Joker besetzen die vertikale Mittelachse. Material: 1 Ball, 8 Leibchen.", ablauf: "[Einleitung] Die ballbesitzende Mannschaft zirkuliert den Ball unter Nutzung der drei Joker, Ziel ist es, den Gegner durch gezieltes Kurzpassspiel in eine Hälfte zu locken. [Dynamik] Sobald das verteidigende Team kompakt verschiebt und den Druck erhöht, muss ein diagonaler line-breaker Überschlagpass erfolgen. [Zielaktion] Das Konzept gipfelt im Dritten-Mann-Konzept durch einen eiskalten vertikalen Schnittstellenpass und der Ballbehauptung in der zentralen Todeszone.", coaching: ["Die Körpervorderseite muss jederzeit in eine offene Stellung zum tiefsten Mitspieler rotiert werden, um den Passweg vorzuprogrammieren", "Vor jeder Ballaufnahme ist ein zweifacher Schulterblick (Scanning-Rate) zwingend, um den Raum hinter der ersten Pressinglinie stetig zu bewerten", "Pässe werden als messerscharfe Laser-Pässe mit extremem Druck in den fernen Fuß gespielt, um die Verarbeitungszeit zu eliminieren"], nutzen: "Durch die absolute Feldverknappung wird die Entscheidungsgeschwindigkeit (Decision Making) unter höchstem Zeitdruck isoliert und das Perception-Action-Coupling perfektioniert.", dialog_wechsel: "Ein strenges Zwei-Kontakt-Limit erhöht sofort die Anforderungen an die radikale Vororientierung und das permanente Freilaufverhalten ohne Ball enorm, da absolut keine Zeit mehr für einfache Korrekturen bleibt. Die Implementierung einer dreisekündigen Gegenpressing-Box zwingt das Team nach jedem Ballverlust zur totalen Dominanz in der Umschaltbewegung.", mermaid_code: "graph TD\n    subgraph Übungsquadrat 15x15m\n    A1((Roter Spieler)) -- \"Pass\" --> J1{Joker Zentral}\n    J1 -- \"Klatsch\" --> A2((Roter Spieler))\n    A2 -. \"Diagonal-Pass\" .-> J2{Joker Tief}\n    end\n    style J1 fill:#00ff00,stroke:#333\n    style J2 fill:#00ff00,stroke:#333", legacy_statement: "Dieses spanisch inspirierte Positonsspiel formt die feinen und unwiderstehlichen Klingen, mit denen wir jeden Defensivverbund sezieren werden.", media_trigger: { "action": "generate_media", "taktiktafel": { "feld_typ": "halbfeld", "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}], "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}], "huetchen": [{"x": 250, "y": 300}], "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}] }, "veo_video_prompt": "5-second cinematic high-tech football sequence. High-fidelity motion AI capturing receiving a ball in an open stance. Drone-tracking shot. Visuals are intense and professional.", "audio_sync": "Papa.mp3" }
+          },
+          main_drill: {
+              title: "3. Taktisches Umschaltspiel (Deutschland)", briefing: "[Das Briefing] Fokussiere dich vollumfänglich auf exzellente Ausführung und kompromisslose Intensität in diesem Block!", aufbau: "Spielfeld: Halbfeld 50m x 70m, markiert durch weiße Kreise. Teams: 8v8 mit zwei großen Dimensionstoren.", ablauf: "[Einleitung] Das Szenario startet mit dem stetigen und aggressiven Anlaufen der gegnerischen Viererkette durch den pressenden zentralen Stürmer. [Dynamik] Die provozierenden Schattenläufe der nachrückenden Achter erzwingen das massive Einrücken und ein asymmetrisches Gegenpressing des Gegners. [Zielaktion] Das taktische Finale gipfelt in einem blitzschnellen, dominanten Tiefenlauf in den nun ungedeckten Rücken der völlig entblößten Restverteidigung.", coaching: ["Das sofortige Besetzen der hochbrisanten Zwischenlinienräume und die proaktive Kommunikation sind bei Ballgewinn absolut essenziell", "Das kollektive Gegenpressing muss unmittelbar und instinktiv als Rudelverhalten innerhalb von exakt drei Sekunden hochgefahren werden"], nutzen: "Diese radikale Umschalthärte schult das autonome periphere Nervensystem der Eliteathleten und zementiert ihre physische Stressresistenz signifikant.", dialog_wechsel: "Sollten wir doppelte Trefferpunkte für Abschlüsse aus One-Touch-Situationen einführen, wird die offensive vertikale Spielkultur exponentiell gestärkt, da der Ballhalter zu sofortiger vertikaler Progression gezwungen wird.", mermaid_code: "graph TD\n  subgraph Umschaltzone\n  D1((Verteidiger Blau)) -- \"Ballverlust\" --> S1((Stürmer Rot))\n  S1 -. \"Tiefenlauf 10m\" .-> T{Strafraum}\n  end\n  style S1 fill:#e21b4d,stroke:#333", legacy_statement: "Das totale Gegenpressing ist keine plumpe Aktion auf dem Platz, es ist die unumstößliche Mentalität und Philosophie unserer Vereins-DNA.", media_trigger: { "action": "generate_media", "taktiktafel": { "feld_typ": "halbfeld", "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}], "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}], "huetchen": [{"x": 250, "y": 300}], "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}] }, "veo_video_prompt": "5-second cinematic high-tech football sequence. High-fidelity motion AI capturing an aggressive Gegenpressing trigger where 3 red players swarm a blue defender. Drone-tracking shot. Visuals are intense and professional.", "audio_sync": "Papa.mp3" }
+          },
+          final_game: {
+              title: "4. Ginga 1v1 (Brasilien)", briefing: "[Das Briefing] Fokussiere dich vollumfänglich auf exzellente Ausführung und kompromisslose Intensität in diesem Block!", aufbau: "Spielfeld: Strafraumgröße, begrenzt durch feste rote Hütchen und ausgestattet mit Mini-Toren an den Seitenrändern.", ablauf: "[Einleitung] Provokation und direkte Eins-gegen-Eins-Duelle sollen mutig durch isolierte Offensivspieler fernab des großen Spielgeschehens gesucht werden. [Dynamik] Der Angreifer destabilisiert die Verteidigung durch Übersteiger, stetige Körpertäuschungen und plötzliche Richtungswechsel. [Zielaktion] Nach dem erfolgreichen Durchbruch wird ein gnadenloser Abschluss durch einen explosiven Schuss ins lange Eck mit dem schwächeren Fuß vollzogen.", coaching: ["Der Körperschwerpunkt muss extrem tief über den Fußballen liegen, um asymmetrische Bewegungswechsel in Bruchteilen von Sekunden zu ermöglichen", "Das mutige Aufsuchen risikobehafteter Dribblingzonen hat oberste Priorität zur Destabilisierung der gegnerischen Halbräume"], nutzen: "Die forcierte Limitlosigkeit im Angriffsdrittel ermöglicht eine freie Verknüpfung der kreativen neuronalen Handlungsstränge bei jedem einzelnen Eliteakteur.", dialog_wechsel: "Verbieten wir physischen Kontakt und erzwingen wir allein eine taktisch saubere Verzögerung durch die Defensivspieler, fördern wir beim Angriffsspieler unzählige Lösungsansätze ohne das Verletzungsrisiko unnötig nach oben zu treiben.", mermaid_code: "graph LR\n  A1((Angreifer)) -. \"Dribbling (Übersteiger)\" .-> V1((Verteidiger))\n  A1 -- \"Schuss\" --> Tor{Mini-Tor}\n  style A1 fill:#e21b4d,stroke:#333", legacy_statement: "Die Genialität auf allerengstem Raum trennt den ewigen Mitläufer von dem einen echten Spielentscheider.", media_trigger: { "action": "generate_media", "taktiktafel": { "feld_typ": "halbfeld", "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}], "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}], "huetchen": [{"x": 250, "y": 300}], "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}] }, "veo_video_prompt": "5-second cinematic high-tech football sequence. High-fidelity motion AI capturing an attacker performing a double step-over and scoring. Drone-tracking shot. Visuals are intense and professional.", "audio_sync": "Papa.mp3" }
+          },
+          cooldown: {
+              title: "5. Active Recovery", briefing: "[Das Briefing] Fokussiere dich vollumfänglich auf exzellente Ausführung und kompromisslose Intensität in diesem Block!", aufbau: "Spielfeld: 30m x 30m Zone im leichten Flutlichtschatten, ausgestattet mit Foam-Rollern und Blackrolls.", ablauf: "[Einleitung] Ein extrem leichtes und lockeres Traben zur sofortigen aktiven Senkung der verbleibenden toxischen Muskelspannung der Beine. [Dynamik] Die Spieler zentrieren ihre Achtsamkeit aktiv auf das intensive manuelle Plätten schwerer Faszien über die pneumatischen Rollen. [Zielaktion] Vollständiges Schließen der Augen und Fokussierung auf die tiefe und verlängerte Bauchatmung zur Absenkung der kardiovaskulären Baseline.", coaching: ["Das zentrale Nervensystem muss durch langsame, extrem bewusste Ausatmung vom sympathischen Kampfmodus in die parasympathische Ruhe gezwungen werden", "Die Körperhaltung bleibt auch am Boden extrem spannungserhaltend, um den Muskeltonus der stabilisierenden Fasern sanft abklingen zu lassen"], nutzen: "Der rasche Abbau von katabolen und schädlichen Stresshormonen wie Cortisol maximiert die Effizienz des anschließenden Muskelwachstums und beschleunigt den Rebound.", dialog_wechsel: "Sollten wir Kaltwassertriggermethoden durch bereitgestellte Eisboxen zulassen, provozieren wir eine gewollte Gefäßverengung, die Laktatausschwemmung messbar um bis zu vierzig Prozent optimiert und beschleunigt.", mermaid_code: "graph TD\n  subgraph Cool-Down Area\n  P1((Spieler A)) -. \"Faszien-Rollout\" .-> R1{Regeneration}\n  P2((Spieler B)) -. \"Box-Breathing\" .-> R1\n  end\n  style R1 fill:#003366,stroke:#fff,color:#fff", legacy_statement: "Die absolute Professionalität in der unmittelbaren Erholung sichert unsere physische und unantastbare Dominanz in den letzten zwanzig Minuten des nächsten Spiels.", media_trigger: { "action": "generate_media", "taktiktafel": { "feld_typ": "halbfeld", "spieler_blau": [{"x": 250, "y": 400}, {"x": 100, "y": 300}], "spieler_rot": [{"x": 250, "y": 200}, {"x": 400, "y": 300}], "huetchen": [{"x": 250, "y": 300}], "linien": [{"start": [250, 400], "ende": [250, 200], "typ": "pass", "farbe": "weiß"}] }, "veo_video_prompt": "5-second cinematic high-tech football sequence. High-fidelity motion AI tracking exhausted athletes breathing heavily on massage rollers. Drone-tracking shot. Visuals are intense and professional.", "audio_sync": "Papa.mp3" }
+          }
+      };
+
+      try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 180000); 
+          
+          const res = await fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${activeKey}` },
+              body: JSON.stringify({ 
+                  model: modelString, 
+                  messages: [{ role: "user", content: systemPrompt }], 
+                  temperature: 0.3,
+                  response_format: { type: "json_object" } 
+              }),
+              signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          if (!res.ok) throw new Error(`HTTP status: ${res.status}`);
+          const data = await res.json();
+          if(data.error) throw new Error(data.error.message);
+          let content = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message.content : data.message.content;
+
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) throw new Error("No JSON object found");
+          
+          try {
+              const parsed = JSON.parse(jsonMatch[0]);
+              setGeneratedSession({
+                  title: parsed.title || "Elite Training Session",
+                  metadata: parsed.metadata || "⏳ 90 Min",
+                  gerd_advice: parsed.gerd_advice || fallbackJSON.gerd_advice,
+                  warmup: parsed.warmup || fallbackJSON.warmup,
+                  technik: parsed.technik || fallbackJSON.technik,
+                  main_drill: parsed.main_drill || fallbackJSON.main_drill,
+                  final_game: parsed.final_game || fallbackJSON.final_game,
+                  cooldown: parsed.cooldown || fallbackJSON.cooldown
+              });
+              setGerdFeedback(`▶️ SESSION WELTWEIT GENERIERT: ${parsed.title.toUpperCase()}`);
+          } catch (e) {
+              console.warn("Parse error", e);
+              setGeneratedSession(fallbackJSON);
+              setGerdFeedback(`KI FEHLER: Fallback geladen`);
+          }
+      } catch (error) {
+          console.warn("Network error", error);
+          setGeneratedSession(fallbackJSON);
+          setGerdFeedback(`Netzwerk FEHLER: Fallback geladen`);
+      } finally {
+          setIsGeneratingSession(false);
+      }
+  };
+
+  const renderVisualAsset = (phase) => {
+      const media = phase.media_trigger || phase;
+      return (
+         <div className="w-full h-full min-h-[150px] border-2 border-green-500/20 bg-[#050914] rounded-2xl overflow-hidden relative shadow-[0_0_30px_rgba(0,0,0,0.5)] flex flex-col p-4 md:p-6">
+             <div className="flex justify-between items-center mb-6">
+                 <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[10px] uppercase font-mono font-bold text-green-500 tracking-widest leading-none">Media Generation Engine</span>
+                 </div>
+             </div>
+             <div className="relative z-10 flex flex-col gap-4 w-full">
+                 <div className="bg-[#0b1324] w-full rounded-xl border border-green-500/30 overflow-hidden flex flex-col aspect-[4/3] max-h-[300px]">
+                     <div className="bg-black/80 backdrop-blur-md px-3 py-2 border-b border-green-500/30 flex items-center gap-2">
+                         <Icon name="monitor" size={14} className="text-green-400" />
+                         <span className="text-[10px] font-mono uppercase font-bold text-green-400 tracking-widest leading-none">Wyscout SVG Engine</span>
+                     </div>
+                     <div className="flex-1 w-full bg-[#050914] flex items-center justify-center p-2 custom-scrollbar overflow-auto">
+                         <SvgTacticalBoard data={media.taktiktafel} />
+                     </div>
+                 </div>
+                 
+                 <div className="bg-red-900/10 backdrop-blur-md px-4 py-3 rounded-xl border border-red-500/30">
+                     <div className="flex items-center gap-2 mb-2">
+                         <Icon name="video" size={14} className="text-red-400" />
+                         <span className="text-[10px] uppercase font-bold text-red-400 tracking-widest leading-none">Veo Motion AI ({media.audio_sync || "Kein Audio"})</span>
+                     </div>
+                     <p className="text-white/80 text-[11px] md:text-xs italic leading-relaxed">{media.veo_video_prompt || "Video-Prompt nicht definiert."}</p>
+                 </div>
+             </div>
+          </div>
+      );
+  };
+
+  const SvgTacticalBoard = ({ data }) => {
+      if (!data) return <svg viewBox="0 0 800 600"><rect fill="#2d8c3c" width="800" height="600"/><text x="400" y="300" fill="white" textAnchor="middle">Keine Taktik-Daten</text></svg>;
+
+      const isHalf = data.feld_typ === "halbfeld";
+      const blau = data.spieler_blau || [];
+      const rot = data.spieler_rot || [];
+      const gruen = data.spieler_gruen || [];
+      const huetchen = data.huetchen || [];
+      const linien = data.linien || [];
+
+      return (
+         <svg viewBox="0 0 800 600" className="w-full h-full font-mono select-none" preserveAspectRatio="xMidYMid meet">
+            <defs>
+               <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <polygon points="0 0, 6 3, 0 6" fill="white" />
+               </marker>
+            </defs>
+            <rect width="800" height="600" fill="#2d8c3c" />
+            <rect x="20" y="20" width="760" height="560" fill="none" stroke="white" strokeWidth="3" opacity="0.6"/>
+            {isHalf ? (
+                <>
+                <line x1="20" y1="580" x2="780" y2="580" stroke="white" strokeWidth="3" opacity="0.6"/>
+                <path d="M300 580 A 100 100 0 0 1 500 580" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                </>
+            ) : (
+                <>
+                <line x1="20" y1="300" x2="780" y2="300" stroke="white" strokeWidth="3" opacity="0.6"/>
+                <circle cx="400" cy="300" r="80" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                </>
+            )}
+
+            {linien.map((l, i) => (
+                <line 
+                   key={`l-${i}`} 
+                   x1={l.start[0]} y1={l.start[1]} 
+                   x2={l.ende[0]} y2={l.ende[1]} 
+                   stroke={l.farbe === "gelb" ? "#facc15" : "white"} 
+                   strokeWidth="3" 
+                   strokeDasharray={l.typ === "lauf" ? "5,5" : "none"}
+                   markerEnd={l.typ === "pass" || l.typ === "lauf" ? "url(#arrowhead)" : ""}
+                   opacity="0.8"
+                />
+            ))}
+
+            {huetchen.map((h, i) => (
+                <polygon key={`h-${i}`} points={`${h.x-10},${h.y+10} ${h.x+10},${h.y+10} ${h.x},${h.y-10}`} fill="#facc15" />
+            ))}
+            
+            {blau.map((n, i) => <circle key={`b-${i}`} cx={n.x} cy={n.y} r="14" fill="#3b82f6" stroke="white" strokeWidth="2"/>)}
+            {rot.map((n, i) => <circle key={`r-${i}`} cx={n.x} cy={n.y} r="14" fill="#ef4444" stroke="white" strokeWidth="2"/>)}
+            {gruen.map((n, i) => <circle key={`g-${i}`} cx={n.x} cy={n.y} r="14" fill="#22c55e" stroke="white" strokeWidth="2"/>)}
+         </svg>
+      );
+  };
+
+  const MermaidChart = ({ code }) => {
+      const [svg, setSvg] = useState('');
+      const id = useRef(`mermaid-${Math.random().toString(36).substr(2, 9)}`);
+      
+      useEffect(() => {
+          if (code) {
+              const cleanCode = code.replace(/```mermaid/g, '').replace(/```/g, '').trim();
+              mermaid.render(id.current, cleanCode).then(res => {
+                  setSvg(res.svg);
+              }).catch(e => {
+                  console.warn("Mermaid Render Error", e);
+                  setSvg(`<div class="text-red-500 font-mono text-[10px] whitespace-pre-wrap">${cleanCode}</div>`);
+              });
+          }
+      }, [code]);
+  
+      if (!code) return null;
+      return (
+         <div className="w-full aspect-[4/3] max-h-[400px] bg-[#0b1324] border-2 border-green-500/30 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,255,100,0.05)] relative flex flex-col">
+            <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-green-500/50 z-20 flex items-center gap-2 shadow-lg">
+               <Icon name="git-commit" size={14} className="text-green-400" />
+               <span className="text-[10px] font-mono font-bold text-green-400 uppercase tracking-widest">Wyscout AI Engine (Live Diagram)</span>
+            </div>
+            <div className="flex-1 p-2 pt-16 bg-[#050914] flex items-center justify-center overflow-auto custom-scrollbar [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full" dangerouslySetInnerHTML={{ __html: svg }} />
+         </div>
+      );
+  };
+
+  const AnalyticalDrillCard = ({ phase, phaseKey, iconName, iconColor, isMainDrill = false }) => {
+      if (!phase) return null;
+      return (
+         <div className={`flex flex-col gap-6 bg-[#0b1324]/50 p-6 md:p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all group ${isMainDrill ? 'bg-gradient-to-br from-[#050914] to-[#0a1128] border-neon/50 shadow-[0_0_50px_rgba(0,243,255,0.1)]' : ''}`}>
+             
+             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch">
+                 <div className="xl:col-span-4 w-full flex flex-col gap-6">
+                     <MermaidChart code={phase.mermaid_code} />
+                     {renderVisualAsset(phase)}
+                 </div>
+
+                 <div className="xl:col-span-8 flex flex-col">
+                     <div className="flex items-center gap-4 border-b border-white/10 pb-4 mb-6">
+                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${isMainDrill ? 'bg-neon text-black shadow-[0_0_20px_rgba(0,243,255,0.6)]' : `bg-gradient-to-br ${iconColor}`}`}>
+                             <Icon name={iconName} />
+                         </div>
+                         <h3 className="text-2xl md:text-3xl font-black uppercase tracking-wider text-white">
+                             {phase.title}
+                         </h3>
+                     </div>
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                         <div className="flex flex-col gap-4">
+                             <div className="bg-black/40 rounded-xl p-5 border border-white/5 h-full">
+                                 {phase.briefing && (
+                                     <div className="mb-6 pb-6 border-b border-white/10">
+                                         <div className="text-[11px] uppercase font-black text-blue-400 mb-3 flex items-center gap-2 tracking-widest">
+                                             <Icon name="mic" size={14}/> Das Briefing
+                                         </div>
+                                         <p className="text-white/90 text-[14px] leading-relaxed italic font-medium">"{phase.briefing}"</p>
+                                     </div>
+                                 )}
+
+                                 <div className="text-[11px] uppercase font-black text-white/40 mb-3 flex items-center gap-2 tracking-widest">
+                                     <Icon name="layout" size={14}/> Kopfkino: Der Aufbau
+                                 </div>
+                                 <p className="text-white/80 text-[13px] leading-relaxed mb-6 whitespace-pre-line">{phase.aufbau || phase.organisation}</p>
+                                 
+                                 <div className="text-[11px] uppercase font-black text-white/40 mb-3 flex items-center gap-2 tracking-widest">
+                                     <Icon name="play-circle" size={14}/> Der Ablauf
+                                 </div>
+                                 <p className="text-white text-[13px] leading-relaxed font-medium whitespace-pre-line">{phase.ablauf}</p>
+                             </div>
+                         </div>
+                         
+                         <div className="flex flex-col gap-4">
+                             <div className="bg-neon/5 rounded-xl p-5 border border-neon/20 h-full flex flex-col">
+                                 <div className="text-[11px] uppercase font-black text-neon mb-3 flex items-center gap-2 tracking-widest">
+                                     <Icon name="crosshair" size={14}/> Worauf ist zu achten?
+                                 </div>
+                                 <ul className="flex flex-col gap-3 mb-6">
+                                     {Array.isArray(phase.coaching) && phase.coaching.length > 0 ? phase.coaching.map((cp, idx) => (
+                                         <li key={idx} className="text-white/90 text-[13px] flex gap-3 items-start">
+                                             <div className="w-2 h-2 rounded-full bg-neon mt-1.5 shrink-0 shadow-[0_0_10px_rgba(0,243,255,1)]"/>
+                                             <span className="leading-relaxed">{cp}</span>
+                                         </li>
+                                     )) : <span className="text-white/50 text-[13px] italic">Keine spezifischen Punkte hinterlegt</span>}
+                                 </ul>
+
+                                 {(phase.nutzen || phase.wissenschaftliche_einordnung || phase.altersgerecht) && (
+                                     <>
+                                         <div className="text-[11px] uppercase font-black text-purple-400 mb-2 flex items-center gap-2 tracking-widest mt-auto">
+                                             <Icon name="brain" size={14}/> Der Nutzen
+                                         </div>
+                                         <p className="text-white/80 text-xs italic border-l-2 border-purple-500/50 pl-4 mb-6">{phase.nutzen || phase.wissenschaftliche_einordnung || phase.altersgerecht}</p>
+                                     </>
+                                 )}
+
+                                 <div className="text-[11px] uppercase font-black text-yellow-500 mb-3 flex items-center gap-2 tracking-widest mt-auto">
+                                     <Icon name="message-circle" size={14}/> Dialog-Wechsel
+                                 </div>
+                                 <p className="text-white/80 text-[13px] italic border-l-2 border-yellow-500/50 pl-4 whitespace-pre-line">{phase.dialog_wechsel || phase.variationen}</p>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+
+             {/* Legacy Statement Footer Block */}
+             {phase.legacy_statement && (
+                 <div className="w-full mt-2 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent pl-4 border-l-4 border-amber-500 rounded-r-xl py-4 pr-6">
+                     <div className="text-[11px] uppercase font-black text-amber-500 mb-2 flex items-center gap-2 tracking-widest leading-none">
+                         <Icon name="award" size={14}/> Elite Architect: The Legacy
+                     </div>
+                     <p className="text-amber-500/90 text-[15px] font-medium italic leading-relaxed">
+                         "{phase.legacy_statement}"
+                     </p>
+                 </div>
+             )}
+         </div>
+      );
+  };
+
+  const renderChatMessages = () => {
+      const msgs = [
+          { sender: 'gerd', text: "Willkommen beim Elite Architect, Coach! Für welchen Verein und welche Spielphilosophie planen wir heute?" },
+          ...(wizardStep > 0 ? [{ sender: 'coach', text: answers.verein }, { sender: 'gerd', text: "Starkes Portfolio. Welche Altersklasse und welches Leistungsniveau betreust du dort?" }] : []),
+          ...(wizardStep > 1 ? [{ sender: 'coach', text: answers.alter }, { sender: 'gerd', text: "Wurde notiert. Was ist dein zentraler Trainingsschwerpunkt für diese Einheit?" }] : []),
+          ...(wizardStep > 2 ? [{ sender: 'coach', text: answers.schwerpunkt }, { sender: 'gerd', text: "Sehr gut. Zuletzt: Welche Mittel stehen dir zur Verfügung (Spieleranzahl, Feldgröße)?" }] : []),
+          ...(wizardStep > 3 ? [{ sender: 'coach', text: answers.mittel }, { sender: 'gerd', text: "Perfekt! Ich berechne den Elite Master-Plan. Global Scouting, 3-Phasen Struktur, Wyscout-Boards und Veo AI Motion Cues werden synchronisiert. Generiere..." }] : [])
+      ];
+
+      return (
+          <div className="flex flex-col gap-4">
+              {msgs.map((m, i) => (
+                  <div key={i} className={`flex items-start gap-3 w-full max-w-2xl ${m.sender === 'coach' ? 'ml-auto flex-row-reverse' : ''} animate-fade-in`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${m.sender === 'coach' ? 'bg-white/10 border-white/20' : 'bg-neon/10 border-neon/30 text-neon'}`}>
+                          <Icon name={m.sender === 'coach' ? 'user' : 'cpu'} size={20} />
+                      </div>
+                      <div className={`p-4 rounded-2xl text-sm leading-relaxed ${m.sender === 'coach' ? 'bg-white/10 text-white rounded-tr-sm border border-white/10' : 'bg-black/60 text-white/90 rounded-tl-sm border border-neon/20 shadow-[0_0_20px_rgba(0,243,255,0.05)]'}`}>
+                          {m.text}
+                      </div>
+                  </div>
+              ))}
+              {isGeneratingSession && (
+                  <div className="flex items-start gap-3 w-full max-w-2xl animate-fade-in">
+                      <div className="w-10 h-10 rounded-full bg-neon/10 border border-neon/30 text-neon flex items-center justify-center shrink-0">
+                          <Icon name="cpu" size={20} />
+                      </div>
+                      <div className="p-4 rounded-2xl bg-black/60 text-white/90 rounded-tl-sm border border-neon/20 flex flex-col gap-2">
+                          <div className="flex items-center gap-2 text-neon font-black uppercase text-xs">
+                              <Icon name="loader" size={12} className="animate-spin" /> Deep-Linking Wyscout DB & Veo AI...
+                          </div>
+                      </div>
+                  </div>
+              )}
+              <div ref={endOfChatRef} className="h-4" />
+          </div>
+      );
+  };
+
+  const renderActiveButtons = () => {
+      if (wizardStep >= 4) return null;
+      let buttons = [];
+      if (wizardStep === 0) buttons = ["BVB (Umschaltspiel & High-Intensity)", "FC Bayern (Dominanz & Ballbesitz)", "Bayer Leverkusen (Ballbesitz & Positionsspiel)", "RB Leipzig (Gegenpressing)"];
+      if (wizardStep === 1) buttons = ["U11 Breitensport", "U15 Leistungskader (NLZ)", "U19 Bundesliga", "Senioren / Erste Herren"];
+      if (wizardStep === 2) buttons = ["Taktik & Verschieben der Ketten", "Technik & Passspiel", "Athletik & Intensität", "Kognition & Handlungsschnelligkeit"];
+      if (wizardStep === 3) buttons = ["Halbes Feld, 16 Spieler", "Viertelfeld, 10 Spieler", "Ganzes Feld, 22 Spieler", "Nur Strafraum, 14 Spieler"];
+
+      return (
+          <div className="flex flex-col gap-3 mt-4 animate-fade-in">
+              <div className="flex flex-wrap gap-2">
+                  {buttons.map((b, i) => (
+                      <button 
+                          key={i} 
+                          onClick={() => handleNextStep(b)}
+                          className="px-4 py-2 bg-white/5 hover:bg-neon hover:text-black border border-white/10 hover:border-neon rounded-full text-xs font-bold uppercase tracking-wider text-white transition-all shadow-sm"
+                      >
+                          {b}
+                      </button>
+                  ))}
+              </div>
+              <div className="flex items-center gap-2 mt-2 w-full max-w-xl relative">
+                  <input 
+                      type="text" 
+                      placeholder="Oder eigenen Wunsch hier eingeben..."
+                      value={customInput}
+                      onChange={e => setCustomInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && customInput.trim() && handleNextStep(customInput)}
+                      className="flex-1 bg-black/40 border border-white/10 rounded-full px-5 py-3 text-sm text-white outline-none focus:border-neon"
+                  />
+                  <button 
+                      onClick={() => customInput.trim() && handleNextStep(customInput)}
+                      className="absolute right-2 px-3 py-1.5 bg-neon text-black rounded-full font-black uppercase text-[10px]"
+                  >
+                      Senden
+                  </button>
+              </div>
+          </div>
+      );
+  };
+
+  return (
+    <div className={`flex flex-col gap-8 mx-auto w-full max-w-[1200px] animate-fade-in pb-32 ${isNlzTheme ? "text-white" : ""}`}>
+      
+      {/* MEGA HEADER */}
+      <div className="flex flex-col gap-4 text-center mt-8 cursor-pointer" onClick={() => { if(wizardStep===4) setWizardStep(0); }}>
+         <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon via-white to-neon uppercase tracking-tighter drop-shadow-[0_0_20px_rgba(0,243,255,0.3)]">
+            GERD 2.0: Elite Architect
+         </h1>
+         <p className="text-white/50 text-xs font-medium tracking-widest uppercase">Global Scouting, Wyscout Tactical & Veo Motion AI</p>
+      </div>
+
+      {/* CHAT INTERFACE */}
+      {!generatedSession && (
+      <div className="w-full max-w-4xl mx-auto mt-4 bg-[#050914]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-neon/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-redbull/10 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col h-[500px] md:h-[600px] overflow-hidden">
+              <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar flex flex-col pb-4">
+                  {renderChatMessages()}
+              </div>
+              <div className="pt-4 border-t border-white/10 shrink-0">
+                  {renderActiveButtons()}
+              </div>
+          </div>
+      </div>
+      )}
+
+      {gerdFeedback && !generatedSession && (
+          <div className="text-neon border border-neon/30 bg-neon/5 max-w-2xl mx-auto px-6 py-2 rounded-full text-xs font-mono animate-pulse text-center mt-4">
+             {gerdFeedback}
+          </div>
+      )}
+
+      {/* GENERATED 5-PHASE LIST */}
+      {generatedSession && (
+         <div className="flex flex-col gap-10 mt-6 animate-fade-in">
+            {/* Advice Header Card */}
+            <div className="bg-gradient-to-r from-neon/10 to-transparent border border-neon/30 p-6 md:p-8 rounded-2xl flex flex-col md:flex-row gap-6 items-center md:items-start relative overflow-hidden">
+               <div className="w-16 h-16 shrink-0 bg-neon/20 rounded-full flex items-center justify-center border border-neon text-neon">
+                  <Icon name="info" size={32} />
+               </div>
+               <div>
+                  <h3 className="text-xl font-black text-white uppercase tracking-widest mb-2">GERD's Kommentar & Video-Analyse</h3>
+                  <p className="text-white/80 font-medium leading-relaxed">{generatedSession.gerd_advice}</p>
+               </div>
+               <button 
+                  onClick={() => { setWizardStep(0); setGeneratedSession(null); setAnswers({verein:"", alter:"", schwerpunkt:"", mittel:""}); }}
+                  className="absolute top-6 right-6 px-4 py-2 border border-white/20 text-white/50 hover:bg-white/10 hover:text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all"
+               >
+                  Neu Starten
+               </button>
+            </div>
+
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+               <div>
+                  <h2 className="text-3xl font-black uppercase tracking-widest text-white">{generatedSession.title}</h2>
+                  <div className="text-neon font-mono mt-2">{generatedSession.metadata}</div>
+               </div>
+            </div>
+
+            <div className="flex flex-col gap-12 relative z-10 w-full">
+                <AnalyticalDrillCard phase={generatedSession.warmup} phaseKey="warmup" iconName="thermometer" iconColor="from-neon/20 to-transparent border-neon/30 text-neon" isMainDrill={true} />
+                <AnalyticalDrillCard phase={generatedSession.technik} phaseKey="technik" iconName="zap" iconColor="from-purple-500/20 to-transparent border-purple-500/30 text-purple-400" isMainDrill={true} />
+                <AnalyticalDrillCard phase={generatedSession.main_drill} phaseKey="main_drill" iconName="crosshair" iconColor="text-black" isMainDrill={true} />
+                <AnalyticalDrillCard phase={generatedSession.final_game} phaseKey="final_game" iconName="flag" iconColor="from-yellow-500/20 to-transparent border-yellow-500/30 text-yellow-400" isMainDrill={true} />
+                <AnalyticalDrillCard phase={generatedSession.cooldown} phaseKey="cooldown" iconName="wind" iconColor="from-blue-500/20 to-transparent border-blue-500/30 text-blue-400" isMainDrill={true} />
+            </div>
+         </div>
+      )}
+    </div>
+  );
+};
+
+export default TacticalHub;
+
+```
+
+Bitte generiere mir auf Basis dieses Scripts die fertige Seite und erkläre mir kurz, welche Dependencies (z.B. `lucide-react`, `mermaid`) ich in meinem neuen Projekt installieren muss.

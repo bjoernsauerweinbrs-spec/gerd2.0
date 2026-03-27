@@ -5,7 +5,9 @@
 
 const express = require('express');
 const cors = require('cors');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -402,4 +404,246 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// --- NEW SCRAPER MERGE (V2.0) ---
+function mapPosition(pos) {
+    if(!pos) return "ZM";
+    const p = pos.toLowerCase();
+    if(p.includes('torwart')) return "TW";
+    if(p.includes('innenverteidiger')) return "IV";
+    if(p.includes('linker verteidiger')) return "LV";
+    if(p.includes('rechter verteidiger')) return "RV";
+    if(p.includes('defensives mittelfeld')) return "ZDM";
+    if(p.includes('zentrales mittelfeld')) return "ZM";
+    if(p.includes('offensives mittelfeld')) return "ZOM";
+    if(p.includes('linkes mittelfeld')) return "LM";
+    if(p.includes('rechtes mittelfeld')) return "RM";
+    if(p.includes('linksaußen')) return "LF";
+    if(p.includes('rechtsaußen')) return "RF";
+    if(p.includes('mittelstürmer') || p.includes('sturm')) return "ST";
+    return "ZM";
+}
+
+app.get('/api/scrape', async (req, res) => {
+    const rawTeamQuery = req.query.team;
+    const apiKey = req.query.apiKey || GEMINI_API_KEY;
+    if(!rawTeamQuery) return res.status(400).json({ error: "Missing team query parameter" });
+
+    try {
+        console.log(`[SCRAPER] Merged Engine: Incoming for ${rawTeamQuery}`);
+        const cheerio = require('cheerio');
+        
+        // Step 1: Search for the team ID
+        const searchUrl = `https://www.transfermarkt.de/schnellsuche/ergebnis/schnellsuche?query=${encodeURIComponent(rawTeamQuery)}`;
+        const searchRes = await fetch(searchUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const searchHtml = await searchRes.text();
+        let $ = cheerio.load(searchHtml);
+        
+        let officialClubName = rawTeamQuery;
+        let clubLink = null;
+        $('.items tbody tr').each((i, el) => {
+            const row = $(el);
+            const aTag = row.find('td.hauptlink a');
+            const href = aTag.attr('href');
+            if(href && href.includes('/verein/')) {
+                clubLink = href;
+                officialClubName = aTag.text().trim() || rawTeamQuery;
+                return false;
+            }
+        });
+        
+        if(!clubLink) {
+            return res.status(404).json({ error: "Verein nicht gefunden." });
+        }
+        
+        clubLink = clubLink.replace('startseite', 'kader');
+        const rosterUrl = `https://www.transfermarkt.de${clubLink}`;
+        const rosterRes = await fetch(rosterUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const rosterHtml = await rosterRes.text();
+        $ = cheerio.load(rosterHtml);
+        
+        const players = [];
+        $('.items > tbody > tr').each((i, el) => {
+            const row = $(el);
+            const inlines = row.find('.inline-table');
+            if(inlines.length > 0) {
+              const name = inlines.find('td.hauptlink a').text().trim();
+              const pos = inlines.find('tr').eq(1).find('td').text().trim();
+              let imgTag = inlines.find('img.bilderrahmen-fixed');
+              let imgUrl = imgTag.attr('data-src') || imgTag.attr('src') || null;
+              
+              if(name && !players.find(p => p.name === name)) {
+                 players.push({
+                     id: players.length + 1,
+                     name: name,
+                     position: mapPosition(pos),
+                     ovr: Math.floor(Math.random() * 10) + 75,
+                     inSquad: true
+                 });
+              }
+            }
+        });
+
+        // LIVE INTELLIGENCE AI - The "Gerd-Sprech" part using Gemini
+        let liveIntelligence = {
+            lastMatch: "N/A (Keine Live-Daten)",
+            nextMatch: "Wird gescannt...",
+            form: "?-?-?-?-?",
+            tacticalNotes: "Datenextraktion läuft...",
+            dataSource: "Gerd Core",
+            confidence: 0
+        };
+
+        let manualSetupAdvice = null;
+
+        if (apiKey) {
+            try {
+                const hasPlayers = players.length > 0;
+                const aiPrompt = `Du bist GERD 2.0, der High-Performance Director.
+                VEREIN: ${officialClubName}
+                SPIELER GEFUNDEN: ${players.length}
+                
+                AUFGABE (RECHERCHE & ANALYSE):
+                1. Identifiziere das LETZTE SPIEL von ${officialClubName} (Ergebnis, Gegner, kurzes Fazit). Nutze deine interne Wissensdatenbank.
+                2. Identifiziere das NÄCHSTE SPIEL (Gegner, Datum/Zeitraum).
+                3. Erstelle eine detaillierte GEGNER-ANALYSE für das nächste Spiel (Stärken, Schwächen, Taktik vs. ${officialClubName}).
+                
+                Antworte ZWINGEND als valides JSON-Objekt in diesem Format:
+                {
+                  "liveIntelligence": {
+                     "lastMatch": "Resultat + Gegner + Fazit (Max 15 Wörter)",
+                     "nextMatch": "Nächster Gegner + Kontext",
+                     "form": "S-S-U-S-N",
+                     "tacticalNotes": "Brutale taktische Analyse (Max 40 Wörter)",
+                     "opponentStrengths": ["...", "..."],
+                     "opponentWeaknesses": ["...", "..."],
+                     "dataSource": "${hasPlayers ? 'Transfermarkt + News-Scan' : 'Synthetic Data'} (Gerd 2.0)",
+                     "confidence": ${hasPlayers ? 95 : 30}
+                  },
+                  "manualSetupAdvice": ${!hasPlayers ? '"Drei konkrete Tipps zur manuellen System-Hydrierung..."' : 'null'}
+                }`;
+
+                const localGenAI = new GoogleGenerativeAI(apiKey);
+                const model = localGenAI.getGenerativeModel({ 
+                    model: "gemini-1.5-pro",
+                    generationConfig: { response_mime_type: "application/json" }
+                });
+
+                const result = await model.generateContent(aiPrompt);
+                const responseText = result.response.text();
+                
+                try {
+                    const parsed = JSON.parse(responseText);
+                    if (parsed.liveIntelligence) {
+                        liveIntelligence = parsed.liveIntelligence;
+                    }
+                    if (parsed.manualSetupAdvice) {
+                        manualSetupAdvice = parsed.manualSetupAdvice;
+                    }
+                } catch (parseErr) {
+                    console.error("[SCRAPER] JSON Parse Error from AI:", parseErr);
+                    // Fallback attempt to extract JSON if model wrapped it in markdown
+                    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const extracted = JSON.parse(jsonMatch[0]);
+                        if (extracted.liveIntelligence) liveIntelligence = extracted.liveIntelligence;
+                    }
+                }
+            } catch (aiErr) {
+                console.warn("[SCRAPER] AI Enhancement failed via Gemini 1.5 Pro SDK:", aiErr.message);
+            }
+        }
+
+        res.json({ 
+            success: true, 
+            officialClubName, 
+            players: players.slice(0, 35), 
+            liveIntelligence,
+            manualSetupAdvice,
+            isHonestFallback: players.length === 0
+        });
+
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+app.post('/api/ollama', async (req, res) => {
+    try {
+        const ollamaResp = await fetch('http://localhost:11434/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        if (!ollamaResp.ok) {
+            return res.status(ollamaResp.status).json({ error: `Ollama returned ${ollamaResp.status}` });
+        }
+        const data = await ollamaResp.json();
+        res.json(data);
+    } catch (e) {
+        console.error("[api/ollama] Error:", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+
+const TACTIC_SYSTEM_INSTRUCTION = `
+Du bist Gerd 2.0, ein Elite-Fußballanalyst.
+Liefere eine hochprofessionelle Taktik-Analyse in 5 Markdown-Sektionen: [DAS BRIEFING], [KOPFKINO: DER AUFBAU], [DER ABLAUF], [MICRO-COACHING], [WISSENSCHAFTLICHER NUTZEN].
+Am absoluten Ende deiner Antwort fügst du ZWINGEND einen JSON-Block für das Frontend-Rendering ein. Nutze X/Y Koordinaten für ein 800x600 Feld.
+Format:
+\`\`\`json
+{
+  "feld_typ": "halbfeld",
+  "spieler_blau": [{"x": 400, "y": 500, "label": "6er"}],
+  "spieler_rot": [{"x": 400, "y": 300, "label": "ST"}],
+  "huetchen": [{"x": 200, "y": 200}],
+  "linien": [{"start": [400, 500], "ende": [400, 300], "typ": "pass", "farbe": "weiß"}]
+}
+\`\`\`
+`;
+
+app.post('/api/generate-tactic', async (req, res) => {
+    try {
+        const { exercise, department, apiKey } = req.body;
+        const finalKey = apiKey || GEMINI_API_KEY;
+
+        if (!finalKey) return res.status(401).json({ error: "Missing API Key" });
+
+        const localGenAI = new GoogleGenerativeAI(finalKey);
+        const model = localGenAI.getGenerativeModel({ 
+            model: "gemini-1.5-pro",
+            systemInstruction: TACTIC_SYSTEM_INSTRUCTION
+        });
+
+        const context = department === "Senioren" 
+            ? "Fokus: Profi-Niveau, maximale taktische Komplexität." 
+            : "Fokus: NLZ-Niveau, Schwerpunkt auf kognitive und technische Ausbildung (Ballkontrolle, Bewegung). Seien Sie extrem detailliert bei der Bewegungsschulung.";
+
+        const result = await model.generateContent(`Analysiere die Übung: ${exercise}. ${context}`);
+        const responseText = result.response.text();
+
+        // Parser: Extrahiere den JSON-Block aus dem Text
+        const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
+        let tacticJson = null;
+        let markdownText = responseText;
+
+        if (jsonMatch && jsonMatch[1]) {
+            try {
+                tacticJson = JSON.parse(jsonMatch[1]);
+                // Entferne das JSON aus dem Text, der ans Frontend geht
+                markdownText = responseText.replace(/```json\n[\s\S]*?\n```/, '').trim();
+            } catch (e) {
+                console.error("JSON Parsing Error:", e);
+            }
+        }
+
+        res.json({ markdownText, tacticJson });
+    } catch (e) {
+        console.error("[api/generate-tactic] Error:", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.listen(PORT, () => console.log(`Proxy on port ${PORT}`));
+

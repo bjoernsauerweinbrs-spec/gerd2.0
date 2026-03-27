@@ -1,0 +1,13 @@
+{
+  "title": "Übungstitel",
+  "metadata": "15 Min / 8 Spieler / Intensität: Hoch",
+  "organisation": "Der Aufbau kurz und präzise.",
+  "ablauf": "Der Ablauf (Wer passt wohin, wer läuft wohin).",
+  "coaching_punkte": ["Punkt 1: Schulterblick", "Punkt 2: offene Stellung"],
+  "diagram_nodes": [
+    {"type": "player", "x": 50, "y": 80, "color": "blue", "label": "A"},
+    {"type": "player", "x": 50, "y": 20, "color": "blue", "label": "B"},
+    {"type": "pass", "startX": 50, "startY": 75, "endX": 50, "endY": 25},
+    {"type": "run", "startX": 50, "startY": 20, "endX": 80, "endY": 50}
+  ]
+}

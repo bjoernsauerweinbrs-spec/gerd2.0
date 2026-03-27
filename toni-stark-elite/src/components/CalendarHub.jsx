@@ -7,23 +7,13 @@ const CalendarHub = ({ playbooks }) => {
   // Default mock playbooks if empty
   const defaultPlaybooks = [
     {
-      id: 999,
-      type: "match",
-      date: "Heute Abend, 20:30 Uhr",
-      title: "Matchday: RB Leipzig vs TSG Hoffenheim",
-      opponent: "TSG HOFFENHEIM",
-      formation: "4-3-3",
-      notes: "Hohes Gegenpressing. Willi Orban als direkter Manndecker gegen Kramaric angesetzt. Xavi Simons zieht extrem weit rein.",
-      players: []
-    },
-    {
       id: 998,
       type: "training",
-      date: "Gestern, 10:00 Uhr",
-      title: "Drill: Rondo Umschaltspiel (5v2)",
-      opponent: "Taktik-Training",
+      date: "Letzte Einheit",
+      title: "Taktik-Training: Grundlagen",
+      opponent: "Intern",
       formation: "N/A",
-      notes: "Fokus auf Ballbesitzstabilität unter Druck. NLZ-Spieler integriert.",
+      notes: "Einführung in die taktischen Prinzipien von Gerd 2.0.",
       players: []
     }
   ];

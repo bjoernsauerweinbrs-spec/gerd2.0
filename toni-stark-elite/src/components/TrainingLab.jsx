@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Icon from './Icon';
 import DrillSimulator from './DrillSimulator';
 
-const TrainingLab = ({ truthObject, activeRole }) => {
+const TrainingLab = ({ truthObject, setTruthObject, activeRole }) => {
   const [activeView, setActiveView] = useState("schedule"); // schedule, drills, load
   const [aiFeedback, setAiFeedback] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,16 +16,8 @@ const TrainingLab = ({ truthObject, activeRole }) => {
   const [configWarmup, setConfigWarmup] = useState(true);
   const [configCooldown, setConfigCooldown] = useState(false);
 
-  // Dynamic state for training Schedule
-  const [schedule, setSchedule] = useState([
-    { id: 1, day: "Montag", type: "Regeneration", intensity: 30, time: "10:00 - 11:30", completed: true, hasSim: false },
-    { id: 2, day: "Dienstag", type: "Athletik & Kraft", intensity: 85, time: "10:00 - 12:00", completed: true, hasSim: false },
-    { id: 3, day: "Mittwoch", type: "Taktik (Defensive)", intensity: 60, time: "14:00 - 16:00", completed: false, hasSim: false },
-    { id: 4, day: "Donnerstag", type: "Rondo (5v2)", intensity: 75, time: "10:00 - 12:00", completed: false, hasSim: true, simData: { name: "Rondo (5v2)", type: "rondo", focus: "Passspiel & Pressingresistenz" } },
-    { id: 5, day: "Freitag", type: "Abschlusstraining", intensity: 50, time: "15:00 - 16:30", completed: false, hasSim: false },
-    { id: 6, day: "Samstag", type: "MATCHDAY (Bundesliga)", intensity: 100, time: "15:30 Anpfiff", completed: false, hasSim: false, isMatchday: true },
-    { id: 7, day: "Sonntag", type: "Spielersatz-Training & REHA", intensity: 40, time: "10:00 - 11:30", completed: false, hasSim: false }
-  ]);
+  // Dynamic state for training Schedule - Now synced with truthObject
+  const schedule = truthObject?.training_lab?.schedule || [];
 
   // Mock data for Drills
   const drills = [
@@ -75,14 +67,17 @@ const TrainingLab = ({ truthObject, activeRole }) => {
         // Keep intensity rules
         const intent = (pInput.includes("auslauf") || pInput.includes("regeneration")) ? 30 : 80;80;
 
-        // Map over existing schedule to update the specific requested day instead of mutating top of the list!
-        setSchedule(prev => {
-            const index = prev.findIndex(item => item.day.toLowerCase() === targetDay);
+        // Map over existing schedule to update the specific requested day
+        setTruthObject(prev => {
+            const currentSchedule = prev.training_lab.schedule;
+            const index = currentSchedule.findIndex(item => item.day.toLowerCase() === targetDay);
+            let updatedSchedule;
+
             if (index !== -1) {
                 // Update existing row
-                const updated = [...prev];
-                updated[index] = {
-                   ...updated[index],
+                updatedSchedule = [...currentSchedule];
+                updatedSchedule[index] = {
+                   ...updatedSchedule[index],
                    type: newTitle,
                    intensity: intent,
                    completed: false,
@@ -93,10 +88,9 @@ const TrainingLab = ({ truthObject, activeRole }) => {
                        focus: finalPrompt.substring(0, 45) + (finalPrompt.length > 45 ? "..." : "")
                    }
                 };
-                return updated;
             } else {
                 // Day not in default 5-day view, so we append a new row for them
-                return [...prev, {
+                updatedSchedule = [...currentSchedule, {
                     id: Date.now(),
                     day: formattedDay,
                     type: newTitle,
@@ -111,6 +105,14 @@ const TrainingLab = ({ truthObject, activeRole }) => {
                     }
                 }];
             }
+
+            return {
+                ...prev,
+                training_lab: {
+                    ...prev.training_lab,
+                    schedule: updatedSchedule
+                }
+            };
         });
 
         setAiFeedback(`GERD AI REPORT: Trainingsplan Update für ${formattedDay}! Übung: "${newTitle}" wurde eingeloggt. Vector-Simulation als Vorschau verfügbar.`);

@@ -22,11 +22,21 @@ const Sidebar = ({ activeTab, setActiveTab, activeRole }) => {
       {/* DESKTOP SIDEBAR */}
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 h-full border-r border-[#e21b4d]/20 bg-[#060a12] z-[100] transition-all pt-28 pb-8 shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-y-auto">
         <nav className="flex-1 flex flex-col items-stretch gap-2 px-4">
-          {visibleNav.map((item) => (
+          {visibleNav.map((item) => {
+            const isActive = activeTab === item.id;
+            let activeStyles = "hover:bg-white/5 border border-transparent";
+            
+            if (isActive) {
+               if (item.color === 'neon') activeStyles = "bg-[#00f3ff]/10 border border-[#00f3ff]/30 shadow-[inset_0_0_20px_rgba(0,243,255,0.05)]";
+               else if (item.color === 'redbull') activeStyles = "bg-[#e21b4d]/10 border border-[#e21b4d]/30 shadow-[inset_0_0_20px_rgba(226,27,77,0.05)]";
+               else if (item.color === 'gold') activeStyles = "bg-[#d4af37]/10 border border-[#d4af37]/30 shadow-[inset_0_0_20px_rgba(212,175,55,0.05)]";
+            }
+
+            return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`relative flex items-center gap-4 px-4 py-4 rounded-lg transition-all group overflow-hidden ${activeTab === item.id ? "bg-[#0a1120] border border-[#00f3ff]/20" : "hover:bg-white/5 border border-transparent"}`}
+              className={`relative flex items-center gap-4 px-4 py-4 rounded-lg transition-all group overflow-hidden ${activeStyles}`}
             >
               {/* Active Indicator Line */}
               {activeTab === item.id && (
@@ -42,7 +52,8 @@ const Sidebar = ({ activeTab, setActiveTab, activeRole }) => {
                 {item.label}
               </span>
             </button>
-          ))}
+          );
+          })}
         </nav>
       </aside>
 

@@ -1,9 +1,46 @@
-import React, { useState, useEffect, useRef } from 'react';
+import json
+import os
+
+# Update board components directly in the builder for sync consistency
+BOARD_COMPONENTS = """
+  const AnalyticalDrillCard = ({ phase, phaseKey, iconName, iconColor, isMainDrill = false }) => {
+      if (!phase) return null;
+      return (
+         <div className={`flex flex-col gap-6 bg-[#0b1324]/50 p-6 md:p-8 md:px-12 rounded-3xl border border-white/10 hover:border-white/20 transition-all group max-w-5xl mx-auto w-full ${isMainDrill ? "bg-gradient-to-br from-[#050914] to-[#0a1128] border-neon/50 shadow-[0_0_50px_rgba(0,243,255,1)]" : ""}`}>
+             
+             <div className="flex flex-col w-full">
+                 <div className="flex items-center gap-4 border-b border-white/10 pb-4 mb-8">
+                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${isMainDrill ? "bg-neon text-black shadow-[0_0_20px_rgba(0,243,255,0.6)]" : `bg-gradient-to-br ${iconColor}`}`}>
+                         <Icon name={iconName} />
+                     </div>
+                     <h3 className="text-2xl md:text-3xl font-black uppercase tracking-wider text-white">
+                         {phase.title}
+                     </h3>
+                 </div>
+
+                 <div className="text-white/90 space-y-4">
+                     <ReactMarkdown components={{
+                         h1: ({node, ...props}) => <h1 className="text-2xl font-black text-neon mt-10 mb-6 uppercase tracking-[0.2em] border-b-2 border-neon/30 pb-3 flex items-center gap-4" {...props} />,
+                         h2: ({node, ...props}) => <h2 className="text-xl font-bold text-white mt-8 mb-4 uppercase tracking-widest border-l-4 border-neon/50 pl-4" {...props} />,
+                         h3: ({node, ...props}) => <h3 className="text-base font-black text-white/50 mt-8 mb-3 uppercase tracking-[0.15em] flex items-center gap-3" {...props} />,
+                         p: ({node, ...props}) => <p className="leading-relaxed mb-5 text-lg" {...props} />,
+                         li: ({node, ...props}) => <li className="mb-3 list-none flex gap-4 items-start"><div className="w-2 h-2 rounded-full bg-neon mt-2.5 shrink-0 shadow-[0_0_8px_rgba(0,243,255,0.8)]"/><span>{props.children}</span></li>,
+                         strong: ({node, ...props}) => <strong className="text-neon font-black" {...props} />,
+                         blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-neon/50 pl-6 py-4 italic bg-neon/5 rounded-r-2xl my-8 text-xl font-medium text-white shadow-inner" {...props} />
+                     }}>
+                         {phase.markdownContent}
+                     </ReactMarkdown>
+                 </div>
+             </div>
+         </div>
+      );
+  };
+"""
+
+REACT_START = """import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Icon from './Icon';
-import SvgTacticalBoard from './SvgTacticalBoard';
 import { getAiConfig } from '../utils/aiConfig';
-import { savePlan } from '../utils/supabaseClient';
 import mermaid from 'mermaid';
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark' });
@@ -48,7 +85,6 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
   // Final Draft
   const [draft, setDraft] = useState({ warmup: null, main_drill: null, cooldown: null, taktischerFokus: "" });
   const [cooldownType, setCooldownType] = useState("");
-  const [cloudStatus, setCloudStatus] = useState("");
   
   const handbuch = truthObject?.training_handbuch || [];
 
@@ -66,22 +102,6 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
 
   const addChatMessage = (sender, text) => {
     setChatHistory(prev => [...prev, { sender, text }]);
-  };
-
-  const handleCloudSave = async () => {
-      setCloudStatus("Uploading...");
-      const result = await savePlan({
-          title: `Elite Session - ${draft.taktischerFokus}`,
-          markdown_content: `${draft.warmup.markdownContent}\n\n${draft.main_drill.markdownContent}\n\n${draft.cooldown?.markdownContent || ''}`,
-          tactic_json: draft.main_drill.tacticJson, // Primary tactic
-          visibility: 'team_parents'
-      });
-      if (result.success) {
-          setCloudStatus("Cloud Sync OK");
-          setGerdFeedback("Session in Supabase Cloud gesichert!");
-      } else {
-          setCloudStatus("Sync Error");
-      }
   };
 
   const saveToHandbuch = () => {
@@ -104,25 +124,41 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
       setPhase('handbuch_or_new');
   };
 
-  const askAi = async (promptText, expectJson = false, temp = 0.2, department = "Senioren") => {
+  const askAi = async (promptText, expectJson = false, temp = 0.2) => {
+      const isOllama = aiProvider === "ollama" || (endpoint && endpoint.includes("11434"));
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 300000); 
 
-      try {
-          const res = await fetch("http://localhost:3001/api/generate-tactic", { 
-              method: "POST", 
-              headers: { "Content-Type": "application/json" }, 
-              body: JSON.stringify({ 
-                  exercise: promptText,
-                  department: department,
-                  apiKey: activeKey // Fallback if proxy doesn't have it
-              }), 
-              signal: controller.signal 
+      let requestBody;
+      let requestHeaders = { "Content-Type": "application/json" };
+
+      if (aiProvider === 'gemini') {
+          requestBody = JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: promptText }] }],
+              systemInstruction: { role: "system", parts: [{ text: GERD_MASTER_PROMPT }] },
+              generationConfig: { temperature: temp }
           });
+      } else if (isOllama) {
+          requestBody = JSON.stringify({
+              model: modelString || "llama3",
+              messages: [{ role: "system", content: GERD_MASTER_PROMPT }, { role: "user", content: promptText }],
+              stream: false,
+              options: { temperature: temp }
+          });
+      } else {
+          requestHeaders["Authorization"] = `Bearer ${activeKey}`;
+          requestBody = JSON.stringify({
+              model: modelString,
+              messages: [{ role: "system", content: GERD_MASTER_PROMPT }, { role: "user", content: promptText }],
+              temperature: temp
+          });
+      }
+      
+      try {
+          const res = await fetch(endpoint, { method: "POST", headers: requestHeaders, body: requestBody, signal: controller.signal });
           clearTimeout(timeoutId);
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
           const data = await res.json();
-          return data; // Returns { markdownText, tacticJson }
+          return data.text || data.message?.content || data.choices?.[0]?.message?.content || "";
       } catch (err) {
           clearTimeout(timeoutId);
           throw err;
@@ -133,8 +169,7 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
       setClubName(club); setPhase('generating_club'); setIsGenerating(true);
       const prompt = `Analysiere die taktische DNA von "${club}". RB-DNA, Gegenpressing oder Positionsspiel? Max 70 Wörter. Direkt zum Trainer ${trainerName}.`;
       try {
-          const data = await askAi(prompt);
-          const res = data.markdownText || "";
+          const res = await askAi(prompt);
           setClubAnalysis(res); addChatMessage('gerd', res); setPhase('club_analysis');
       } catch (e) { setPhase('club_analysis'); }
       setIsGenerating(false);
@@ -147,31 +182,16 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
           { focus: "Präzisions-Passspiel & Myelinisierung", title: "2. Myelinisierungs-Passspiel (Pro)" }
       ];
       const results = [];
-      const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
           for (let opt of options) {
               setGerdFeedback(`Berechne Warmup: ${opt.title}...`);
-              const data = await askAi(`Generiere Warmup: "${opt.title}". Fokus: ${opt.focus}. Nutze die 5-Punkte-Struktur. KEINE Bulletpoints im Ablauf!`, false, 0.2, dept);
-              if (data && data.markdownText) {
-                  results.push({ title: opt.title, markdownContent: data.markdownText, tacticJson: data.tacticJson });
-              } else {
-                  throw new Error(`Ungültige Daten für ${opt.title}`);
-              }
+              const res = await askAi(`Generiere Warmup: "${opt.title}". Fokus: ${opt.focus}. Nutze die 5-Punkte-Struktur. KEINE Bulletpoints im Ablauf!`);
+              results.push({ title: opt.title, markdownContent: res });
           }
-          if (results.length > 0) {
-              setWarmupOptions(results);
-              addChatMessage('gerd', "Warmup-Varianten bereit. Wähle deinen Fokus.");
-              setPhase('warmup_options');
-          } else {
-              throw new Error("Keine Warmup-Optionen generiert.");
-          }
-      } catch(e) { 
-          console.error(e); 
-          setGerdFeedback("FEHLER: KI-Intelligence konnte nicht geladen werden.");
-          addChatMessage('gerd', "System-Fehler: Die Verbindung zur KI-Core ist unterbrochen. Bitte API-Key und Proxy-Verbindung prüfen.");
-          setPhase('intro'); // Go back to start if it fails
-      }
-      setIsGenerating(false);
+          setWarmupOptions(results);
+          addChatMessage('gerd', "Warmup-Varianten bereit. Wähle deinen Fokus.");
+      } catch(e) { console.error(e); }
+      setIsGenerating(false); setPhase('warmup_options');
   };
 
   const generateMainDrills = async (fokus) => {
@@ -179,12 +199,11 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
       setPhase('generating_main'); setIsGenerating(true);
       const results = [];
       const topics = [`Variante A: ${fokus} (Inspir. Nagelsmann)`, `Variante B: ${fokus} (Inspir. Klopp)`];
-      const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
           for (let i = 0; i < 2; i++) {
               setGerdFeedback(`Berechne Hauptübung ${i+1}/2...`);
-              const data = await askAi(`Hauptübung: "${topics[i]}". Fokus: ${fokus}. Millimetergenaues Kopfkino. Min. 150 Wörter für Ablauf.`, false, 0.2, dept);
-              results.push({ title: `${i === 0 ? 'A' : 'B'}. ${fokus} Elite`, markdownContent: data.markdownText, tacticJson: data.tacticJson });
+              const res = await askAi(`Hauptübung: "${topics[i]}". Fokus: ${fokus}. Millimetergenaues Kopfkino. Min. 150 Wörter für Ablauf.`);
+              results.push({ title: `${i === 0 ? 'A' : 'B'}. ${fokus} Elite`, markdownContent: res });
           }
           setMainOptions(results);
           addChatMessage('gerd', `Taktik-Mastering für ${fokus} abgeschlossen.`);
@@ -194,63 +213,15 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
 
   const generateCooldown = async (type) => {
       setPhase('generating_cooldown'); setIsGenerating(true);
-      const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
-          const data = await askAi(`Generiere Cooldown: "${type}". Fokus: Active Recovery.`, false, 0.2, dept);
-          setDraft(p => ({...p, cooldown: { title: `5. Recovery (${type})`, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
+          const res = await askAi(`Generiere Cooldown: "${type}". Fokus: Active Recovery.`);
+          setDraft(p => ({...p, cooldown: { title: `5. Recovery (${type})`, markdownContent: res }}));
       } catch(e) { }
       setIsGenerating(false); setPhase('summary');
   };
+"""
 
-  const AnalyticalDrillCard = ({ phase, phaseKey, iconName, iconColor, isMainDrill = false }) => {
-      if (!phase) return null;
-      return (
-         <div className={`flex flex-col gap-6 bg-[#0b1324]/50 p-6 md:p-8 md:px-12 rounded-3xl border border-white/10 hover:border-white/20 transition-all group max-w-5xl mx-auto w-full ${isMainDrill ? "bg-gradient-to-br from-[#050914] to-[#0a1128] border-neon/50 shadow-[0_0_50px_rgba(0,243,255,1)]" : ""}`}>
-             
-             <div className="flex flex-col xl:flex-row gap-8 w-full">
-                 <div className="flex-1">
-                     <div className="flex items-center gap-4 border-b border-white/10 pb-4 mb-8">
-                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${isMainDrill ? "bg-neon text-black shadow-[0_0_20px_rgba(0,243,255,0.6)]" : `bg-gradient-to-br ${iconColor}`}`}>
-                             <Icon name={iconName} />
-                         </div>
-                         <h3 className="text-2xl md:text-3xl font-black uppercase tracking-wider text-white">
-                             {phase.title}
-                         </h3>
-                     </div>
-
-                     <div className="text-white/90 space-y-4">
-                         <ReactMarkdown components={{
-                             h1: ({node, ...props}) => <h1 className="text-2xl font-black text-neon mt-10 mb-6 uppercase tracking-[0.2em] border-b-2 border-neon/30 pb-3 flex items-center gap-4" {...props} />,
-                             h2: ({node, ...props}) => <h2 className="text-xl font-bold text-white mt-8 mb-4 uppercase tracking-widest border-l-4 border-neon/50 pl-4" {...props} />,
-                             h3: ({node, ...props}) => <h3 className="text-base font-black text-white/50 mt-8 mb-3 uppercase tracking-[0.15em] flex items-center gap-3" {...props} />,
-                             p: ({node, ...props}) => <p className="leading-relaxed mb-5 text-lg" {...props} />,
-                             li: ({node, ...props}) => <li className="mb-3 list-none flex gap-4 items-start"><div className="w-2 h-2 rounded-full bg-neon mt-2.5 shrink-0 shadow-[0_0_8px_rgba(0,243,255,0.8)]"/><span>{props.children}</span></li>,
-                             strong: ({node, ...props}) => <strong className="text-neon font-black" {...props} />,
-                             blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-neon/50 pl-6 py-4 italic bg-neon/5 rounded-r-2xl my-8 text-xl font-medium text-white shadow-inner" {...props} />
-                         }}>
-                             {phase.markdownContent}
-                         </ReactMarkdown>
-                     </div>
-                 </div>
-
-                 {phase.tacticJson && (
-                     <div className="xl:w-1/3 w-full shrink-0">
-                         <div className="sticky top-6 bg-black/40 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                             <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between">
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Tactical Board</span>
-                                 <Icon name="layout" size={12} className="text-neon" />
-                             </div>
-                             <div className="aspect-[4/3] w-full p-2">
-                                 <SvgTacticalBoard data={phase.tacticJson} />
-                             </div>
-                         </div>
-                     </div>
-                 )}
-             </div>
-         </div>
-      );
-  };
-
+JS_COMPONENTS_AND_RENDER = """
   const TextInput = ({ placeholder, onSubmit, buttonText }) => {
       const [val, setVal] = useState("");
       return (
@@ -311,12 +282,7 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
                         <h3 className="text-2xl font-black text-white uppercase mb-2">Plan Bereit</h3>
                         <p className="text-white/80">{clubName} | Fokus: {draft.taktischerFokus}</p>
                      </div>
-                      <div className="flex gap-3">
-                         <button onClick={saveToHandbuch} className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-black uppercase text-[10px] tracking-widest border border-white/10">Lokal Speichern</button>
-                         <button onClick={handleCloudSave} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">
-                            {cloudStatus || "Cloud Sync (Supabase)"}
-                         </button>
-                      </div>
+                     <button onClick={saveToHandbuch} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase">Speichern</button>
                   </div>
                   <AnalyticalDrillCard phase={draft.warmup} iconName="thermometer" iconColor="from-neon/20 to-transparent text-neon" isMainDrill={true} />
                   <AnalyticalDrillCard phase={draft.main_drill} iconName="crosshair" iconColor="from-red-500/20 to-transparent text-red-500" isMainDrill={true} />
@@ -380,3 +346,12 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
   );
 };
 export default TacticalHub;
+"""
+
+final = REACT_START + BOARD_COMPONENTS + JS_COMPONENTS_AND_RENDER
+
+with open('src/components/TacticalHub.jsx', 'w') as f:
+    f.write(final)
+
+print("Elite Modular Rewrite Complete!")
+
