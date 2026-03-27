@@ -75,17 +75,17 @@ const SvgTacticalBoard = ({ data }) => {
                         <line x1="20" y1={height-20} x2={width-20} y2={height-20} stroke="white" strokeWidth="2" opacity="0.4"/>
                         <path d={`M${width/2 - 100} ${height-20} A 100 100 0 0 1 ${width/2 + 100} ${height-20}`} fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
                         {/* Penalty Box (Half-field top) */}
-                        <rect x={width/2 - 200} y="20" width="400" height="150" fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
-                        <rect x={width/2 - 80} y="20" width="160" height="50" fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
+                        <rect x={width/2 - 200} y="20" width="400" height="150" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                        <rect x={width/2 - 80} y="20" width="160" height="50" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
                     </>
                 ) : (
                     <>
                         {/* Full-field Center Line */}
-                        <line x1="20" y1={height/2} x2={width-20} y2={height/2} stroke="white" strokeWidth="2" opacity="0.4"/>
-                        <circle cx={width/2} cy={height/2} r="80" fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
+                        <line x1="20" y1={height/2} x2={width-20} y2={height/2} stroke="white" strokeWidth="3" opacity="0.6"/>
+                        <circle cx={width/2} cy={height/2} r="80" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
                         {/* Penalty Boxes */}
-                        <rect x={width/2 - 150} y="20" width="300" height="100" fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
-                        <rect x={width/2 - 150} y={height-120} width="300" height="100" fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
+                        <rect x={width/2 - 150} y="20" width="300" height="100" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                        <rect x={width/2 - 150} y={height-120} width="300" height="100" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
                     </>
                 )}
 
@@ -113,20 +113,20 @@ const SvgTacticalBoard = ({ data }) => {
                 ))}
                 
                 {/* Players - Blue (Team A) */}
-                {blau.map((p, i) => (
-                    <g key={`b-${i}`} className="cursor-pointer group/player transition-transform hover:scale-110">
-                        <circle cx={p.x} cy={p.y} r="16" fill="#3b82f6" stroke="white" strokeWidth="2" filter="url(#neon-glow)" className="drop-shadow-lg" />
-                        <text x={p.x} y={p.y + 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="900" style={{ pointerEvents: 'none' }}>{p.label || 'B'}</text>
-                    </g>
-                ))}
-
-                {/* Players - Red (Team B) */}
-                {rot.map((p, i) => (
-                    <g key={`r-${i}`} className="cursor-pointer group/player transition-transform hover:scale-110">
-                        <circle cx={p.x} cy={p.y} r="16" fill="#ef4444" stroke="white" strokeWidth="2" filter="url(#neon-glow)" className="drop-shadow-lg" />
-                        <text x={p.x} y={p.y + 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="900" style={{ pointerEvents: 'none' }}>{p.label || 'R'}</text>
-                    </g>
-                ))}
+                 {blau.map((p, i) => (
+                     <g key={`b-${i}`} className="cursor-pointer group/player transition-transform hover:scale-110">
+                         <circle cx={p.x} cy={p.y} r="16" fill="#3b82f6" stroke="white" strokeWidth="2" filter="url(#neon-glow)" className="drop-shadow-lg" />
+                         <text x={p.x} y={p.y + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="900" style={{ pointerEvents: 'none' }}>{p.label || 'B'}</text>
+                     </g>
+                 ))}
+ 
+                 {/* Players - Red (Team B) */}
+                 {rot.map((p, i) => (
+                     <g key={`r-${i}`} className="cursor-pointer group/player transition-transform hover:scale-110">
+                         <circle cx={p.x} cy={p.y} r="16" fill="#ef4444" stroke="white" strokeWidth="2" filter="url(#neon-glow)" className="drop-shadow-lg" />
+                         <text x={p.x} y={p.y + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="900" style={{ pointerEvents: 'none' }}>{p.label || 'R'}</text>
+                     </g>
+                 ))}
 
                 {/* Players - Green (Neutrals/Jokers) */}
                 {gruen.map((p, i) => (

@@ -15,6 +15,11 @@ const NlzAcademy = ({ truthObject, setTruthObject, activeRole }) => {
   const [nlzPlayerPositions, setNlzPlayerPositions] = useState({});
   const [activeDossierPlayerId, setActiveDossierPlayerId] = useState(null);
 
+  // --- Stat Editing ---
+  const [showStatEditModal, setShowStatEditModal] = useState(false);
+  const [editingStatsPlayer, setEditingStatsPlayer] = useState(null);
+  const [tempStats, setTempStats] = useState({ pac: 50, sho: 50, pas: 50, dri: 50, def: 50, phy: 50 });
+
   // --- Phase 32: Trainer-Parent Comms ---
   const [dossierEvalNote, setDossierEvalNote] = useState("");
   const [dossierChatInput, setDossierChatInput] = useState("");
@@ -35,6 +40,29 @@ const NlzAcademy = ({ truthObject, setTruthObject, activeRole }) => {
     });
     setTruthObject({ ...truthObject, nlz_squad: updatedSquad });
     setDossierEvalNote(""); // reset
+  };
+
+  const handleOpenStatEdit = (e, player) => {
+    e.stopPropagation();
+    setEditingStatsPlayer(player);
+    setTempStats({
+      pac: player.pac || 50,
+      sho: player.sho || 50,
+      pas: player.pas || 50,
+      dri: player.dri || 50,
+      def: player.def || 50,
+      phy: player.phy || 50
+    });
+    setShowStatEditModal(true);
+  };
+
+  const handleSaveStats = () => {
+    const updatedSquad = youthPlayers.map(p => 
+      p.id === editingStatsPlayer.id ? { ...p, ...tempStats } : p
+    );
+    setTruthObject({ ...truthObject, nlz_squad: updatedSquad });
+    setShowStatEditModal(false);
+    setEditingStatsPlayer(null);
   };
 
   const [nlzPrDrafts, setNlzPrDrafts] = useState([
@@ -1167,7 +1195,6 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                               <div className="flex justify-between"><span>PHY</span><span className="text-navy">{p.phy || 50}</span></div>
                           </div>
                           
-                          {/* Birthdate */}
                           {p.dob && (
                              <div className="mt-2 text-center text-[9px] text-gray-500 tracking-widest font-black uppercase border-t border-gray-200 pt-1.5 opacity-80 bg-gray-50 mx-[-0.5rem]">
                                 * {p.dob}
@@ -1175,17 +1202,26 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                           )}
 
                           <div className="mt-0 text-center text-[9px] tracking-widest font-black uppercase border-t border-gray-100 pt-2 pb-1 bg-white mx-[-0.5rem] mb-[-0.5rem] rounded-b-xl flex items-center justify-between px-3">
-                             <span className="text-gray-400">ELTERN-PIN:</span>
-                             {p.parentPin ? (
-                               <span className="text-navy bg-gold/20 px-2 py-0.5 rounded text-xs border border-gold/40">{p.parentPin}</span>
-                             ) : (
-                               <button 
-                                 onClick={(e) => handleGenerateParentPin(e, p.id)}
-                                 className="text-white bg-navy hover:bg-neon hover:text-navy px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-md"
-                               >
-                                 <Icon name="key" size={10} /> GEN
-                               </button>
-                             )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-400">ELTERN-PIN:</span>
+                                {p.parentPin ? (
+                                  <span className="text-navy bg-gold/20 px-2 py-0.5 rounded text-xs border border-gold/40">{p.parentPin}</span>
+                                ) : (
+                                  <button 
+                                    onClick={(e) => handleGenerateParentPin(e, p.id)}
+                                    className="text-white bg-navy hover:bg-neon hover:text-navy px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-md"
+                                  >
+                                    <Icon name="key" size={10} /> GEN
+                                  </button>
+                                )}
+                              </div>
+                              <button 
+                                onClick={(e) => handleOpenStatEdit(e, p)}
+                                className="text-navy/40 hover:text-neon transition-colors"
+                                title="Werte bearbeiten"
+                              >
+                                <Icon name="settings" size={14} />
+                              </button>
                           </div>
                       </div>
                     </div>
@@ -2130,6 +2166,61 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                     </div>
                 </div>
             </div>
+        )}
+
+        {/* Stat Edit Modal */}
+        {showStatEditModal && editingStatsPlayer && (
+           <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+              <div className="bg-white border border-gray-200 w-full max-w-md rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fade-in text-navy">
+                 <div className="flex justify-between items-center bg-gray-50 p-6 border-b border-gray-200">
+                    <div>
+                       <h3 className="text-navy font-black uppercase tracking-widest text-lg flex items-center gap-3">
+                          <Icon name="settings" className="text-redbull" size={24} /> 
+                          Werte bearbeiten
+                       </h3>
+                       <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">{editingStatsPlayer.name}</p>
+                    </div>
+                    <button onClick={() => setShowStatEditModal(false)} className="text-gray-400 hover:text-navy transition-colors">
+                       <Icon name="x" size={24} />
+                    </button>
+                 </div>
+                 
+                 <div className="p-8 space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                       {['pac', 'sho', 'pas', 'dri', 'def', 'phy'].map(stat => (
+                          <div key={stat}>
+                             <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2 block">{stat}</label>
+                             <div className="flex items-center gap-3">
+                                <input 
+                                   type="range" 
+                                   min="1" max="99" 
+                                   value={tempStats[stat]} 
+                                   onChange={(e) => setTempStats({...tempStats, [stat]: parseInt(e.target.value)})}
+                                   className="flex-1 accent-redbull h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                />
+                                <span className="w-8 text-center font-black text-sm text-navy">{tempStats[stat]}</span>
+                             </div>
+                          </div>
+                       ))}
+                    </div>
+                 </div>
+                 
+                 <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+                    <button 
+                       onClick={() => setShowStatEditModal(false)}
+                       className="px-6 py-3 rounded-lg border border-gray-200 text-gray-400 font-black uppercase text-[10px] tracking-widest hover:bg-white transition-colors"
+                    >
+                       Abbrechen
+                    </button>
+                    <button 
+                       onClick={handleSaveStats}
+                       className="bg-navy text-white px-8 py-3 rounded-lg font-black uppercase text-[10px] tracking-widest hover:bg-redbull transition-all shadow-md"
+                    >
+                       Speichern
+                    </button>
+                 </div>
+              </div>
+           </div>
         )}
 
       </div>

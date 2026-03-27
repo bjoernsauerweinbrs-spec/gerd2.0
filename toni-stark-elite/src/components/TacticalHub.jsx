@@ -24,7 +24,7 @@ PFLICHT-STRUKTUR FÜR JEDE TRAININGSÜBUNG:
 5. 🧠 WISSENSCHAFTLICHER NUTZEN: Begründung aus neurologischer/physischer Sicht (z.B. Perception-Action-Coupling).`;
 
 
-const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) => {
+const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targetPlayers, targetPositions, setTargetPositions }) => {
   const { activeKey, endpoint, modelString, aiProvider } = getAiConfig();
   
   // State Machine
@@ -115,7 +115,8 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
               body: JSON.stringify({ 
                   exercise: promptText,
                   department: department,
-                  apiKey: activeKey 
+                  apiKey: activeKey,
+                  playerContext: targetPlayers?.map(p => `${p.name} (${p.position})`).join(", ") || ""
               }), 
               signal: controller.signal 
           });
@@ -248,6 +249,14 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme }) =>
                              <div className="aspect-[4/3] w-full p-2">
                                  <SvgTacticalBoard data={phase.tacticJson} />
                              </div>
+                              <div className="p-4 border-t border-white/10 bg-black/20">
+                                 <button 
+                                    onClick={() => alert("KI-Visualisierung angefordert. GERD generiert nun ein fotorealistisches Bild dieser Übung...")}
+                                    className="w-full py-2 bg-neon/10 hover:bg-neon text-neon hover:text-navy border border-neon/30 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                                 >
+                                    <Icon name="image" size={12} /> KI-Visualisierung generieren
+                                 </button>
+                              </div>
                          </div>
                      </div>
                  )}
