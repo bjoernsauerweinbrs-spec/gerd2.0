@@ -1114,8 +1114,9 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {youthPlayers.filter(p => ageFilter === "All" || p.group === ageFilter).map((p) => {
-                const ovr = Math.round((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6) || 60;
-                const pot = p.pot || Math.min(99, ovr + 15);
+                // Stable OVR calculation: rounded to integer from stored stats
+                const ovr = Math.floor((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6) || 60;
+                const pot = p.pot ? Math.floor(p.pot) : Math.min(99, ovr + 15);
                 
                 return (
                   <div
@@ -1135,10 +1136,20 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                             <span className="text-[10px] text-gray-500 tracking-widest mt-1">POT</span>
                           </div>
                         </div>
-                        <div className="text-center mt-2">
-                          <span className="px-3 py-1 bg-navy/10 text-navy rounded-full text-[9px] font-black uppercase tracking-widest">
+                        <div className="text-center mt-2 relative">
+                          <span className="px-3 py-1 bg-navy/10 text-navy rounded-full text-[9px] font-black uppercase tracking-widest relative z-20">
                             {p.group.toUpperCase()} • {p.position}
                           </span>
+                          
+                          {/* Player Image / Silhouette */}
+                          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-32 h-32 flex items-end justify-center pointer-events-none">
+                             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent opacity-50 z-10"></div>
+                             {p.imageUrl ? (
+                               <img src={p.imageUrl} alt={p.name} className="h-32 object-contain relative z-10 drop-shadow-lg scale-110" />
+                             ) : (
+                               <Icon name="user" size={80} className="text-gray-200 relative z-10 mb-2" />
+                             )}
+                          </div>
                         </div>
                       </div>
                       

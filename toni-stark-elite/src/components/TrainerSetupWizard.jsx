@@ -44,13 +44,13 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
             position: pos,
             group: group.id,
             groupName: group.name,
-            pac: rating + (Math.random()*10 - 5),
-            dri: rating + (Math.random()*10 - 5),
-            sho: rating + (Math.random()*10 - 5),
-            def: rating + (Math.random()*10 - 5),
-            pas: rating + (Math.random()*10 - 5),
-            phy: rating + (Math.random()*10 - 5),
-            pot: rating + 15 > 99 ? 99 : rating + 15, // Potential is higher
+            pac: Math.floor(rating + (Math.random()*10 - 5)),
+            dri: Math.floor(rating + (Math.random()*10 - 5)),
+            sho: Math.floor(rating + (Math.random()*10 - 5)),
+            def: Math.floor(rating + (Math.random()*10 - 5)),
+            pas: Math.floor(rating + (Math.random()*10 - 5)),
+            phy: Math.floor(rating + (Math.random()*10 - 5)),
+            pot: Math.floor(rating + 15 > 99 ? 99 : rating + 15), // Potential is higher
             focus: Math.floor(Math.random() * 5) + 5,
             frustration: Math.floor(Math.random() * 4) + 1
          });

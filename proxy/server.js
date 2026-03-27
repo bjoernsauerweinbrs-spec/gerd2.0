@@ -468,16 +468,22 @@ app.get('/api/scrape', async (req, res) => {
             if(inlines.length > 0) {
               const name = inlines.find('td.hauptlink a').text().trim();
               const pos = inlines.find('tr').eq(1).find('td').text().trim();
-              let imgTag = inlines.find('img.bilderrahmen-fixed');
+              
+              // Better Image Logic: Try multiple selectors and data attributes
+              let imgTag = row.find('img.bilderrahmen-fixed, img.bilderrahmen, img.profilfoto');
               let imgUrl = imgTag.attr('data-src') || imgTag.attr('src') || null;
               
+              if(imgUrl && imgUrl.includes('placeholder')) imgUrl = null;
+              if(imgUrl && !imgUrl.startsWith('http')) imgUrl = `https://www.transfermarkt.de${imgUrl}`;
+
               if(name && !players.find(p => p.name === name)) {
                  players.push({
                      id: players.length + 1,
                      name: name,
                      position: mapPosition(pos),
-                     ovr: Math.floor(Math.random() * 10) + 75,
-                     inSquad: true
+                     ovr: 75, // Stable default, AI will refine later if needed
+                     inSquad: true,
+                     imageUrl: imgUrl
                  });
               }
             }
