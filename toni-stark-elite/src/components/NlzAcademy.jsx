@@ -303,6 +303,33 @@ Antworte zwingend im JSON Format: {"score": [Zahl 0-100], "report": "[1 Satz Beg
       }
   };
 
+  const handleAddPlayer = () => {
+    const newPlayer = {
+      id: "p_" + Date.now(),
+      name: "Neuer Spieler",
+      position: "ST",
+      group: ageFilter === "All" ? "U15" : ageFilter,
+      pac: 50, sho: 50, pas: 50, dri: 50, def: 50, phy: 50,
+      pot: 75,
+      avatar_url: null,
+      dob: "01.01.2012"
+    };
+    setTruthObject(prev => ({
+      ...prev,
+      nlz_squad: [newPlayer, ...(prev.nlz_squad || [])]
+    }));
+  };
+
+  const handleDeletePlayer = (e, id) => {
+    e.stopPropagation();
+    if (window.confirm("Spieler wirklich aus dem NLZ-Kader entfernen?")) {
+      setTruthObject(prev => ({
+        ...prev,
+        nlz_squad: (prev.nlz_squad || []).filter(p => p.id !== id)
+      }));
+    }
+  };
+
   const handleSendCoachMessage = (playerId) => {
     if (!dossierChatInput.trim()) return;
     const updatedSquad = youthPlayers.map(p => {
@@ -486,7 +513,7 @@ Antworte zwingend im JSON Format: {"score": [Zahl 0-100], "report": "[1 Satz Beg
        ageRange: "U10",
        videoId: "uDavIINSWag",
        tags: ["1v1", "Dribbling", "Offensive", "DFB", "Stützpunkt"],
-       summary: "Einübung absoluter Dribbling-Überzeugung mit Fokus auf Körpertäuschungen zur Überwindung isolierter Abwehrspieler.",
+       summary: "Einübung absoluter Dribbling-Überzeugung mit Fokus auf Körperschwerpunkt-Täuschungen zur Überwindung isolierter Abwehrspieler.",
        focusPoints: ["Mutiges Andribbeln", "Explosiver Antritt nach Finte", "Viel Lob und Motivation"],
        gerdSpeech: "Ich will hier maximalen Mut sehen! Die Jungs müssen Fehler machen dürfen. Andribbeln am Verteidiger, klare Finte und dann der explosive Antritt. Die Gewichtsverlagerung des Gegners muss bestraft werden. Wenn er scheitert? Egal! Nächster Versuch. Bei den Zehnjährigen bauen wir hier das Selbstvertrauen für das offensive Eins-gegen-Eins auf."
      }
@@ -943,13 +970,13 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
 
             <nav className="flex flex-wrap justify-center items-center gap-3 bg-gray-100/50 p-3 rounded-[2rem] border border-gray-100 backdrop-blur-sm relative z-10">
                 {[
-                  { id: 'squad', label: 'Squad / Kader', icon: 'users', color: 'text-redbull' },
+                  { id: 'squad', label: 'Squad Hub', icon: 'users', color: 'text-redbull' },
+                  { id: 'character', label: 'Character', icon: 'target', color: 'text-navy' },
                   { id: 'finance', label: 'Budget / Finanzen', icon: 'dollar-sign', color: 'text-gold' },
                   { id: 'logistics', label: 'Logistik Hub', icon: 'package', color: 'text-[#00f3ff]' },
                   { id: 'biomechanics', label: 'Biomechanik', icon: 'activity', color: 'text-redbull' },
                   { id: 'training', label: 'Training Lab', icon: 'cpu', color: 'text-neon' },
                   { id: 'board', label: 'Taktik Board', icon: 'layout', color: 'text-neon' },
-                  { id: 'intel', label: 'Club Intel', icon: 'zap', color: 'text-blue-500' },
                   { id: 'pr', label: 'PR & Medien', icon: 'radio', color: 'text-navy' }
                 ].map(tab => (
                   <button 
@@ -973,14 +1000,6 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
 
         {/* Dynamic Views */}
         
-        {/* === CLUB INTEL (Vision Scanner & Planner) === */}
-        {activeNlzView === "intel" && (
-           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <NlzScanner onScanComplete={() => console.log("Scan success")} />
-              <NlzWeekPlanner clubInfo={truthObject.club_info} />
-           </div>
-        )}
-
         {/* === MEDIA / PR (Jugendabteilung) === */}
         {activeNlzView === "media" && (
            <div className="space-y-6 animate-fade-in">
@@ -1102,158 +1121,6 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
            </div>
         )}
 
-        {/* === E-MITGLIEDSANTRAG (APPLICATIONS) === */}
-        {activeNlzView === "applications" && (
-          <div className="space-y-6 animate-fade-in">
-             <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5"><Icon name="file-text" size={120}/></div>
-                <div className="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center relative z-10">
-                   <div>
-                      <h2 className="text-2xl font-black uppercase tracking-tighter text-navy flex items-center gap-3">
-                         <Icon name="check-circle" size={24} className="text-neon" /> E-Mitgliedsantrag
-                      </h2>
-                      <div className="text-[10px] font-mono text-gray-400 tracking-widest uppercase mt-1">Digitales Onboarding & Abrechnung</div>
-                   </div>
-                   <div className="text-right">
-                      <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Vereinswappen</div>
-                      <div className="w-16 h-16 rounded-lg bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 mt-2 cursor-pointer hover:bg-gray-200 transition-colors">
-                         <Icon name="upload" size={20} />
-                      </div>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                   <div className="space-y-4">
-                      <div>
-                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Spieler Daten</label>
-                         <div className="grid grid-cols-2 gap-4">
-                            <input type="text" placeholder="Vorname" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-black text-navy focus:outline-none focus:border-neon" />
-                            <input type="text" placeholder="Nachname" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-black text-navy focus:outline-none focus:border-neon" />
-                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                         <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Geburtsdatum</label>
-                            <input type="date" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-black text-navy focus:outline-none focus:border-neon" />
-                         </div>
-                         <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Altersklasse</label>
-                            <select className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-black text-navy focus:outline-none focus:border-neon">
-                               <option>G-Jugend</option>
-                               <option>F-Jugend</option>
-                               <option>E-Jugend</option>
-                               <option>D-Jugend</option>
-                               <option>C-Jugend</option>
-                               <option>B-Jugend (U17)</option>
-                               <option>A-Jugend (U19)</option>
-                            </select>
-                         </div>
-                      </div>
-                      <div>
-                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-1">Elternteil / Erziehungsberechtigter</label>
-                         <input type="email" placeholder="E-Mail Adresse für Parent App Zugang" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-black text-navy focus:outline-none focus:border-neon mb-2" />
-                         <input type="tel" placeholder="Mobile Telefonnummer" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm font-black text-navy focus:outline-none focus:border-neon" />
-                      </div>
-                   </div>
-
-                   <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 flex flex-col justify-between">
-                      <div>
-                         <div className="flex items-center gap-2 mb-4">
-                            <Icon name="credit-card" size={18} className="text-gold" />
-                            <h3 className="font-black uppercase text-xs tracking-widest text-navy">Beitragsfestsetzung</h3>
-                         </div>
-                         <p className="text-xs text-gray-500 font-medium mb-6 leading-relaxed">Bitte trage die spezifische Jahresgebühr für dieses Mitglied ein. Diese berechnet sich individuell nach Vereinsstatuten, Spendenbereitschaft oder Geschwister-Rabatten.</p>
-                         
-                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Festgelegter Jahresbeitrag (€)</label>
-                         <div className="flex relative items-center">
-                            <span className="absolute left-4 font-black text-navy text-xl">€</span>
-                            <input 
-                               type="number" 
-                               defaultValue={60} 
-                               className="w-full bg-white border border-gray-300 rounded-lg pl-12 pr-4 py-4 text-2xl font-black text-navy focus:outline-none focus:border-gold shadow-inner" 
-                            />
-                         </div>
-                         <div className="flex gap-2 mt-3">
-                            <button className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">Set 60€ (G-Jugend)</button>
-                            <button className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300">Set 1500€ (Elite)</button>
-                         </div>
-                      </div>
-
-                      <button className="w-full mt-8 bg-navy text-white px-6 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-blue-900 transition-colors shadow-lg flex items-center justify-center gap-3">
-                         <Icon name="check" size={18} className="text-neon" /> Mitglied aufnehmen & SEPA generieren
-                      </button>
-                   </div>
-                </div>
-             </div>
-          </div>
-        )}
-
-        {/* === FINANCE & ADMIN === */}
-        {activeNlzView === "finance" && (() => {
-          const nlzCount = youthPlayers.length;
-          const finances = clubIdentity.nlz_hub?.finances || { equipment_budget: 15000, travel_costs: 5000, materials: 3000 };
-          const annualRevenue = nlzCount * annualFee;
-          const totalExpenses = finances.equipment_budget + finances.travel_costs + finances.materials;
-          const netBalance = annualRevenue - totalExpenses;
-
-          return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-[100px] pointer-events-none"></div>
-                  <h3 className="text-navy font-black uppercase text-sm tracking-widest mb-6 flex items-center gap-3">
-                    <Icon name="pie-chart" className="text-gold" size={20} /> NLZ Budget Calculator
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
-                      <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Jahres-Einnahmen (Beiträge)</div>
-                      <div className="text-4xl font-black text-navy leading-none">€ {annualRevenue.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500 mt-2 font-mono">{nlzCount} Spieler × €{annualFee} / Jahr</div>
-                    </div>
-                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center items-center text-center">
-                      <div className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">Fixe Ausgaben (Jahr)</div>
-                      <div className="text-4xl font-black text-redbull leading-none">€ {totalExpenses.toLocaleString()}</div>
-                      <div className="text-xs text-gray-500 mt-2 font-mono">Equipment, Reisen, Material</div>
-                    </div>
-                  </div>
-
-                  <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-xl relative overflow-hidden">
-                     <span className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Icon name="settings" size={60} /></span>
-                     <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest block mb-4 flex items-center justify-between">
-                        <span>Dynamische Beitragskonfiguration</span>
-                        <span className="text-navy bg-white border border-gray-200 px-3 py-1 rounded text-lg">{annualFee} € / Jahr</span>
-                     </label>
-                     <input 
-                        type="range" 
-                        min="30" max="1500" step="10" 
-                        value={annualFee} 
-                        onChange={(e) => setAnnualFee(Number(e.target.value))} 
-                        className="w-full accent-gold h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                     />
-                     <div className="flex justify-between text-[10px] text-gray-400 font-mono mt-2 px-1">
-                        <span>30 € (G-Jugend)</span>
-                        <span>1500 € (Elite)</span>
-                     </div>
-                  </div>
-
-                  <div className="p-6 rounded-xl border border-gray-200 bg-white flex justify-between items-center">
-                     <div>
-                       <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Netto-Bilanz (P.A.)</div>
-                       <div className={`text-2xl font-black uppercase tracking-tighter ${netBalance >= 0 ? "text-green-600" : "text-redbull"}`}>
-                         {netBalance >= 0 ? "+" : ""}€ {netBalance.toLocaleString()}
-                       </div>
-                     </div>
-                     <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50">
-                       <Icon name={netBalance >= 0 ? "trending-up" : "trending-down"} className={netBalance >= 0 ? "text-green-600" : "text-redbull"} size={20} />
-                     </div>
-                   </div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
         {/* === YOUTH SQUAD (FIFA CARDS) === */}
         {activeNlzView === "squad" && (
           <div className="space-y-6 animate-fade-in">
@@ -1297,6 +1164,13 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                    {isAutoFillingYouth ? <Icon name="loader" className="animate-spin" size={16} /> : <Icon name="zap" size={16} />}
                    {isAutoFillingYouth ? "KI-Scouting läuft..." : "KI-Youth-Scouting"}
                  </button>
+                 <button 
+                    onClick={handleAddPlayer}
+                    className="px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all bg-white text-navy border-2 border-neon shadow-lg hover:scale-110 hover:bg-neon"
+                  >
+                    <Icon name="user-plus" size={16} />
+                    + Spieler
+                  </button>
               </div>
             </div>
             
@@ -1339,6 +1213,14 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
 
                         {/* Texture / Shine Effect */}
                         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-shine pointer-events-none" />
+
+                        {/* DELETE BUTTON */}
+                        <button 
+                           onClick={(e) => handleDeletePlayer(e, p.id)}
+                           className="absolute top-2 right-2 z-30 w-8 h-8 bg-red-600/20 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                        >
+                           <Icon name="trash-2" size={14} />
+                        </button>
 
                         {/* Top Section: Stats & Quality */}
                         <div className="relative pt-6 px-4 flex flex-col items-start gap-0.5 z-20">
