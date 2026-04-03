@@ -3,21 +3,20 @@
 -- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Create Roles Enum (Optional but cleaner)
--- CREATE TYPE user_role AS ENUM ('trainer', 'nlz_leiter', 'eltern');
-
--- 3. Create Training Plans Table
+-- 2. Create Training Plans Table
 CREATE TABLE IF NOT EXISTS training_plans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   author_id UUID REFERENCES auth.users(id) NOT NULL,
+  team_id TEXT DEFAULT 'seniors', -- 'seniors' or 'youth'
   title TEXT NOT NULL,
   markdown_content TEXT,
   tactic_json JSONB,
   visibility TEXT CHECK (visibility IN ('private', 'team_parents', 'public')) DEFAULT 'private',
+  status TEXT DEFAULT 'draft',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Create Messages Table
+-- 3. Create Messages Table
 CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   plan_id UUID REFERENCES training_plans(id) ON DELETE CASCADE NOT NULL,
@@ -26,9 +25,24 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 4. [NEW] Create Logistics Ledger Table
+CREATE TABLE IF NOT EXISTS logistics_ledger (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  requester_id UUID REFERENCES auth.users(id),
+  item_name TEXT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  type TEXT CHECK (type IN ('income', 'expense')) NOT NULL,
+  category TEXT DEFAULT 'material',
+  status TEXT CHECK (status IN ('requested', 'approved', 'rejected', 'completed')) DEFAULT 'requested',
+  ai_offer_json JSONB, -- Stores the "Idealo" simulated results
+  sponsor_inquiry_text TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 5. Enable RLS
 ALTER TABLE training_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE logistics_ledger ENABLE ROW LEVEL SECURITY;
 
 -- 6. RLS POLICIES: training_plans
 
@@ -70,10 +84,19 @@ USING (
   )
 );
 
--- ELTERN: Read messages they sent or on public plans? 
--- The user prompt said: "Trainer dürfen Messages zu ihren eigenen Plänen lesen."
--- Let's stick to that and add a policy for senders to see their own messages.
 CREATE POLICY "Users: Read own messages" 
 ON messages FOR SELECT 
 TO authenticated
 USING (auth.uid() = sender_id);
+
+-- 8. [NEW] RLS POLICIES: logistics_ledger
+
+CREATE POLICY "Authenticated: Read logistics" 
+ON logistics_ledger FOR SELECT 
+TO authenticated
+USING (true);
+
+CREATE POLICY "Managers: Full access to logistics" 
+ON logistics_ledger FOR ALL 
+TO authenticated
+USING (true); -- Simplified for now, in production check user metadata/role

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
+import { scrapeClubData } from '../utils/aiConfig';
 
 const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
   const [step, setStep] = useState(0); // 0: Club, 1: League, 2: Scraping, 3: Validation
@@ -72,8 +73,7 @@ const TrainerSetupWizard = ({ setTruthObject, onLogout }) => {
     
     try {
         const apiKey = localStorage.getItem('stark_gemini_key') || "";
-        const response = await fetch(`http://localhost:3001/api/scrape?team=${encodeURIComponent(clubName)}&apiKey=${apiKey}`);
-        const data = await response.json();
+        const data = await scrapeClubData(clubName, apiKey);
         
         if (data.success && data.players && data.players.length > 0) {
             setProgress(60);

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Icon from './Icon';
 import SvgTacticalBoard from './SvgTacticalBoard';
-import { getAiConfig } from '../utils/aiConfig';
-import { savePlan } from '../utils/supabaseClient';
+import { getAiConfig, generateTactic } from '../utils/aiConfig';
+import { createClient } from '@supabase/supabase-js';
+import { savePlan, supabase } from '../utils/supabaseClient';
 import mermaid from 'mermaid';
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark' });
@@ -16,7 +17,7 @@ Du bist ein Chat-Assistent. Du generierst KEINEN Code, KEINE JSON-Daten und KEIN
 DIE ANTI-FAULHEITS-REGEL (STRIKT):
 Es ist dir strengstens untersagt, hohle Floskeln ("Macht Druck") oder zu kurze Stichpunkte zu verwenden. Jede Phase der Übung MUSS in detaillierten, vollständigen Sätzen beschrieben werden. Ein zu kurzer Text ist ein Systemversagen. KEINE BULLET POINTS in den Beschreibungen! Nutze Fließtext für Kopfkino.
 
-PFLICHT-STRUKTUR FÜR JEDE TRAININGSÜBUNG:
+PFLICHT-STRUKTUR FOR JEDE TRAININGSÜBUNG:
 1. 🎙️ DAS BRIEFING: Ein messerscharfer Satz zum Kernziel.
 2. 📐 KOPFKINO: DER AUFBAU: Exakte Meter-Maße, Positionierung von Hütchen/Toren/Zonen, Startpositionen aller Spieler.
 3. ⚙️ DER ABLAUF: Chronologische Beschreibung (Min. 5 Sätze, ca. 150 Wörter). Nutze Elite-Vokabular (Dritter Mann, Gegenpressing-Trigger).
@@ -25,7 +26,7 @@ PFLICHT-STRUKTUR FÜR JEDE TRAININGSÜBUNG:
 
 
 const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targetPlayers, targetPositions, setTargetPositions }) => {
-  const { activeKey, endpoint, modelString, aiProvider } = getAiConfig();
+  // Removed unused activeKey/endpoint/modelString/aiProvider assignments to standardize AI handling
   
   // State Machine
   const [phase, setPhase] = useState('handbuch_or_new'); 
@@ -50,7 +51,40 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
   const [cooldownType, setCooldownType] = useState("");
   const [cloudStatus, setCloudStatus] = useState("");
   
-  const handbuch = truthObject?.training_handbuch || [];
+  const [handbuch, setHandbuch] = useState([]);
+
+  useEffect(() => {
+    const loadPlans = async () => {
+        const { data, error } = await supabase
+            .from('training_plans')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (data) {
+            const mapped = data.map(p => ({
+                id: p.id,
+                date: new Date(p.created_at).toLocaleDateString(),
+                title: p.title,
+                focus: p.title.replace('Elite Session - ', ''),
+                warmup: { markdownContent: p.markdown_content.split('\n\n')[0] }, 
+                main_drill: { markdownContent: p.markdown_content.split('\n\n')[1], tacticJson: p.tactic_json },
+                cooldown: { markdownContent: p.markdown_content.split('\n\n')[2] }
+            }));
+            setHandbuch(mapped);
+        }
+    };
+
+    loadPlans();
+
+    const channel = supabase
+        .channel('public:training_plans_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'training_plans' }, (payload) => {
+            loadPlans();
+        })
+        .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, []);
 
   useEffect(() => {
     if (endRef.current) {
@@ -71,14 +105,29 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
   const handleCloudSave = async () => {
       setCloudStatus("Uploading...");
       const result = await savePlan({
+          team_id: isNlzTheme ? 'youth' : 'seniors',
           title: `Elite Session - ${draft.taktischerFokus}`,
-          markdown_content: `${draft.warmup.markdownContent}\n\n${draft.main_drill.markdownContent}\n\n${draft.cooldown?.markdownContent || ''}`,
-          tactic_json: draft.main_drill.tacticJson, // Primary tactic
+          markdown_content: `${draft.warmup ? draft.warmup.markdownContent : ''}\n\n${draft.main_drill ? draft.main_drill.markdownContent : ''}\n\n${draft.cooldown ? draft.cooldown.markdownContent : ''}`,
+          tactic_json: draft.main_drill?.tacticJson,
           visibility: 'team_parents'
       });
       if (result.success) {
           setCloudStatus("Cloud Sync OK");
           setGerdFeedback("Session in Supabase Cloud gesichert!");
+          // Refresh handbuch
+          const { data } = await supabase.from('training_plans').select('*').order('created_at', { ascending: false });
+          if (data) {
+             const mapped = data.map(p => ({
+                id: p.id,
+                date: new Date(p.created_at).toLocaleDateString(),
+                title: p.title,
+                focus: p.title.replace('Elite Session - ', ''),
+                warmup: { markdownContent: p.markdown_content.split('\n\n')[0] },
+                main_drill: { markdownContent: p.markdown_content.split('\n\n')[1], tacticJson: p.tactic_json },
+                cooldown: { markdownContent: p.markdown_content.split('\n\n')[2] }
+             }));
+             setHandbuch(mapped);
+          }
       } else {
           setCloudStatus("Sync Error");
       }
@@ -105,31 +154,14 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
   };
 
   const askAi = async (promptText, expectJson = false, temp = 0.2, department = "Senioren") => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 300000); 
-
       try {
-          const res = await fetch("http://localhost:3001/api/generate-tactic", { 
-              method: "POST", 
-              headers: { "Content-Type": "application/json" }, 
-              body: JSON.stringify({ 
-                  exercise: promptText,
-                  department: department,
-                  apiKey: activeKey,
-                  playerContext: targetPlayers?.map(p => `${p.name} (${p.position})`).join(", ") || ""
-              }), 
-              signal: controller.signal 
-          });
-          clearTimeout(timeoutId);
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          const data = await res.json();
+          const playerContext = targetPlayers?.map(p => `${p.name} (${p.position})`).join(", ") || "";
+          const data = await generateTactic(promptText, department, playerContext);
           return data; 
       } catch (err) {
-          clearTimeout(timeoutId);
-          console.warn("Tactical AI Proxy failed, using internal fallback for stability.");
-          // SMART FALLBACK
+          console.error("Tactical AI Proxy failure:", err);
           return {
-             markdownText: `### GERD-ANALYSE: ${promptText}\n\nAufgrund einer temporären Verbindungsstörung zur Cloud-Intelligence (Gemini) habe ich dir diesen optimierten Plan aus meinem Cache erstellt.\n\nFokus: Hohe Intensität und saubere Ausführung.\n- Aufbau: Markierungshütchen im 20x20m Quadrat.\n- Ablauf: 3 Min. Belastung, 1 Min. Pause. 4 Intervalle.\n- Coaching: Fokus auf die Vororientierung (Scanning).`,
+             markdownText: `### GERD-ANALYSE: ${promptText}\n\n**STATUS: OFFLINE-MODE (DEMO)**\n\nDie Verbindung zur Cloud-Intelligence (Gemini) ist aktuell unterbrochen. Ich nutze meine lokalen taktischen Muster, um dir trotzdem eine Einheit auf A-Lizenz Niveau zu erstellen.\n\n**Tipp:** Prüfe deinen API-Key in den Einstellungen (Gears Icon oben rechts).`,
              tacticJson: { players: [], cones: [], balls: [], paths: [] }
           };
       }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
 import AiSettingsWidget from './AiSettingsWidget';
+import GerdLiveAssistant from './GerdLiveAssistant';
 
 const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }) => {
   const [globalAiInput, setGlobalAiInput] = useState('');
@@ -49,13 +50,7 @@ const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleGlobalAiSubmit = async () => {
-    if (!globalAiInput.trim()) return;
-    setIsAiProcessing(true);
-    setTimeout(() => {
-      console.log(`Global AI commanded: ${globalAiInput} via ${activeRole}`);
-      setIsAiProcessing(false);
-      setGlobalAiInput('');
-    }, 1500);
+    // Legacy support removed in favor of GerdLiveAssistant
   };
 
   const markAsRead = (id) => {
@@ -171,6 +166,13 @@ const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }
             <Icon name="settings" size={20} />
           </button>
           
+          {/* Gerd Live Voice Assistant */}
+          <GerdLiveAssistant 
+              activeRole={activeRole} 
+              activeTab={activeTab} 
+              truthObject={truthObject} 
+          />
+          
           {showAiSettings && (
              <div className="absolute top-14 right-0 w-80 bg-[#0a1120]/95 backdrop-blur-xl border border-neon/30 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden z-[100] animate-fade-in text-left">
                 <AiSettingsWidget context={activeRole === 'Manager' ? 'management' : 'trainer'} onClose={() => setShowAiSettings(false)} />
@@ -192,32 +194,12 @@ const Header = ({ activeTab, activeRole, onLogout, truthObject, setTruthObject }
            </div>
         </div>
 
-        {/* Global Intelligence Input */}
-        <div className={`w-full md:w-96 bg-black/60 border rounded-xl overflow-hidden flex transition-colors shadow-inner ${isAiProcessing ? 'border-neon shadow-[0_0_20px_rgba(0,243,255,0.2)]' : 'border-white/20 focus-within:border-white/50'}`}>
-          <div className="pl-4 py-3 flex items-center justify-center border-r border-white/10 bg-black/40">
-            <Icon name="zap" className={isAiProcessing ? "text-neon animate-pulse" : "text-white/40"} size={18} />
-          </div>
-          <input
-            type="text"
-            value={globalAiInput}
-            onChange={(e) => setGlobalAiInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleGlobalAiSubmit()}
-            placeholder={`Befehl an GERD als ${activeRole}...`}
-            className="flex-1 w-full bg-transparent border-none text-white text-sm font-mono px-4 outline-none placeholder:text-white/30"
-            disabled={isAiProcessing}
-          />
-          <button
-            onClick={handleGlobalAiSubmit}
-            disabled={!globalAiInput.trim() || isAiProcessing}
-            className={`px-4 py-3 font-black text-[10px] uppercase tracking-widest transition-colors ${
-              globalAiInput.trim() 
-                ? 'bg-neon text-black hover:bg-white' 
-                : 'bg-white/5 text-white/20'
-            }`}
-          >
-            {isAiProcessing ? '...' : 'Go'}
-          </button>
-        </div>
+        {/* Gerd Live Voice Assistant */}
+        <GerdLiveAssistant 
+            activeRole={activeRole} 
+            activeTab={activeTab} 
+            truthObject={truthObject} 
+        />
       </div>
       
       {/* AI INTERVIEW MODAL */}

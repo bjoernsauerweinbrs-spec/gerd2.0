@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import { getAiConfig, sendAiRequest } from '../utils/aiConfig';
+import { sendMessage, fetchMessages, subscribeToMessages, supabase } from '../utils/supabaseClient';
+import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
 import AiSettingsWidget from './AiSettingsWidget';
-import { getAiConfig } from '../utils/aiConfig';
+
 
 const ParentPortal = ({ truthObject, setTruthObject, activeChildId }) => {
-  const clubName = truthObject?.club_identity?.name || "Stark Elite";
+  const clubName = truthObject?.club_info?.name || "Stark Elite";
   
   // Dynamic child data
   const childRaw = truthObject?.nlz_squad?.find(p => p.id === activeChildId) || {};
@@ -24,18 +26,40 @@ const ParentPortal = ({ truthObject, setTruthObject, activeChildId }) => {
   const [aiFeedback, setAiFeedback] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [supabaseMessages, setSupabaseMessages] = useState([]);
 
-  const handleSendParentMessage = () => {
-    if (!chatInput.trim()) return;
-    const updatedSquad = (truthObject.nlz_squad || []).map(p => {
-       if (p.id === activeChildId) {
-          const newMsg = { from: 'Parent', text: chatInput, time: new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'}) };
-          return { ...p, messages: [...(p.messages || []), newMsg] };
-       }
-       return p;
+  React.useEffect(() => {
+    if (activeChildId) {
+        const loadMsgs = async () => {
+            const msgs = await fetchMessages('coach_unified', activeChildId);
+            setSupabaseMessages(msgs);
+        };
+        loadMsgs();
+
+        const channel = subscribeToMessages((payload) => {
+            const newMsg = payload.new;
+            if ((newMsg.sender_id === 'coach_unified' && newMsg.receiver_id === activeChildId) ||
+                (newMsg.sender_id === activeChildId && newMsg.receiver_id === 'coach_unified')) {
+                setSupabaseMessages(prev => [...prev, newMsg]);
+            }
+        });
+
+        return () => supabase.removeChannel(channel);
+    }
+  }, [activeChildId]);
+
+  const handleSendParentMessage = async () => {
+    if (!chatInput.trim() || !activeChildId) return;
+    
+    const success = await sendMessage({
+        sender_id: activeChildId,
+        receiver_id: 'coach_unified',
+        content: chatInput
     });
-    setTruthObject({ ...truthObject, nlz_squad: updatedSquad });
-    setChatInput("");
+    
+    if (success) {
+        setChatInput("");
+    }
   };
 
   const handleGenerateFeedback = async () => {
@@ -61,13 +85,7 @@ Formatiere zwingend als JSON:
 }`;
 
       try {
-          const res = await fetch(endpoint, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${activeKey}` },
-              body: JSON.stringify({ model: modelString, messages: [{ role: "user", content: prompt }], temperature: 0.7 })
-          });
-          const data = await res.json();
-          let raw = data.choices[0].message.content.trim();
+          let raw = await sendAiRequest(prompt);
           if(raw.startsWith("```json")) raw = raw.replace(/^```json/, "").replace(/```$/, "").trim();
           else if(raw.startsWith("```")) raw = raw.replace(/^```/, "").replace(/```$/, "").trim();
           
@@ -90,7 +108,7 @@ Formatiere zwingend als JSON:
              <div className="relative z-10">
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50 mb-2">{clubName} Parent App</div>
                 <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-tight mb-6">
-                   Hallo, <br/>Familie <span className="text-gold hidden">Wunderkind</span>Wunderkind
+                   Hallo, <br/>Familie <span className="text-neon">Wunderkind</span>
                 </h1>
                 
                 <div className="flex bg-white/10 rounded-xl p-4 border border-white/20 backdrop-blur-sm items-center gap-4">
@@ -228,16 +246,16 @@ Formatiere zwingend als JSON:
                 )}
 
                 <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#e5ddd5] custom-scrollbar">
-                   {(childRaw.messages || []).map((msg, i) => (
-                      <div key={i} className={`flex ${msg.from === 'Parent' ? 'justify-end' : 'justify-start'}`}>
-                         <div className={`max-w-[75%] p-3 rounded-2xl relative shadow-sm ${msg.from === 'Parent' ? 'bg-[#dcf8c6] text-navy rounded-br-none' : 'bg-white text-navy rounded-bl-none'}`}>
-                            <div className="text-sm font-medium leading-snug">{msg.text}</div>
-                            <div className={`text-[8px] font-mono mt-1 text-right ${msg.from === 'Parent' ? 'text-green-800/60' : 'text-gray-400'}`}>{msg.time}</div>
+                   {supabaseMessages.map((msg, i) => (
+                      <div key={msg.id || i} className={`flex ${msg.sender_id === activeChildId ? 'justify-end' : 'justify-start'}`}>
+                         <div className={`max-w-[75%] p-3 rounded-2xl relative shadow-sm ${msg.sender_id === activeChildId ? 'bg-[#dcf8c6] text-navy rounded-br-none' : 'bg-white text-navy rounded-bl-none'}`}>
+                            <div className="text-sm font-medium leading-snug">{msg.content}</div>
+                            <div className={`text-[8px] font-mono mt-1 text-right ${msg.sender_id === activeChildId ? 'text-green-800/60' : 'text-gray-400'}`}>{new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                          </div>
                       </div>
                    ))}
-                   {!(childRaw.messages || []).length && (
-                      <div className="text-center text-xs text-gray-500 mt-4 font-mono">Sichere Chat-Verbindung steht.</div>
+                   {!supabaseMessages.length && (
+                      <div className="text-center text-xs text-gray-500 mt-4 font-mono">Sichere Cloud-Verbindung steht. Keine Nachrichten vorhanden.</div>
                    )}
                 </div>
                 <div className="bg-[#f0f2f5] p-3 flex gap-2 border-t border-gray-300 z-10">

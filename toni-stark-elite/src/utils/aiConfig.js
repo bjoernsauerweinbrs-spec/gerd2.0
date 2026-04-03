@@ -14,9 +14,9 @@ export const getAiConfig = () => {
         modelString = "gpt-4o";
     } else if (aiProvider === "gemini") {
         activeKey = geminiKey;
-        // Check if we want Pro specifically
-        const isPro = localStorage.getItem('stark_gemini_pro') === 'true';
-        const model = isPro ? "gemini-1.5-pro" : "gemini-1.5-flash"; 
+        // Force gemini-1.5-pro for direct v1beta fallback to ensure maximum compatibility. 
+        // Pro models are now handled safely via the Proxy fallback chain.
+        const model = "gemini-1.5-pro"; 
         endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
         modelString = model;
     } else if (aiProvider === "ollama") {
@@ -28,82 +28,213 @@ export const getAiConfig = () => {
     return { activeKey, endpoint, modelString, aiProvider };
 };
 
-export const sendAiRequest = async (systemPrompt) => {
-    // ULTIMATE DEMO SAFETY NET: Deploys automatically if ANY network, CORS, or key validation fails.
-    const ultimateDemoFallback = () => {
-         console.warn("AI FAILOVER ACTIVATED! Simulating perfect response to protect the Live Demo UI.");
-         if (systemPrompt.includes("Reporter-Fragen")) {
-             return "Herr Trainer, die Leistung im letzten Spiel war eine absolute Machtdemonstration! Wie erklären Sie sich diese brutale Effizienz im Gegenpressing der Mannschaft?\n\nUnd eine zweite Frage: Die Laufwege waren heute extrem dominant und laufintensiv. Werden Sie gegen den nächsten Gegner in der Startelf rotieren, um Frische zu garantieren?";
-         }
-         if (systemPrompt.includes("Shitstorm-Potenzial")) {
-             return JSON.stringify({ riskScore: 12, riskReport: "Sehr sauber formuliert. Minimales Risiko für Fehlinterpretationen. Kann direkt an die DPA raus." });
-         }
-         if (systemPrompt.includes("Frontpage")) {
-             return JSON.stringify({ headline: "DOMINANZ PUR IM LETZTEN MATCH!", excerpt: "Der Commander zerlegt die Konkurrenz mit gnadenlosem High-Pressing.", content: "Was für ein Machtwort! Unser extrem hohes Balleroberungsnetz hat den Gegner förmlich erstickt. Die GPS-Laufwege zeigen: Unsere Intensität ist das neue Maß der Dinge. Wir ruhen uns nicht aus. Fokus auf die Auswärtspartie, volle Kraft voraus!", author: "Neural-Gerd" });
-         }
-         if (systemPrompt.includes("Chefredakteur für das Stadion-Magazin") || systemPrompt.includes("EXKLUSIV INTERVIEW")) {
-             return JSON.stringify({ headline: "DER TRAINER SPRICHT KLARTEXT!", excerpt: "Gerd Sauerwein exklusiv über die aktuelle Dominanz.", content: "Der Fokus liegt voll auf der Offensive. Wir haben den letzten Gegner taktisch neutralisiert und werden morgen noch härter trainieren. Die Konkurrenz ist gewarnt: Wenn Stark Elite ins Rollen kommt, gibt es keine Gnade mehr. Wir sind bereit für den nächsten Gegner und dulden keine Ausreden.", author: "Neural-Gerd" });
-         }
-         if (systemPrompt.includes("Logistik-Hub")) {
-             return "Guten Tag, wir sind Stark Elite. Wir wissen, Sie suchen nach maximaler nationaler Sichtbarkeit. Wir suchen einen Partner, der unsere Hochgeschwindigkeits-DNA versteht. Lassen Sie uns über Synergien sprechen, die messbare Conversion bringen.";
-         }
-         return "Überragendes Resultat im letzten Spiel, dieser Sieg festigt unsere Ambitionen eindrucksvoll. Das extrem hohe Balleroberungsnetz und die optimierten Laufwege aus den Scraper-Daten haben den Gegner brutal erdrückt. Jetzt gibt es keine Ausreden: Der volle Fokus liegt ab sofort auf der Vorbereitung für das bevorstehende nächste Spiel. Wir müssen die Pressing-Intensität im Training morgen früh nochmal hochfahren!";
-    };
-
+export const generateLineup = async (text) => {
     try {
-        const { activeKey, endpoint, modelString, aiProvider } = getAiConfig();
-        
-        if (!activeKey) return ultimateDemoFallback();
+        const geminiKey = localStorage.getItem('stark_gemini_key') || "";
+        if (!geminiKey) {
+            throw new Error("FEHLENDER GEMINI API KEY. Bitte in den Einstellungen hinterlegen.");
+        }
 
-        const tryGroqFallback = async () => {
-            const groqKey = localStorage.getItem('stark_groq_key') || "";
-            if(!groqKey) return ultimateDemoFallback();
-            
-            console.warn("AI FAILOVER: Routing to Groq Llama3...");
-            try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groqKey}` },
-                    body: JSON.stringify({ model: "llama3-70b-8192", messages: [{ role: "user", content: systemPrompt }], temperature: 0.7 })
-                });
-                if(!response.ok) return ultimateDemoFallback();
-                const data = await response.json();
-                return data.choices[0].message.content;
-            } catch(e) {
-                return ultimateDemoFallback();
-            }
-        };
+        console.log("[AI] Generating Lineup via Proxy (3001)...");
+        const response = await fetch("http://localhost:3001/api/generate-lineup", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                text, 
+                apiKey: geminiKey 
+            })
+        });
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Fehler bei der Lineup-Generierung via Proxy");
+        }
+    } catch (fatalError) {
+        console.error("LINEUP ARCHITECT FAILURE:", fatalError);
+        throw fatalError;
+    }
+};
+
+export const generateTactic = async (promptText, department = "Senioren", playerContext = "", smId = null, fde = "", clubContext = null, isNlz = false, ageGroup = "") => {
+    try {
+        const geminiKey = localStorage.getItem('stark_gemini_key') || "";
+        if (!geminiKey) {
+            throw new Error("FEHLENDER GEMINI API KEY. Bitte in den Einstellungen hinterlegen.");
+        }
+
+        console.log("[AI] Generating Tactic via Proxy (3001)...");
+        const response = await fetch("http://localhost:3001/api/generate-tactic", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                exercise: promptText,
+                department,
+                apiKey: geminiKey,
+                playerContext,
+                teamId: smId,
+                fussballDeUrl: fde,
+                clubContext,
+                isNlz,
+                ageGroup
+            })
+        });
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || "Fehler bei der Taktik-Generierung via Proxy");
+        }
+    } catch (fatalError) {
+        console.error("TACTICAL ARCHITECT FAILURE:", fatalError);
+        throw fatalError;
+    }
+};
+
+export const scrapeClubData = async (team, apiKey = "", directAi = false) => {
+    const finalKey = apiKey || localStorage.getItem('stark_gemini_key') || "";
+    const url = `http://localhost:3001/api/scrape?team=${encodeURIComponent(team)}&apiKey=${finalKey}&directAi=${directAi}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Scraping failed" }));
+        throw new Error(err.error);
+    }
+    return await res.json();
+};
+
+export const searchLogistics = async (query, clubInfo) => {
+    const geminiKey = localStorage.getItem('stark_gemini_key') || "";
+    const res = await fetch("http://localhost:3001/api/logistics-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, apiKey: geminiKey, clubInfo })
+    });
+    if (!res.ok) throw new Error("Logistics search failed");
+    return await res.json();
+};
+
+export const generateSponsorInquiry = async (sponsorName, materialName, clubInfo) => {
+    const geminiKey = localStorage.getItem('stark_gemini_key') || "";
+    const res = await fetch("http://localhost:3001/api/sponsor-inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sponsorName, materialName, clubInfo, apiKey: geminiKey })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Inquiry generation failed");
+    return data;
+};
+
+export const uploadScoutingReport = async (formData) => {
+    const res = await fetch('http://localhost:3001/api/upload-scouting', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+    return data;
+};
+
+export const sendAiRequest = async (systemPrompt, contextOverride = null) => {
+    try {
+        const geminiKey = localStorage.getItem('stark_gemini_key') || "";
+        
+        // 1. Check if key exists (Early return to save proxy overhead)
+        if (!geminiKey) {
+            throw new Error("FEHLENDER GEMINI API KEY. Bitte in den Einstellungen hinterlegen.");
+        }
+
+        // 2. Always try the proxy first for centralized context and intelligence
+        console.log("[AI] Requesting via Proxy (3001)...");
+        const response = await fetch("http://localhost:3001/api/ai-chat", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: systemPrompt, 
+                apiKey: geminiKey,
+                contextOverride 
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.response;
+        }
+
+        // 3. --- FALLBACK IF PROXY IS DOWN / ERROR ---
+        console.warn("Proxy AI failed or returned error, falling back to direct API...");
+        const { activeKey, endpoint, aiProvider } = getAiConfig();
+        
+        if (!activeKey) throw new Error("KEIN API KEY VERFÜGBAR (Direkt-Modus)");
 
         if (aiProvider === 'gemini') {
-            const body = { 
-                contents: [{ parts: [{ text: systemPrompt }] }] 
-            };
-            
-            // Minimalist check: if we have a special character or the first 50 chars look like a system instruction, we could split it.
-            // But better: let the caller provide it.
-            
-            const response = await fetch(endpoint, {
+            const resp = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
             });
-            const data = await response.json();
-            if (!response.ok || (data.candidates && data.candidates[0].finishReason === "SAFETY") || !data.candidates || !data.candidates[0].content) {
-                return await tryGroqFallback();
-            }
+            const data = await resp.json();
+            if (data.error) throw new Error(`Google API Error: ${data.error.message}`);
             return data.candidates[0].content.parts[0].text;
         } else {
-            const response = await fetch(endpoint, {
+            const resp = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${activeKey}` },
-                body: JSON.stringify({ model: modelString, messages: [{ role: "user", content: systemPrompt }], temperature: 0.7 })
+                body: JSON.stringify({ model: "llama3-70b-8192", messages: [{ role: "user", content: systemPrompt }] })
             });
-            if (!response.ok) return await tryGroqFallback();
-            const data = await response.json();
+            const data = await resp.json();
             return data.choices[0].message.content;
         }
     } catch (fatalError) {
-        console.error("FATAL API PIPELINE CRASH CAUGHT: ", fatalError);
-        return ultimateDemoFallback();
+        console.error("AI SYSTEM FAILURE:", fatalError);
+        return `KI-SYSTEM FEHLER: ${fatalError.message}. Bitte prüfen Sie Ihre API-Einstellungen (Zahnrad-Icon) oder den Proxy (Port 3001).`;
+    }
+};
+
+export const extractPlayersFromImage = async (base64Image) => {
+    try {
+        const geminiKey = localStorage.getItem('stark_gemini_key') || "";
+        if (!geminiKey) throw new Error("Kein Gemini API Schlüssel gefunden!");
+        
+        const base64Data = base64Image.split(',')[1] || base64Image;
+        const mimeType = base64Image.split(';')[0].split(':')[1] || "image/png";
+
+        const prompt = `Du bist ein FIFA Elite Scout. Extrahiere Spielerdaten aus diesem Browser-Screenshot (Fussball.de).
+WICHTIG: Ignoriere Browser-Leisten, Tabs und das Dock! Suche NUR in der Tabelle.
+1. Name (Vorname Nachname).
+2. Geburtsdatum (Format: DD.MM.YYYY).
+3. Koordinaten (0.00 bis 1.00) des MITTELPUNKTS DES GESICHTS (links neben dem Namen).
+ACHTUNG: Das Gesicht ist sehr klein (ca. 2-5% der Breite). Die X-Koordinate liegt meist ganz links (0.02 - 0.05).
+Antworte AUSSCHLIESSLICH als JSON: [{"name": "...", "dob": "...", "xPosition": 0.024, "yPosition": 0.31}]`;
+
+        const resp = await fetch("http://localhost:3001/api/extract-roster", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               base64Image: base64Data,
+               mimeType,
+               prompt,
+               apiKey: geminiKey
+            })
+        });
+
+        if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`Proxy AI Error (${resp.status}): ${errText}`);
+        }
+
+        const data = await resp.json();
+        if (data.error) throw new Error(`Proxy API Error: ${data.error}`);
+        
+        let aiText = data.result.trim();
+        if (aiText.startsWith("```json")) aiText = aiText.replace(/^```json/, "").replace(/```$/, "").trim();
+        else if (aiText.startsWith("```")) aiText = aiText.replace(/^```/, "").replace(/```$/, "").trim();
+        
+        return JSON.parse(aiText);
+    } catch (e) {
+        console.error("Failed to extract players from image:", e);
+        throw e;
     }
 };

@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Icon from './Icon';
 import TacticalHub from './TacticalHub';
-import { getAiConfig, sendAiRequest } from '../utils/aiConfig';
+import { getAiConfig, sendAiRequest, extractPlayersFromImage } from '../utils/aiConfig';
+import { saveLogisticsEntry, savePlan, fetchLogistics, supabase } from '../utils/supabaseClient';
+import { speakGerd } from '../utils/audioUtils';
+import NlzScanner from './nlz/NlzScanner';
+import NlzWeekPlanner from './nlz/NlzWeekPlanner';
 
 const NlzAcademy = ({ truthObject, setTruthObject, activeRole }) => {
   const [activeNlzView, setActiveNlzView] = useState("finance");
+  const [logisticsInput, setLogisticsInput] = useState("");
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [isExtractingSquad, setIsExtractingSquad] = useState(false);
   
   // Read global state instead of local
   const youthPlayers = truthObject.nlz_squad || [];
@@ -65,6 +72,47 @@ const NlzAcademy = ({ truthObject, setTruthObject, activeRole }) => {
     setEditingStatsPlayer(null);
   };
 
+  const uploadPlayerAvatar = async (event, playerId) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsSendingRequest(true);
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${playerId}_${Date.now()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        // 1. Upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+            .from('player_avatars')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // 2. Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('player_avatars')
+            .getPublicUrl(filePath);
+
+        // 3. Update truthObject (NLZ Squad)
+        const updatedSquad = youthPlayers.map(p => 
+            p.id === playerId ? { ...p, avatar_url: publicUrl } : p
+        );
+        setTruthObject({ ...truthObject, nlz_squad: updatedSquad });
+        
+        speakGerd(`Avatar für Spieler ${playerId} erfolgreich hochgeladen!`);
+    } catch (err) {
+        console.error("Avatar Upload Error:", err);
+        if (err.message?.includes("Bucket not found") || err.name === "StorageApiError") {
+            alert("FEHLER: Supabase Bucket 'player_avatars' wurde nicht gefunden. Bitte führen Sie das bereitgestellte SQL-Setup in Ihrem Supabase Dashboard aus.");
+        } else {
+            alert("Upload fehlgeschlagen: " + err.message);
+        }
+    } finally {
+        setIsSendingRequest(false);
+    }
+  };
+
   const [nlzPrDrafts, setNlzPrDrafts] = useState([
     { id: 101, title: "Stadionkurier Seite 3: 'Die Jugend brennt'", text: "Ein Artikel über die neuen Talente aus dem NLZ. Hervorgehoben wird der brutale Konkurrenzkampf und wie die jungen Spieler die Altstars unter Druck setzen.", status: "pending", riskScore: 0, riskReport: "" },
   ]);
@@ -95,6 +143,39 @@ Schlage 2 kritische Fragen vor, die man der NLZ-Leitung dazu stellen kann (z.B. 
 WICHTIG: Antworte AUSSCHLIESSLICH mit den beiden Fragen (als Aufzählung).`
       }
   ];
+
+  const [ledger, setLedger] = useState([]);
+
+  useEffect(() => {
+    fetchLogistics().then(data => setLedger(data));
+    
+    // Subscribe to changes for real-time logistics (Manager approval etc)
+    const channel = supabase
+      .channel('public:logistics_ledger')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'logistics_ledger' }, (payload) => {
+        fetchLogistics().then(data => setLedger(data));
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, []);
+
+  const handleRequestMaterial = async () => {
+    if (!logisticsInput.trim()) return;
+    setIsSendingRequest(true);
+    const newReq = {
+      item_name: logisticsInput,
+      type: 'expense',
+      category: 'material',
+      status: 'requested',
+      requester_name: "NLZ Head Coach"
+    };
+    
+    await saveLogisticsEntry(newReq);
+    setLogisticsInput("");
+    setIsSendingRequest(false);
+    alert("Anforderung an das Management gesendet (Persistent in Supabase).");
+  };
 
   const handleOpenNlzInterview = (interview) => {
       setActiveNlzInterview(interview);
@@ -452,33 +533,15 @@ Antworte zwingend im JSON Format: {"score": [Zahl 0-100], "report": "[1 Satz Beg
   }, [activeYouthTeam, searchQuery]);
 
   const speakCoachingEvent = (text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'de-DE';
-      utterance.rate = 0.95;
-      utterance.pitch = 0.9;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const germanMaleVoice = voices.find(v => v.lang.includes('de') && v.name.toLowerCase().includes('male')) || voices.find(v => v.lang.includes('de'));
-      if (germanMaleVoice) utterance.voice = germanMaleVoice;
-
-      utterance.onstart = () => {
-         setIsSpeaking(true);
-      };
-      
-      utterance.onend = () => {
-         setIsSpeaking(false);
-         setIsTeardownActive(false); // End teardown visual states
-      };
-      
-      utterance.onerror = () => {
-         setIsSpeaking(false);
-         setIsTeardownActive(false);
-      };
-      
-      window.speechSynthesis.speak(utterance);
-    }
+    setIsSpeaking(true);
+    speakGerd(text, {
+      pitch: 0.9,
+      rate: 0.95,
+      onEnd: () => {
+        setIsSpeaking(false);
+        setIsTeardownActive(false);
+      }
+    });
   };
 
   // --- Character Matrix ---
@@ -753,7 +816,7 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
     }
   };
 
-  const clubIdentity = truthObject?.club_identity || { name: "Stark Elite" };
+  const clubIdentity = truthObject?.club_info || { name: "Stark Elite" };
 
   const handleAutoFillYouthSquad = () => {
     setIsAutoFillingYouth(true);
@@ -766,76 +829,158 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
     }, 1500);
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const processSquadImage = async (file) => {
+      setIsExtractingSquad(true);
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      const calculateAgeGroup = (dob) => {
+          if (!dob) return ageFilter === "All" ? "G-Jugend" : ageFilter;
+          try {
+              const year = parseInt(dob.split('.').pop());
+              if (isNaN(year)) return ageFilter === "All" ? "G-Jugend" : ageFilter;
+              const currentYear = new Date().getFullYear();
+              const age = currentYear - year;
+              if (age <= 7) return "G-Jugend";
+              if (age <= 9) return "F-Jugend";
+              if (age <= 11) return "E-Jugend";
+              if (age <= 13) return "D-Jugend";
+              if (age <= 15) return "C-Jugend";
+              if (age <= 17) return "B-Jugend";
+              return "A-Jugend";
+          } catch(e) { return ageFilter === "All" ? "G-Jugend" : ageFilter; }
+      };
+
+      reader.onload = async () => {
+          try {
+              const base64Image = reader.result;
+              const players = await extractPlayersFromImage(base64Image);
+              
+              const newSquad = players.map((p, idx) => ({
+                  id: `squad_ai_${Date.now()}_${idx}`,
+                  name: p.name,
+                  position: 'ANY',
+                  dob: p.dob || "",
+                  group: calculateAgeGroup(p.dob),
+                  pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 85 + Math.floor(Math.random()*10),
+                  focus: 6, frustration: 4,
+                  imageUrl: base64Image,
+                  xPosition: p.xPosition,
+                  yPosition: p.yPosition
+              }));
+              
+              setTruthObject(prev => ({ 
+                  ...prev, 
+                  nlz_squad: [...(prev.nlz_squad || []), ...newSquad] 
+              }));
+          } catch(err) {
+              alert("Fehler beim Extrahieren: " + err.message);
+          } finally {
+              setIsExtractingSquad(false);
+          }
+      };
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const isVideo = file.type.startsWith('video/') || !!file.name.match(/\.(mp4|mov|webm)$/i);
+      
+      // Wenn wir im Kader-Bereich sind und es kein Video ist, gehen wir von einem Kader-Screenshot aus!
+      if (activeNlzView === "squad" && !isVideo) {
+          processSquadImage(file);
+      } else {
+          // Navigate to training and open modal
+          if (activeNlzView !== "training") {
+            setActiveNlzView("training");
+          }
+          setNewVideoUrl(URL.createObjectURL(file));
+          setNewTitle(file.name.split('.')[0] || "KI Analyse");
+          setShowUploadModal(true);
+      }
+    }
+  };
+
   return (
-    <div className="w-full">
-      <div className="space-y-8 animate-fade-in pb-20">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-2xl border border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
-          <div className="absolute right-0 top-0 opacity-[0.03] pointer-events-none">
-            <Icon name="activity" size={240} className="text-navy" />
-          </div>
-          <div className="relative z-10">
-            <h2 className="text-4xl font-black tracking-tighter text-navy flex items-center gap-4 uppercase mb-2">
-              <Icon name="plus-square" size={32} className="text-neon" />{" "}
-              Fuchs NLZ Hub
-            </h2>
-            <div className="text-[10px] font-mono text-gray-500 tracking-[0.4em] uppercase font-black">
-              Elite Youth Academy | Psycho & Biomechanics Center
+    <div 
+      className="min-h-screen bg-[#f8f9fa] text-navy pb-32"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      <div className="max-w-[1700px] mx-auto px-6 pt-12">
+        {isExtractingSquad && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md">
+            <div className="bg-navy p-8 rounded-2xl border border-neon/50 text-center flex flex-col items-center">
+               <Icon name="cpu" size={48} className="text-neon animate-pulse mb-4" />
+               <h2 className="text-white font-black uppercase tracking-widest text-xl mb-2">KI Kader-Analyse läuft...</h2>
+               <p className="text-neon text-[10px] uppercase tracking-widest font-mono">Lese Spielerdaten aus Screenshot aus</p>
             </div>
           </div>
-          <div className="mt-6 md:mt-0 flex flex-wrap gap-4 bg-gray-100 p-2 rounded-xl border border-gray-200">
-            <button
-              onClick={() => setActiveNlzView("finance")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "finance" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="pie-chart" size={16} className={activeNlzView === "finance" ? "text-gold" : ""} /> Finance & Admin
-            </button>
-            <button
-              onClick={() => setActiveNlzView("character")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "character" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="user" size={16} className={activeNlzView === "character" ? "text-neon" : ""} /> Character Matrix
-            </button>
-            <button
-              onClick={() => setActiveNlzView("biomechanics")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "biomechanics" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="activity" size={16} className={activeNlzView === "biomechanics" ? "text-redbull" : ""} /> Biomechanik
-            </button>
-            <button
-              onClick={() => setActiveNlzView("squad")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "squad" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="users" size={16} className={activeNlzView === "squad" ? "text-redbull" : ""} /> Youth Squad
-            </button>
-            <button
-              onClick={() => setActiveNlzView("training")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "training" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="cpu" size={16} className={activeNlzView === "training" ? "text-neon" : ""} /> Training Protocol
-            </button>
-            <button
-              onClick={() => setActiveNlzView("board")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "board" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="layout" size={16} className={activeNlzView === "board" ? "text-neon" : ""} /> Taktik Board
-            </button>
-            <button
-              onClick={() => setActiveNlzView("applications")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "applications" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="file-text" size={16} className={activeNlzView === "applications" ? "text-navy" : ""} /> Mitgliedsanträge
-            </button>
-            <button
-              onClick={() => setActiveNlzView("media")}
-              className={`px-4 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${activeNlzView === "media" ? "bg-white text-navy border-gray-200 shadow-md" : "bg-transparent text-gray-400 hover:text-navy"}`}
-            >
-              <Icon name="mic" size={16} className={activeNlzView === "media" ? "text-neon" : ""} /> PR & Medien
-            </button>
-          </div>
+        )}
+        
+        {/* === GLOBAL NLZ NAVIGATION HEADER === */}
+        <div className="mb-12 bg-white border border-gray-200 rounded-[2.5rem] p-10 shadow-2xl flex flex-col xl:flex-row justify-between items-center gap-10 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-navy/[0.02] rounded-bl-[300px] pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            
+            <div className="flex items-center gap-8 relative z-10">
+                <div className="w-20 h-20 bg-navy rounded-3xl flex items-center justify-center p-4 shadow-2xl rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                    <Icon name="award" className="text-gold" size={40} />
+                </div>
+                <div>
+                    <h1 className="text-5xl font-black uppercase tracking-tighter italic text-navy leading-none">
+                        FUCHS <span className="text-redbull">ACADEMY</span>
+                    </h1>
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 mt-2 ml-1">Elite Performance Center • {clubName}</p>
+                </div>
+            </div>
+
+            <nav className="flex flex-wrap justify-center items-center gap-3 bg-gray-100/50 p-3 rounded-[2rem] border border-gray-100 backdrop-blur-sm relative z-10">
+                {[
+                  { id: 'squad', label: 'Squad / Kader', icon: 'users', color: 'text-redbull' },
+                  { id: 'finance', label: 'Budget / Finanzen', icon: 'dollar-sign', color: 'text-gold' },
+                  { id: 'logistics', label: 'Logistik Hub', icon: 'package', color: 'text-[#00f3ff]' },
+                  { id: 'biomechanics', label: 'Biomechanik', icon: 'activity', color: 'text-redbull' },
+                  { id: 'training', label: 'Training Lab', icon: 'cpu', color: 'text-neon' },
+                  { id: 'board', label: 'Taktik Board', icon: 'layout', color: 'text-neon' },
+                  { id: 'intel', label: 'Club Intel', icon: 'zap', color: 'text-blue-500' },
+                  { id: 'pr', label: 'PR & Medien', icon: 'radio', color: 'text-navy' }
+                ].map(tab => (
+                  <button 
+                    key={tab.id}
+                    onClick={() => setActiveNlzView(tab.id)} 
+                    className={`px-6 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border ${
+                      activeNlzView === tab.id 
+                      ? 'bg-navy text-white border-navy shadow-[0_10px_25px_rgba(0,19,56,0.3)] scale-105' 
+                      : 'bg-white/80 text-navy/40 border-gray-200 hover:border-navy hover:text-navy hover:bg-white'
+                    }`}
+                  >
+                    <Icon name={tab.icon} size={16} className={activeNlzView === tab.id ? 'text-neon' : tab.color} />
+                    {tab.label}
+                  </button>
+                ))}
+            </nav>
         </div>
+
+        {/* === VIEW RENDERER === */}
+
 
         {/* Dynamic Views */}
         
+        {/* === CLUB INTEL (Vision Scanner & Planner) === */}
+        {activeNlzView === "intel" && (
+           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <NlzScanner onScanComplete={() => console.log("Scan success")} />
+              <NlzWeekPlanner clubInfo={truthObject.club_info} />
+           </div>
+        )}
+
         {/* === MEDIA / PR (Jugendabteilung) === */}
         {activeNlzView === "media" && (
            <div className="space-y-6 animate-fade-in">
@@ -1093,16 +1238,16 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                   </div>
 
                   <div className="p-6 rounded-xl border border-gray-200 bg-white flex justify-between items-center">
-                    <div>
-                      <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Netto-Bilanz (P.A.)</div>
-                      <div className={`text-2xl font-black uppercase tracking-tighter ${netBalance >= 0 ? "text-green-600" : "text-redbull"}`}>
-                        {netBalance >= 0 ? "+" : ""}€ {netBalance.toLocaleString()}
-                      </div>
-                    </div>
-                    <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50">
-                      <Icon name={netBalance >= 0 ? "trending-up" : "trending-down"} className={netBalance >= 0 ? "text-green-600" : "text-redbull"} size={20} />
-                    </div>
-                  </div>
+                     <div>
+                       <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Netto-Bilanz (P.A.)</div>
+                       <div className={`text-2xl font-black uppercase tracking-tighter ${netBalance >= 0 ? "text-green-600" : "text-redbull"}`}>
+                         {netBalance >= 0 ? "+" : ""}€ {netBalance.toLocaleString()}
+                       </div>
+                     </div>
+                     <div className="w-12 h-12 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50">
+                       <Icon name={netBalance >= 0 ? "trending-up" : "trending-down"} className={netBalance >= 0 ? "text-green-600" : "text-redbull"} size={20} />
+                     </div>
+                   </div>
                 </div>
               </div>
             </div>
@@ -1116,20 +1261,49 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
               <h2 className="text-3xl font-black italic tracking-tighter text-navy flex items-center gap-3 uppercase">
                 <Icon name="users" size={28} className="text-redbull" /> Nachwuchs Kader
               </h2>
-              <button
-                onClick={handleAutoFillYouthSquad}
-                disabled={isAutoFillingYouth}
-                className={`px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all ${isAutoFillingYouth ? "bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200" : "bg-neon text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)] hover:scale-105 hover:bg-white"}`}
-              >
-                {isAutoFillingYouth ? <Icon name="loader" className="animate-spin" size={16} /> : <Icon name="zap" size={16} />}
-                {isAutoFillingYouth ? "KI-Scouting läuft..." : "KI-Youth-Scouting"}
-              </button>
+              <div className="flex items-center gap-3">
+                 {/* Hidden File Input for Image Upload */}
+                 <input 
+                   type="file" 
+                   id="squad-image-upload" 
+                   className="hidden" 
+                   accept="image/*"
+                   onChange={(e) => {
+                       if (e.target.files && e.target.files.length > 0) {
+                           processSquadImage(e.target.files[0]);
+                       }
+                   }}
+                 />
+                 <button 
+                   onClick={() => {
+                        setTruthObject(prev => ({ ...prev, nlz_squad: [] }));
+                   }}
+                   className="px-3 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white"
+                 >
+                   <Icon name="trash-2" size={14} /> Reset
+                 </button>
+                 <button 
+                   onClick={() => document.getElementById('squad-image-upload').click()}
+                   className="px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all bg-white text-navy border border-gray-200 shadow-sm hover:scale-105 hover:border-gray-300"
+                 >
+                   <Icon name="image" size={16} className="text-blue-500" />
+                   Screenshot Import
+                 </button>
+                 <button
+                   onClick={handleAutoFillYouthSquad}
+                   disabled={isAutoFillingYouth}
+                   className={`px-4 py-2 font-black uppercase text-[10px] rounded-lg tracking-widest flex items-center gap-2 transition-all ${isAutoFillingYouth ? "bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200" : "bg-neon text-navy shadow-[0_0_15px_rgba(0,243,255,0.4)] hover:scale-105 hover:bg-white"}`}
+                 >
+                   {isAutoFillingYouth ? <Icon name="loader" className="animate-spin" size={16} /> : <Icon name="zap" size={16} />}
+                   {isAutoFillingYouth ? "KI-Scouting läuft..." : "KI-Youth-Scouting"}
+                 </button>
+              </div>
             </div>
             
             {/* Age Filter Row */}
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-6 border-b border-gray-200 pb-4">
               <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mr-2"><Icon name="filter" size={14} className="inline mr-1 -mt-1" /> Altersklasse:</span>
-              {["All", "u19", "u17", "u15"].map(klass => (
+              {["All", "U19", "U17", "U15", "C-Jugend", "D-Jugend", "E-Jugend", "F-Jugend", "G-Jugend"].map(klass => (
                  <button 
                    key={klass}
                    onClick={() => setAgeFilter(klass)}
@@ -1140,7 +1314,7 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
               ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
               {youthPlayers.filter(p => ageFilter === "All" || p.group === ageFilter).map((p) => {
                 // Stable OVR calculation: rounded to integer from stored stats
                 const ovr = Math.floor((p.pac + p.sho + p.pas + p.dri + p.def + p.phy) / 6) || 60;
@@ -1150,80 +1324,129 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                   <div
                     key={p.id}
                     onClick={() => setActiveDossierPlayerId(p.id)}
-                    className={`group relative p-0 rounded-xl border-2 transition-all cursor-pointer overflow-hidden bg-white ${activeDossierPlayerId === p.id ? "border-gold shadow-[0_0_25px_rgba(255,215,0,0.5)] -translate-y-2" : "border-gray-200 hover:border-gold hover:shadow-[0_0_25px_rgba(255,215,0,0.3)] hover:-translate-y-1"}`}
+                    className={`group relative p-0 transition-all cursor-pointer hover:-translate-y-2 ${activeDossierPlayerId === p.id ? "scale-101 z-20" : "z-10"}`}
                   >
-                    <div className="flex flex-col h-[280px] uppercase font-black tracking-tighter justify-between relative z-10 p-1">
-                      <div>
-                        <div className="flex justify-between p-3 pb-0">
-                          <div className="flex flex-col items-center">
-                            <span className="text-3xl leading-none text-navy">{ovr}</span>
-                            <span className="text-[10px] text-gray-500 tracking-widest mt-1">OVR</span>
-                          </div>
-                          <div className="flex flex-col items-center">
-                            <span className="text-3xl leading-none text-gold">{pot}</span>
-                            <span className="text-[10px] text-gray-500 tracking-widest mt-1">POT</span>
-                          </div>
-                        </div>
-                        <div className="text-center mt-2 relative">
-                          <span className="px-3 py-1 bg-navy/10 text-navy rounded-full text-[9px] font-black uppercase tracking-widest relative z-20">
-                            {p.group.toUpperCase()} • {p.position}
-                          </span>
-                          
-                          {/* Player Image / Silhouette */}
-                          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-32 h-32 flex items-end justify-center pointer-events-none">
-                             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent opacity-50 z-10"></div>
-                             {p.imageUrl ? (
-                               <img src={p.imageUrl} alt={p.name} className="h-32 object-contain relative z-10 drop-shadow-lg scale-110" />
-                             ) : (
-                               <Icon name="user" size={80} className="text-gray-200 relative z-10 mb-2" />
-                             )}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="px-4 text-center mt-auto bg-white/50 backdrop-blur-sm mx-2 mb-2 rounded-xl border border-gray-200 pb-3 pt-2">
-                          <div className="text-sm text-navy truncate font-black italic tracking-widest leading-none mb-2">
-                            {p.name}
-                          </div>
-                          <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-2"></div>
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-gray-600 font-mono">
-                              <div className="flex justify-between"><span>PAC</span><span className="text-navy">{p.pac || 50}</span></div>
-                              <div className="flex justify-between"><span>DRI</span><span className="text-navy">{p.dri || 50}</span></div>
-                              <div className="flex justify-between"><span>SHO</span><span className="text-navy">{p.sho || 50}</span></div>
-                              <div className="flex justify-between"><span>DEF</span><span className="text-navy">{p.def || 50}</span></div>
-                              <div className="flex justify-between"><span>PAS</span><span className="text-navy">{p.pas || 50}</span></div>
-                              <div className="flex justify-between"><span>PHY</span><span className="text-navy">{p.phy || 50}</span></div>
-                          </div>
-                          
-                          {p.dob && (
-                             <div className="mt-2 text-center text-[9px] text-gray-500 tracking-widest font-black uppercase border-t border-gray-200 pt-1.5 opacity-80 bg-gray-50 mx-[-0.5rem]">
-                                * {p.dob}
-                             </div>
-                          )}
+                    {/* FIFA Shield Shape Container */}
+                    <div className={`relative w-full h-[340px] transition-all duration-500 pb-8 ${pot >= 90 ? "drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]" : "drop-shadow-xl"}`}
+                         style={{ clipPath: 'polygon(0% 0%, 100% 0%, 100% 88%, 50% 100%, 0% 88%)' }}>
+                        
+                        {/* Dynamic Background Gradient */}
+                        <div className={`absolute inset-0 transition-colors duration-500 ${
+                          pot >= 90 ? "bg-gradient-to-b from-yellow-100 via-yellow-400 to-amber-600" :
+                          pot >= 80 ? "bg-gradient-to-b from-slate-100 via-gray-300 to-slate-500" :
+                          "bg-gradient-to-b from-orange-100 via-orange-300 to-orange-600"
+                        }`} />
 
-                          <div className="mt-0 text-center text-[9px] tracking-widest font-black uppercase border-t border-gray-100 pt-2 pb-1 bg-white mx-[-0.5rem] mb-[-0.5rem] rounded-b-xl flex items-center justify-between px-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-gray-400">ELTERN-PIN:</span>
-                                {p.parentPin ? (
-                                  <span className="text-navy bg-gold/20 px-2 py-0.5 rounded text-xs border border-gold/40">{p.parentPin}</span>
-                                ) : (
-                                  <button 
-                                    onClick={(e) => handleGenerateParentPin(e, p.id)}
-                                    className="text-white bg-navy hover:bg-neon hover:text-navy px-2 py-1 rounded transition-colors flex items-center gap-1 shadow-md"
-                                  >
-                                    <Icon name="key" size={10} /> GEN
-                                  </button>
-                                )}
+                        {/* Texture / Shine Effect */}
+                        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-shine pointer-events-none" />
+
+                        {/* Top Section: Stats & Quality */}
+                        <div className="relative pt-6 px-4 flex flex-col items-start gap-0.5 z-20">
+                            <span className={`text-4xl font-black italic tracking-tighter leading-none ${pot >= 90 ? "text-navy" : "text-white shadow-sm"}`}>{ovr}</span>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${pot >= 90 ? "text-navy/60" : "text-white/80"}`}>OVR</span>
+                            <div className={`w-8 h-px my-1 ${pot >= 90 ? "bg-navy/10" : "bg-white/20"}`} />
+                            <span className={`text-sm font-black italic ${pot >= 90 ? "text-navy/80" : "text-white"}`}>{p.position}</span>
+                            {p.dob && <span className={`text-[8px] font-black opacity-60 ${pot >= 90 ? "text-navy" : "text-white"}`}>* {p.dob}</span>}
+                            <div className="mt-1">
+                                <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${pot >= 90 ? "bg-navy text-white text-[7px]" : "bg-white/20 text-white text-[7px]"}`}>{p.group}</span>
+                            </div>
+                        </div>
+
+                        {/* POT Badge */}
+                        <div className="absolute top-6 right-4 flex flex-col items-end z-20">
+                            <span className={`text-2xl font-black italic tracking-tighter leading-none ${pot >= 90 ? "text-amber-900" : "text-white text-stroke-sm"}`}>{pot}</span>
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${pot >= 90 ? "text-amber-900/60" : "text-white/80"}`}>POT</span>
+                        </div>
+
+                        {/* Photo Area: LARGE and Prominent Center */}
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-48 pointer-events-none z-10 overflow-hidden">
+                            {p.imageUrl ? (
+                                <div 
+                                    className="w-full h-full relative"
+                                    style={{
+                                        backgroundImage: `url(${p.avatar_url || p.imageUrl})`,
+                                        backgroundSize: p.avatar_url ? 'cover' : '3200% auto', 
+                                        backgroundPosition: p.avatar_url ? 'center' : `${(p.xPosition ?? 0.03) * 100}% ${(p.yPosition ?? 0.5) * 100}%`,
+                                        filter: 'drop-shadow(0 15px 15px rgba(0,0,0,0.4))'
+                                    }}
+                                >
+                                    {/* Bottom Fade to blend photo into card */}
+                                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
+                                </div>
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-black/5 rounded-full mt-4">
+                                    <Icon name="user" size={80} className="text-white/30" />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Name & Player Info Plate */}
+                        <div className="absolute bottom-[23%] inset-x-0 flex flex-col items-center z-30 px-4">
+                             <div className={`w-full py-1.5 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 shadow-lg text-center transform transition-transform group-hover:scale-101 border-b-2 border-b-white/5`}>
+                                 <h4 className="text-xs font-black italic tracking-widest text-white uppercase truncate px-2 leading-tight">{p.name}</h4>
+                             </div>
+                             
+                              {/* Enhanced Stats Grid (2x3 for high legibility) */}
+                              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-2 w-full px-4 relative z-50">
+                                {[
+                                    { key: 'pac', label: 'PAC' },
+                                    { key: 'sho', label: 'SHO' },
+                                    { key: 'pas', label: 'PAS' },
+                                    { key: 'dri', label: 'DRI' },
+                                    { key: 'def', label: 'DEF' },
+                                    { key: 'phy', label: 'PHY' }
+                                ].map(stat => (
+                                    <div key={stat.key} className="flex justify-between items-center group/stat">
+                                        <span className="text-[9px] font-black uppercase text-white/60 tracking-wider group-hover/stat:text-white transition-colors">{stat.label}</span>
+                                        <input 
+                                            type="number" 
+                                            value={p[stat.key] || 50}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onChange={(e) => handleStatUpdate(p.id, stat.key, parseInt(e.target.value) || 0)}
+                                            className="w-10 bg-transparent text-right text-[13px] font-black text-white focus:bg-white/10 outline-none rounded cursor-text transition-all"
+                                        />
+                                    </div>
+                                ))}
                               </div>
-                              <button 
-                                onClick={(e) => handleOpenStatEdit(e, p)}
-                                className="text-navy/40 hover:text-neon transition-colors"
-                                title="Werte bearbeiten"
-                              >
-                                <Icon name="settings" size={14} />
-                              </button>
-                          </div>
-                      </div>
+                        </div>
+
+                        {/* Interactive Controls Overlay (Always Visible for GEN Access) */}
+                        <div className="absolute inset-x-0 bottom-[10%] flex items-center justify-center gap-4 transition-all z-40">
+                             <div className="flex items-center gap-1 bg-white/95 backdrop-blur-xl px-2.5 py-1 rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.3)] border border-white/50">
+                                {p.parentPin && (
+                                  <span className="text-[9px] bg-navy text-neon px-2 py-0.5 rounded-full font-mono font-black">
+                                    {p.parentPin}
+                                  </span>
+                                )}
+                                 <button 
+                                   onClick={(e) => { e.stopPropagation(); handleGenerateParentPin(e, p.id); }}
+                                   className="text-[9px] font-black uppercase text-gray-500 hover:text-navy px-1.5 transition-colors"
+                                 >
+                                   GEN
+                                 </button>
+                                 <button 
+                                    onClick={(e) => { e.stopPropagation(); document.getElementById(`avatar-upload-${p.id}`).click(); }}
+                                    className="px-1.5 hover:text-navy transition-colors text-gray-400 group/cam"
+                                    title="Avatar hochladen"
+                                  >
+                                    <Icon name="camera" size={14} className="group-hover/cam:scale-110 transition-transform" />
+                                  </button>
+                                  <input 
+                                    id={`avatar-upload-${p.id}`}
+                                    type="file" 
+                                    className="hidden" 
+                                    accept="image/*"
+                                    onChange={(e) => uploadPlayerAvatar(e, p.id)}
+                                  />
+                                <div className="w-px h-3 bg-gray-200 mx-1" />
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); handleOpenStatEdit(e, p); }}
+                                  className="text-gray-500 hover:text-navy transition-colors px-1"
+                                >
+                                  <Icon name="settings" size={14} />
+                                </button>
+                             </div>
+                        </div>
                     </div>
                   </div>
                 );
@@ -1783,6 +2006,75 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
             />
         )}
 
+        {/* === LOGISTIK HUB === */}
+        {activeNlzView === "logistics" && (
+           <div className="space-y-6 animate-fade-in pl-2 pr-2">
+              <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 p-8 opacity-5"><Icon name="package" size={120}/></div>
+                 <div className="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center relative z-10">
+                    <div>
+                       <h2 className="text-2xl font-black uppercase tracking-tighter text-navy flex items-center gap-3">
+                          <Icon name="package" size={24} className="text-neon" /> NLZ Logistik & Material
+                       </h2>
+                       <div className="text-[10px] font-mono text-gray-400 tracking-widest uppercase mt-1">Anforderungen an das Management & Status</div>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    {/* Request Input */}
+                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                       <h3 className="text-navy font-black uppercase text-xs tracking-widest mb-4">Neue Material-Anfoderung</h3>
+                       <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            value={logisticsInput}
+                            onChange={e => setLogisticsInput(e.target.value)}
+                            placeholder="Z.B. 20x Trainingsbälle U15..."
+                            className="flex-1 bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-neon"
+                          />
+                          <button 
+                            onClick={handleRequestMaterial}
+                            disabled={isSendingRequest || !logisticsInput.trim()}
+                            className="bg-navy text-white px-6 py-2 rounded-lg font-black uppercase text-[10px] hover:bg-neon hover:text-navy transition-all disabled:opacity-50"
+                          >
+                             Senden
+                          </button>
+                       </div>
+                       <p className="text-[9px] text-gray-400 mt-3 italic">* Anfragen gehen direkt in die Executive Suite zur Budget-Freigabe.</p>
+                    </div>
+
+                    {/* Inbox / Status */}
+                    <div className="space-y-4">
+                       <h3 className="text-navy font-black uppercase text-xs tracking-widest">Status / Management Rückmeldungen</h3>
+                       <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                          {(truthObject.logistics_requests || []).length > 0 ? (truthObject.logistics_requests.map((req, i) => (
+                             <div key={i} className={`p-4 rounded-xl border transition-all ${req.status === 'APPROVED' ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'} ${req.isAiProposal ? 'border-neon/30 bg-neon/5' : ''}`}>
+                                <div className="flex justify-between items-start mb-2">
+                                   <div>
+                                      <h4 className="text-navy font-black uppercase text-[11px] leading-tight flex items-center gap-2">
+                                         {req.isAiProposal && <Icon name="zap" size={12} className="text-neon" />}
+                                         {req.title}
+                                      </h4>
+                                      <div className="text-[8px] text-gray-400 font-mono mt-1">{req.date} | {req.requestedBy}</div>
+                                   </div>
+                                   <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${req.status === 'PENDING' ? 'bg-navy/10 text-navy' : 'bg-green-500 text-white'}`}>{req.status}</span>
+                                </div>
+                                {req.offer && (
+                                   <div className="mt-2 p-3 bg-white/50 border border-gray-100 rounded text-[9px] text-gray-600 font-medium whitespace-pre-wrap">
+                                      {req.offer}
+                                   </div>
+                                )}
+                             </div>
+                          ))) : (
+                             <div className="py-10 text-center text-gray-300 italic text-xs">Keine aktiven Vorgänge.</div>
+                          )}
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        )}
+
         {/* === TRAINING PROTOCOL === */}
         {activeNlzView === "training" && (
            <div className="space-y-6 animate-fade-in pl-2 pr-2">
@@ -2067,12 +2359,12 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                             {/* Giant File Upload Area */}
                             <div className="bg-neon/10 border-2 border-neon/30 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all hover:bg-neon/20 hover:border-neon group relative overflow-hidden">
                                 <Icon name="upload-cloud" size={48} className="text-neon mb-4 group-hover:-translate-y-2 transition-transform duration-300" />
-                                <h4 className="text-white font-black uppercase tracking-widest text-lg mb-2">Video hochladen</h4>
-                                <p className="text-white/50 text-xs max-w-[250px] mb-6">Wähle ein lokales Trainingsvideo (.mp4, .mov) von deinem Gerät aus.</p>
+                                <h4 className="text-white font-black uppercase tracking-widest text-lg mb-2">Screenshot / Video Dropzone</h4>
+                                <p className="text-white/50 text-xs max-w-[250px] mb-6">Screenshot (.png, .jpg) oder Video (.mp4) vom Endgerät hier ablegen oder auswählen.</p>
                                 
                                 <input 
                                     type="file" 
-                                    accept="video/mp4,video/quicktime,video/webm"
+                                    accept="image/*,video/mp4,video/quicktime,video/webm"
                                     onChange={(e) => {
                                         const file = e.target.files[0];
                                         if (file) {
@@ -2081,7 +2373,7 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                                         }
                                     }}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    title="Video hochladen"
+                                    title="Datei hochladen"
                                 />
                                 <div className="bg-neon text-navy px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs pointer-events-none group-hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,243,255,0.4)]">
                                     {newVideoUrl ? "Video ausgewählt ✓" : "Datei auswählen"}

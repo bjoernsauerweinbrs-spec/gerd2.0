@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ManagementHub from './components/ManagementHub';
-import TacticalHub from './components/TacticalHub';
-import TrainingLab from './components/TrainingLab';
+import UnifiedCoachHub from './components/UnifiedCoachHub';
 import StadionKurier from './components/StadionKurier';
 import MedicalLab from './components/MedicalLab';
 import CfoBoard from './components/CfoBoard';
@@ -14,10 +13,12 @@ import TrainerSetupWizard from './components/TrainerSetupWizard';
 import RosterHub from './components/RosterHub';
 import CalendarHub from './components/CalendarHub';
 import ParentPortal from './components/ParentPortal';
+import TrainingLab from './components/TrainingLab';
+import { scrapeClubData, uploadScoutingReport, searchLogistics, generateSponsorInquiry } from './utils/aiConfig';
 
 // ---- MAGIC FILL INITIAL DATA ----
 const INITIAL_TRUTH = {
-  club_identity: { name: "Stark Elite", league: "Regionalliga", philosophy: "Ballbesitz & Pressing", identity_score: 85 },
+  club_info: { name: "RB Leipzig", teams: ["1. Mannschaft"], league: "Bundesliga", philosophy: "Ballbesitz & Pressing", identity_score: 85, isAmateurMode: false },
   financials: { current_budget: 25000000, active_targets: 3 },
   tactical_setup: { formation_home: "4-4-2", formation_away: "3-4-3" },
   training_lab: { 
@@ -34,9 +35,15 @@ const INITIAL_TRUTH = {
   },
   match_day_manifesto: { strategy: "Offensive Power", intensity_level: 95 },
   nlz_squad: [
-    { id: '1', name: 'WUNDERKIND', position: 'ZOM', group: 'u19', dob: '14.05.2008', pac: 85, dri: 92, sho: 78, def: 40, pas: 88, phy: 65, pot: 95, focus: 8, frustration: 2 },
-    { id: '2', name: 'TORMINATOR', position: 'ST', group: 'u17', dob: '03.11.2009', pac: 90, dri: 80, sho: 85, def: 30, pas: 70, phy: 80, pot: 89, focus: 6, frustration: 4 },
-    { id: '3', name: 'FELS', position: 'IV', group: 'u19', dob: '22.01.2008', pac: 70, dri: 50, sho: 40, def: 88, pas: 65, phy: 90, pot: 86, focus: 9, frustration: 1 }
+    { id: "ai_squad_1", name: "Max Berge", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 91, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.32 },
+    { id: "ai_squad_2", name: "Daniel Cernobrisov", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 88, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.40 },
+    { id: "ai_squad_3", name: "Yanis Dardouri", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 94, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.47 },
+    { id: "ai_squad_4", name: "Julian Geier", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 89, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.55 },
+    { id: "ai_squad_5", name: "Matheo Heyer", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 92, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.63 },
+    { id: "ai_squad_6", name: "Lionel Opl", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 87, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.71 },
+    { id: "ai_squad_7", name: "David Luiz Sauerwein", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 95, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.78 },
+    { id: "ai_squad_8", name: "Leonas Schmidt", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 90, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.86 },
+    { id: "ai_squad_9", name: "Carl Sabastzäka", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 86, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.93 }
   ],
   players: [
     { id: 99, name: "Lukas Berg (C)", position: "IV", ovr: 89, readiness: 94, isInjured: false, pac: 84, sho: 60, pas: 85, dri: 75, def: 92, phy: 90, inSquad: true },
@@ -74,7 +81,13 @@ const App = () => {
 
   const [truthObject, setTruthObject] = useState(() => {
     const stored = localStorage.getItem("gerd_truthObject");
-    return stored ? JSON.parse(stored) : INITIAL_TRUTH;
+    if (stored) {
+        const parsed = JSON.parse(stored);
+        // FORCE flush dummy players: always use the newly scraped G-Jugend roster for this session
+        parsed.nlz_squad = INITIAL_TRUTH.nlz_squad;
+        return parsed;
+    }
+    return INITIAL_TRUTH;
   });
 
   const [playbooks, setPlaybooks] = useState([]);
@@ -101,6 +114,88 @@ const App = () => {
     }
   }, []);
 
+  const handleRefreshData = async () => {
+    try {
+      const provider = localStorage.getItem('stark_ai_provider') || 'gemini';
+      const key = localStorage.getItem(`stark_${provider}_key`);
+      
+      const data = await scrapeClubData(truthObject.club_info.name, key);
+      
+      if (data.success) {
+         setTruthObject(prev => ({
+            ...prev,
+            players: data.players && data.players.length > 0 ? data.players : prev.players,
+            club_info: {
+               ...prev.club_info,
+               name: data.officialClubName || prev.club_info.name,
+               liveIntelligence: data.liveIntelligence || prev.club_info.liveIntelligence
+            },
+            liveMatchDayHydrated: true
+         }));
+      }
+    } catch (e) {
+      console.error("Scraper failed:", e);
+    }
+  };
+
+  // Sync Proxy Context on load
+  useEffect(() => {
+    if (isAuthenticated) {
+        scrapeClubData(truthObject.club_info.name)
+        .then(data => console.log("AI Proxy Context Synced:", data.officialClubName))
+        .catch(err => console.warn("AI Proxy Sync failed (Proxy might be down)"));
+    }
+  }, [isAuthenticated, truthObject.club_info.name]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      console.log("[GERD] Triggering forced sync...");
+      handleRefreshData();
+    };
+    window.addEventListener('trigger-gerd-sync', handleSync);
+    return () => window.removeEventListener('trigger-gerd-sync', handleSync);
+  }, [truthObject.club_info.name]);
+
+  useEffect(() => {
+    if (isAuthenticated && activeRole === 'Trainer' && !truthObject.liveMatchDayHydrated) {
+        handleRefreshData();
+    }
+  }, [isAuthenticated, activeRole, truthObject.liveMatchDayHydrated]);
+
+  // --- GERD LIVE VOICE NAVIGATION ---
+  useEffect(() => {
+    const handleGerdNavigate = (e) => {
+        const destination = e.detail;
+        console.log("[GERD] Navigating to:", destination);
+        
+        const map = {
+            'ROSTER': 'roster',
+            'CALENDAR': 'calendar',
+            'DASHBOARD': 'home',
+            'NLZ': 'nlz',
+            'MEDICAL': 'medical',
+            'LEGACY': 'legacy',
+            'TRAINING': 'training',
+            'COACH_HUB': 'coach_hub'
+        };
+        
+        if (map[destination]) {
+            setActiveTab(map[destination]);
+        }
+    };
+    
+    const handleGerdRefresh = (e) => {
+        if (e.detail === 'ROSTER') handleRefreshData();
+    };
+
+    window.addEventListener('gerd-navigate', handleGerdNavigate);
+    window.addEventListener('gerd-refresh', handleGerdRefresh);
+    return () => {
+        window.removeEventListener('gerd-navigate', handleGerdNavigate);
+        window.removeEventListener('gerd-refresh', handleGerdRefresh);
+    };
+  }, []);
+
   const handleLogin = (role, childId = null) => {
     setActiveRole(role);
     setIsAuthenticated(true);
@@ -114,9 +209,12 @@ const App = () => {
           setTruthObject(prev => {
              const sanitizedLiveIntel = data.liveIntelligence ? {
                 ...data.liveIntelligence,
-                lastMatch: data.liveIntelligence.lastMatch?.includes("Suche") ? "Wird aktualisiert..." : data.liveIntelligence.lastMatch,
-                nextMatch: data.liveIntelligence.nextMatch?.includes("Suche") ? "Wird ermittelt..." : data.liveIntelligence.nextMatch,
-                tacticalNotes: data.liveIntelligence.tacticalNotes?.includes("Suche") ? "KI-Analyse läuft..." : data.liveIntelligence.tacticalNotes,
+                lastMatch: data.liveIntelligence.lastMatch || "Wird analysiert...",
+                nextMatch: data.liveIntelligence.nextMatch || "TBD",
+                analyticalSummary: data.liveIntelligence.analyticalSummary || "Forschungs-Dossier wird erstellt...",
+                dataPoints: data.liveIntelligence.dataPoints || [],
+                sources: data.liveIntelligence.sources || ["[Internes Wissen]"],
+                tacticalNotes: data.liveIntelligence.tacticalNotes || "Strategischer Fokus: Daten-Präzision.",
              } : prev.club_info?.liveIntelligence;
 
              return {
@@ -190,13 +288,13 @@ const App = () => {
           {(() => {
             switch (activeTab) {
               case "home": return <ManagementHub truthObject={truthObject} setTruthObject={setTruthObject} setActiveTab={setActiveTab} activeRole={activeRole} />;
-              case "tactical": return <TacticalHub truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} playbooks={playbooks} setPlaybooks={setPlaybooks} />;
+              case "coach_hub": return <UnifiedCoachHub truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} playbooks={playbooks} setPlaybooks={setPlaybooks} onRefreshData={handleRefreshData} />;
               case "roster": return <RosterHub truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-              case "training_lab": return <TrainingLab truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
               case "stadion-kurier": return <StadionKurier truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
               case "medical": return <MedicalLab truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
               case "cfo": return <CfoBoard truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
               case "nlz": return <NlzAcademy truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
+              case "training": return <TrainingLab truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
               case "legacy": return <LegacyHub />;
               case "calendar": return <CalendarHub playbooks={playbooks} activeRole={activeRole} />;
               case "parent_app": return <ParentPortal truthObject={truthObject} setTruthObject={setTruthObject} activeChildId={activeChildId} />;

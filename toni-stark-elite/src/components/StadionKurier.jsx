@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Icon from './Icon';
 import { getAiConfig, sendAiRequest } from '../utils/aiConfig';
+import { speakGerd } from '../utils/audioUtils';
 
 const StadionKurier = ({ truthObject, activeRole }) => {
   const [activeIssue] = useState("Saison-Vorschau 2026/27");
@@ -12,11 +13,20 @@ const StadionKurier = ({ truthObject, activeRole }) => {
   const [isGeneratingSocial, setIsGeneratingSocial] = useState(false);
   const [socialCampaign, setSocialCampaign] = useState(null);
   
+  // Podcast States
+  const [podcastComment, setPodcastComment] = useState("");
+  const [isGeneratingPodcast, setIsGeneratingPodcast] = useState(false);
+  const [podcastScript, setPodcastScript] = useState(null);
+  const [isPlayingPodcast, setIsPlayingPodcast] = useState(false);
+  const [podcastProgress, setPodcastProgress] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  
+  
   const [localArticles, setLocalArticles] = useState([
     {
       type: "EDITORIAL",
       headline: "Die Rückkehr der Identität: Taktik trifft Charakter",
-      author: "Redaktion Stark Elite",
+      author: `Redaktion ${truthObject?.club_info?.name || "Stark Elite"}`,
       excerpt: "In einer Welt von Daten und Algorithmen erinnert uns das neue System daran, dass Fußball mehr ist als nur Zahlen auf einem Screen.",
       content: "Das Erbe von Gerd Sauerwein lebt in jedem Vektor dieses Systems weiter. Während andere auf reine Effizienz setzen, integriert Stark Elite die menschliche Komponente.",
       image: "/image_0.png",
@@ -26,13 +36,21 @@ const StadionKurier = ({ truthObject, activeRole }) => {
       type: "TACTICAL ANALYSIS",
       headline: "Der 4-4-2 Hybrid-Ansatz im Detail",
       author: "Neural-Gerd",
-      excerpt: "Warum das vertikale Pressing in der Regionalliga den Unterschied macht.",
+      excerpt: `Warum das vertikale Pressing in der ${truthObject?.club_info?.league || 'unserer Liga'} den Unterschied macht.`,
       content: "Durch die Kapselung der defensiven Dreierkette bei Ballbesitz erreichen wir eine Asymmetrie, die gegnerische Pressing-Lines kollabieren lässt.",
       featured: false
     }
   ]);
 
   const { activeKey, endpoint, modelString, aiProvider } = getAiConfig();
+
+  const copyToFuPa = (art) => {
+      const text = `${art.headline.toUpperCase()}\n\n${art.excerpt}\n\n${art.content}\n\nBericht von: ${art.author} | Powered by Stark Elite Gerd 2.0`;
+      navigator.clipboard.writeText(text);
+      alert("Erfolgreich für FuPa/fussball.de kopiert!");
+  };
+
+  const isAmateur = truthObject?.club_info?.isAmateurMode;
 
   // Combine newly generated articles from ManagementHub PR Inbox with local fallback articles
   const allArticles = [...(truthObject?.magazine_articles || []), ...localArticles];
@@ -66,8 +84,8 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
           const content = await sendAiRequest(systemPrompt);
           
           let raw = content.trim();
-          if(raw.startsWith("\`\`\`json")) raw = raw.replace(/^\`\`\`json/, "").replace(/\`\`\`$/, "").trim();
-          else if(raw.startsWith("\`\`\`")) raw = raw.replace(/^\`\`\`/, "").replace(/\`\`\`$/, "").trim();
+          if(raw.startsWith("```json")) raw = raw.replace(/^```json/, "").replace(/```$/, "").trim();
+          else if(raw.startsWith("```")) raw = raw.replace(/^```/, "").replace(/```$/, "").trim();
           
           const parsed = JSON.parse(raw);
           
@@ -132,6 +150,100 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
           setIsGeneratingSocial(false);
       }
   };
+
+  const handleGeneratePodcast = async () => {
+      if (!activeKey) {
+          alert("Globaler API Key fehlt! Bitte im NLZ Academy Modul hinterlegen.");
+          return;
+      }
+
+      setIsGeneratingPodcast(true);
+      setPodcastScript(null);
+      setPodcastProgress(0);
+      setCurrentLineIndex(0);
+      
+      const clubContext = truthObject?.club_info?.name || "unseren Verein";
+      const nextMatchContext = truthObject?.club_info?.liveIntelligence?.nextMatch || "das nächste Spiel";
+      const lastMatchContext = truthObject?.club_info?.liveIntelligence?.lastMatch || "das letzte Spiel";
+      const lastResultContext = truthObject?.club_info?.liveIntelligence?.lastResult || "unbekannt";
+      
+      const systemPrompt = `Du bist ein Podcast-Script-Generator für den "Stark Elite - Stammtisch".
+Aufgabe: Erstelle ein unterhaltsames, witziges und fachlich tiefes Podcast-Script (NotebookLM-Style).
+Verein: "${clubContext}"
+Kontext: Analyse des letzten Spiels (${lastMatchContext}, Ergebnis: ${lastResultContext}) und heißer Ausblick auf das kommende Spiel (${nextMatchContext}).
+Coach-Insight: "${podcastComment}"
+
+Charaktere (MÜSSEN witzig und gegensätzlich sein):
+1. Gerd: Der "Professor". Er liebt Wörter wie "reproduzierbare Abläufe" und "Pack-Maße". Er ist ein Nerd, der zum Lachen in den Taktikraum geht. Er nimmt alles extrem ernst.
+2. Kalle: Die "Legende". Er hat früher selbst gespielt (behauptet er), liebt die Bratwurst und hasst modernes "Laptoptrainer-Gequatsche", obwohl er Gerd heimlich bewundert. Er ist schlagfertig und emotional.
+
+Tonalität: 
+- Humorvolle Sticheleien zwischen beiden.
+- Fachliche Tiefe (Gerd) trifft auf Stammtisch-Parolen (Kalle).
+- Erwähne ZWINGEND das nächste Spiel gegen "${nextMatchContext}".
+- Das Script soll LANG sein (ca. 15-20 Dialogzeilen).
+
+Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-Blöcke!):
+{
+  "title": "Elite Talk: ${clubContext} Inside",
+  "dialogue": [
+    {"speaker": "Gerd", "text": "..."},
+    {"speaker": "Kalle", "text": "..."}
+  ]
+}`;
+
+      try {
+          const content = await sendAiRequest(systemPrompt);
+          let raw = content.trim();
+          if(raw.startsWith("```json")) raw = raw.replace(/^```json/, "").replace(/```$/, "").trim();
+          else if(raw.startsWith("```")) raw = raw.replace(/^```/, "").replace(/```$/, "").trim();
+          
+          const parsed = JSON.parse(raw);
+          setPodcastScript(parsed);
+      } catch (err) {
+          console.error(err);
+          alert("Fehler bei der Podcast-Generierung.");
+      } finally {
+          setIsGeneratingPodcast(false);
+      }
+  };
+
+  // Audio System (Web Speech API)
+  const speakLine = (index) => {
+    if (!podcastScript) return;
+    
+    const line = podcastScript.dialogue[index];
+    if (!line) return;
+    
+    // Use standardized Gerd voice for all speakers to ensure male profile
+    speakGerd(line.text, {
+        pitch: line.speaker === 'Gerd' ? 0.7 : 1.0, 
+        rate: line.speaker === 'Gerd' ? 0.9 : 1.1,
+        onEnd: () => {
+           if (isPlayingPodcast && index < podcastScript.dialogue.length - 1) {
+              setTimeout(() => {
+                  if (!isPlayingPodcast) return;
+                  const nextIdx = index + 1;
+                  setCurrentLineIndex(nextIdx);
+                  setPodcastProgress(((nextIdx + 1) / podcastScript.dialogue.length) * 100);
+                  speakLine(nextIdx);
+              }, 1500);
+           } else if (index === podcastScript.dialogue.length - 1) {
+              setIsPlayingPodcast(false);
+              setPodcastProgress(100);
+           }
+        }
+    });
+  };
+
+  React.useEffect(() => {
+     if (isPlayingPodcast) {
+        speakLine(currentLineIndex);
+     } else {
+        window.speechSynthesis?.cancel();
+     }
+     return () => window.speechSynthesis?.cancel();
+  }, [isPlayingPodcast]);
 
   const showPressRoom = activeRole === 'Manager' || activeRole === 'Presse' || !activeRole;
 
@@ -213,6 +325,87 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
              </div>
          </div>
       )}
+
+      {/* NEURAL PODCAST HUB */}
+      {showPressRoom && (
+          <div className="max-w-6xl mx-auto mb-12 bg-gradient-to-br from-[#0a0a0f] to-[#1a1a2e] border border-[#00f3ff]/20 rounded-3xl p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                  <Icon name="mic" size={180} className="text-[#00f3ff]" />
+              </div>
+              
+              <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                  <div className="shrink-0">
+                      <div className={`w-32 h-32 rounded-2xl bg-black border-2 border-[#00f3ff]/50 flex items-center justify-center shadow-[0_0_30px_rgba(0,243,255,0.2)] ${isGeneratingPodcast ? 'animate-pulse' : ''}`}>
+                          <Icon name="headphones" size={60} className="text-[#00f3ff]" />
+                      </div>
+                  </div>
+                  
+                  <div className="flex-1 text-center md:text-left">
+                      <div className="text-[#00f3ff] text-[10px] font-black uppercase tracking-[0.4em] mb-2">NotebookLM Integration</div>
+                      <h3 className="text-white text-3xl font-black uppercase italic tracking-tighter mb-4">Neural <span className="text-[#00f3ff]">Podcast</span> Lab</h3>
+                      <p className="text-white/60 text-sm font-serif italic max-w-xl mb-6">
+                          Lass Gerd und Kalle die aktuelle Lage deines Vereins in einem KI-generierten Deep-Dive analysieren. Taktik trifft auf Emotion.
+                      </p>
+                      
+                      {!podcastScript ? (
+                        <div className="w-full max-w-xl space-y-4">
+                            <textarea 
+                                value={podcastComment}
+                                onChange={(e) => setPodcastComment(e.target.value)}
+                                placeholder="Coach Insight (z.B. 'Kritik an der Chancenverwertung' oder 'Lob für den Nachwuchs')..."
+                                className="w-full bg-black/40 border border-[#00f3ff]/20 p-4 text-white font-serif text-sm outline-none focus:border-[#00f3ff] rounded-xl custom-scrollbar"
+                                rows={2}
+                            />
+                            <button 
+                                onClick={handleGeneratePodcast}
+                                disabled={isGeneratingPodcast}
+                                className="bg-[#00f3ff] hover:bg-white text-black px-8 py-4 rounded-xl font-black uppercase text-xs tracking-widest transition-all flex items-center gap-3 shadow-[0_0_20px_rgba(0,243,255,0.4)] disabled:opacity-50"
+                            >
+                                {isGeneratingPodcast ? <><Icon name="cpu" className="animate-spin" /> Generiere Deep-Dive...</> : <><Icon name="zap" /> KI-Podcast erstellen</>}
+                            </button>
+                        </div>
+                      ) : (
+                        <div className="w-full max-w-2xl bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="text-white font-bold text-lg uppercase tracking-tight">{podcastScript.title}</div>
+                                <button 
+                                    onClick={() => { setIsPlayingPodcast(!isPlayingPodcast); if (podcastProgress >= 100) setPodcastProgress(0); }} 
+                                    className="w-12 h-12 bg-[#00f3ff] text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-[0_0_15px_rgba(0,243,255,0.5)]"
+                                >
+                                    <Icon name={isPlayingPodcast ? "pause" : "play"} size={20} />
+                                </button>
+                            </div>
+                            
+                            {/* PROGRESS BAR */}
+                            <div className="w-full h-1 bg-white/10 rounded-full mb-6 overflow-hidden relative">
+                                <div className="h-full bg-[#00f3ff] transition-all duration-300" style={{ width: `${podcastProgress}%` }}></div>
+                                {isPlayingPodcast && (
+                                    <div className="absolute inset-0 flex items-center justify-around px-2 pointer-events-none opacity-50">
+                                        {[1,2,3,4,5,6,7,8].map(i => (
+                                            <div key={i} className={`w-0.5 bg-[#00f3ff] animate-pulse`} style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}></div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* DIALOGUE DISPLAY */}
+                            <div className="min-h-[80px] flex items-center justify-start gap-4">
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${podcastScript.dialogue[currentLineIndex].speaker === 'Gerd' ? 'bg-[#00f3ff]/10 border-[#00f3ff]/30 text-[#00f3ff]' : 'bg-red-600/10 border-red-600/30 text-red-600'}`}>
+                                    <Icon name={podcastScript.dialogue[currentLineIndex].speaker === 'Gerd' ? 'cpu' : 'user'} size={18} />
+                                </div>
+                                <div>
+                                    <div className="text-[9px] font-black uppercase tracking-widest opacity-50 mb-1">{podcastScript.dialogue[currentLineIndex].speaker}</div>
+                                    <p className="text-white text-sm font-serif italic leading-relaxed animate-fade-in" key={currentLineIndex}>
+                                        "{podcastScript.dialogue[currentLineIndex].text}"
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                      )}
+                  </div>
+              </div>
+          </div>
+      )}
                {/* MAG-WRAPPER */}
       <div className="max-w-[1400px] mx-auto bg-white shadow-2xl">
          
@@ -221,9 +414,9 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
             <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #ffffff 25%, #ffffff 75%, #000 75%, #000)", backgroundPosition: "0 0, 10px 10px", backgroundSize: "20px 20px" }}></div>
             <div className="relative z-10 flex justify-between items-start">
                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-gold">Offizielles Stadion-Magazin</div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-gold">Offizielles {isAmateur ? "Vereins-Heim" : "Stadion-Magazin"}</div>
                   <h1 className="text-6xl md:text-9xl font-black italic tracking-tighter uppercase leading-none">
-                     Stadion<br/><span className="text-gold">Kurier</span>
+                     {isAmateur ? "Vereins" : "Stadion"}<br/><span className="text-gold">{isAmateur ? "Heim" : "Kurier"}</span>
                   </h1>
                </div>
                <div className="text-right">
@@ -278,7 +471,7 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
                
                <div className="space-y-24">
                   {prArticles.map((art, i) => (
-                     <div key={i} className="animate-fade-in relative">
+                     <div key={i} className="animate-fade-in relative shadow-sm p-4 rounded-xl border border-gray-50">
                         {art.type.includes('EXKLUSIV') && (
                            <div className="absolute -top-6 -left-6 hidden md:block opacity-5">
                               <Icon name="radio" size={150} />
@@ -314,8 +507,16 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
                                  );
                               })}
                            </div>
-                           <div className="mt-8 pt-4 border-t border-gray-200 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                              Reportage von: {art.author}
+                           <div className="mt-8 pt-4 border-t border-gray-200 flex justify-between items-center">
+                               <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                   Reportage von: {art.author}
+                               </div>
+                               <button 
+                                 onClick={() => copyToFuPa(art)}
+                                 className="px-4 py-2 bg-navy text-white text-[10px] font-black uppercase tracking-widest rounded hover:bg-gold hover:text-navy transition-all flex items-center gap-2"
+                               >
+                                 <Icon name="copy" size={12} /> Für FuPa kopieren
+                               </button>
                            </div>
                         </div>
                      </div>
@@ -338,8 +539,8 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-16 gap-y-6">
                         {roster.map(player => (
                            <div key={player.id} className="flex items-center gap-6 border-b border-white/10 pb-4 group hover:border-gold transition-colors">
-                              <span className="text-gold font-black w-8 text-xl leading-none">{player.position}</span>
-                              <span className="font-bold uppercase tracking-widest text-lg group-hover:text-gold transition-colors">{player.name}</span>
+                               <span className="text-gold font-black w-8 text-xl leading-none">{player.position}</span>
+                               <span className="font-bold uppercase tracking-widest text-lg group-hover:text-gold transition-colors">{player.name}</span>
                            </div>
                         ))}
                      </div>
@@ -377,20 +578,26 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
                   <Icon name="star" size={300} />
                </div>
                <div className="flex items-center justify-between mb-16 border-b-2 border-gray-300 pb-6 relative z-10">
-                  <h2 className="text-6xl font-black uppercase tracking-tighter italic text-navy">Talentschmiede <span className="text-gold">NLZ</span></h2>
+                  <h2 className="text-6xl font-black uppercase tracking-tighter italic text-navy">{isAmateur ? "Jugend" : "Talentschmiede"} <span className="text-gold">NLZ</span></h2>
                </div>
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
                   {nlzArticles.map((art, i) => (
-                     <div key={i} className="bg-white p-12 shadow-2xl border-t-4 border-red-600 hover:-translate-y-2 transition-transform">
+                     <div key={i} className="bg-white p-12 shadow-2xl border-t-4 border-red-600 hover:-translate-y-2 transition-transform h-fit">
                         <div className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-6 flex items-center gap-2"><Icon name="zap" size={14}/> Jugendabteilung</div>
                         <h3 className="text-4xl font-black uppercase tracking-tighter mb-6 leading-[1.1] text-navy">{art.headline}</h3>
                         <p className="text-xl font-bold italic mb-8 text-gray-600 leading-relaxed border-l-4 border-gold pl-6 bg-gray-50 py-4">
                            {art.excerpt}
-                        </p>
-                        <div className="text-base leading-relaxed hyphens-auto font-medium text-gray-800 text-justify">
+                         </p>
+                         <div className="text-base leading-relaxed hyphens-auto font-medium text-gray-800 text-justify mb-8">
                            {art.content}
-                        </div>
+                         </div>
+                         <button 
+                            onClick={() => copyToFuPa(art)}
+                            className="w-full py-3 border-2 border-navy text-navy text-[10px] font-black uppercase tracking-widest hover:bg-navy hover:text-white transition-all flex items-center justify-center gap-2"
+                         >
+                            <Icon name="copy" size={12} /> Text für FuPa / Lokalsport kopieren
+                         </button>
                      </div>
                   ))}
                </div>
@@ -403,11 +610,17 @@ Formatiere deine Antwort ZWINGEND in folgendem JSON-Format (Ohne Markdown Code-B
                <h2 className="text-3xl font-black uppercase tracking-[0.3em] mb-16 opacity-50">Taktik & Analysen</h2>
                <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-12">
                   {tacticalArticles.map((art, i) => (
-                     <div key={i} className="group cursor-pointer bg-white/5 border border-white/10 p-8 rounded-xl hover:bg-gold hover:text-navy transition-all">
+                     <div key={i} className="group cursor-pointer bg-white/5 border border-white/10 p-8 rounded-xl hover:bg-gold hover:text-navy transition-all h-fit">
                         <div className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100">{art.type}</div>
                         <h4 className="text-2xl font-black uppercase leading-tight mb-4">{art.headline}</h4>
                         <p className="text-sm leading-relaxed opacity-70 mb-6">{art.excerpt}</p>
                         <div className="text-[10px] font-bold uppercase tracking-widest border-b border-white/20 inline-block pb-1 group-hover:border-navy group-hover:text-navy">Weiterlesen →</div>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); copyToFuPa(art); }}
+                            className="mt-4 w-full py-2 bg-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-navy transition-all"
+                        >
+                            Copy for Media
+                        </button>
                      </div>
                   ))}
                </div>

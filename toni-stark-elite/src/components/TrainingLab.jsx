@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import Icon from './Icon';
 import DrillSimulator from './DrillSimulator';
+import LineupCanvas from './LineupCanvas';
+import { generateLineup } from '../utils/aiConfig';
 
 const TrainingLab = ({ truthObject, setTruthObject, activeRole }) => {
-  const [activeView, setActiveView] = useState("schedule"); // schedule, drills, load
-  const [aiFeedback, setAiFeedback] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [promptInput, setPromptInput] = useState("");
   const [activeDrillSim, setActiveDrillSim] = useState(null);
+  const [lineupText, setLineupText] = useState("Formation: 4-4-2. TW: Meier. IV: Schmidt, Müller. LV: Weber. RV: Bauer. ZM: Kroos, Gündogan. LM: Sané. RM: Musiala. ST: Kane, Füllkrug.");
+  const [lineupResult, setLineupResult] = useState(null);
+  const [isGeneratingLineup, setIsGeneratingLineup] = useState(false);
   
   // Abfragen-Katalog State
   const [configDay, setConfigDay] = useState("Mittwoch");
@@ -151,6 +152,7 @@ const TrainingLab = ({ truthObject, setTruthObject, activeRole }) => {
       <div className="flex flex-wrap gap-2 mb-6">
         <button onClick={() => setActiveView("schedule")} className={`px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest border transition-all ${activeView === "schedule" ? "bg-white text-black border-white" : "bg-black/40 text-white/50 border-white/10 hover:border-white/30"}`}>Trainingsplan</button>
         <button onClick={() => setActiveView("drills")} className={`px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest border transition-all ${activeView === "drills" ? "bg-neon text-black border-neon" : "bg-black/40 text-white/50 border-white/10 hover:border-white/30"}`}>Trainingsübungen (Drills)</button>
+        <button onClick={() => setActiveView("matchday")} className={`px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest border transition-all ${activeView === "matchday" ? "bg-gold text-black border-gold shadow-[0_0_10px_rgba(255,184,0,0.5)]" : "bg-black/40 text-white/50 border-white/10 hover:border-white/30"}`}>Spieltag / Aufstellung</button>
         <button onClick={() => setActiveView("load")} className={`px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest border transition-all ${activeView === "load" ? "bg-redbull text-white border-redbull" : "bg-black/40 text-white/50 border-white/10 hover:border-white/30"}`}>Belastungs-Matrix</button>
       </div>
 
@@ -331,7 +333,57 @@ const TrainingLab = ({ truthObject, setTruthObject, activeRole }) => {
         </div>
       )}
 
-      {/* View: Load Management & AI */}
+      {/* View: Matchday Lineup Generator */}
+      {activeView === "matchday" && (
+        <div className="flex flex-col gap-6 animate-fade-in">
+          <div className="bg-[#02050c]/80 border border-gold/30 p-6 rounded-2xl shadow-[0_0_30px_rgba(255,184,0,0.05)] backdrop-blur-md">
+             <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <div>
+                   <h3 className="text-gold font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                     <Icon name="swords" size={16} /> Matchday Lineup Architect
+                   </h3>
+                   <p className="text-white/50 text-[10px] uppercase font-bold tracking-widest mt-1">Strukturiere deine Startelf via KI</p>
+                </div>
+                <button 
+                  onClick={async () => {
+                    setIsGeneratingLineup(true);
+                    try {
+                      const data = await generateLineup(lineupText);
+                      setLineupResult(data);
+                    } catch (e) {
+                      console.error("Lineup error:", e);
+                      alert(`Fehler bei der Visualisierung: ${e.message}`);
+                    } finally {
+                      setIsGeneratingLineup(false);
+                    }
+                  }}
+                  disabled={isGeneratingLineup}
+                  className="bg-gold/20 hover:bg-gold hover:text-black border border-gold text-gold px-6 rounded-xl font-black uppercase text-xs tracking-widest transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center h-[36px] min-w-[140px] shadow-[0_0_15px_rgba(255,184,0,0.3)]"
+                >
+                  {isGeneratingLineup ? <Icon name="loader" className="animate-spin" size={16} /> : "Visualisieren"}
+                </button>
+             </div>
+
+             <textarea 
+                value={lineupText}
+                onChange={(e) => setLineupText(e.target.value)}
+                placeholder="Formation und Spieler eingeben (z.B: 4-3-3. TW: Neuer, IV: Kim, Upamecano...)"
+                className="w-full bg-black/50 border border-white/20 rounded-xl p-4 text-white text-sm focus:border-gold focus:outline-none min-h-[100px] resize-none hover:border-white/40 transition-colors font-medium leading-relaxed"
+             />
+          </div>
+
+          {lineupResult && (
+            <div className="animate-fade-in">
+              <LineupCanvas lineup={lineupResult} />
+              <div className="mt-4 text-center">
+                <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold italic">
+                  * Dynamisch generiert auf Basis der Formation: <span className="text-gold">{lineupResult.formation}</span>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       {activeView === "load" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Chart Placeholder */}

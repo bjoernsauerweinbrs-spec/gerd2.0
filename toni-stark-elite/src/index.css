@@ -135,6 +135,10 @@
     animation: slideInUp 0.5s ease-out forwards;
   }
   
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
   .ai-pulse-active {
     animation: aiPulse 2s infinite ease-in-out;
   }
@@ -189,6 +193,11 @@
   0% { filter: brightness(1) drop-shadow(0 0 0px rgba(0, 243, 255, 0)); }
   50% { filter: brightness(1.3) drop-shadow(0 0 20px rgba(0, 243, 255, 0.6)); }
   100% { filter: brightness(1) drop-shadow(0 0 0px rgba(0, 243, 255, 0)); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes shimmer {

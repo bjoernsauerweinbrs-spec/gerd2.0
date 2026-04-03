@@ -1,0 +1,149 @@
+{
+  "RB Leipzig": {
+    "coach": "Zsolt Löw (Interim)",
+    "players": [
+      {"name": "Péter Gulácsi", "position": "GK", "ovr": 84, "pac": 45, "sho": 25, "pas": 75, "dri": 48, "def": 84, "phy": 78},
+      {"name": "Maarten Vandevoordt", "position": "GK", "ovr": 82, "pac": 50, "sho": 30, "pas": 72, "dri": 52, "def": 82, "phy": 75},
+      {"name": "Leopold Zingerle", "position": "GK", "ovr": 70, "pac": 48, "sho": 22, "pas": 65, "dri": 45, "def": 70, "phy": 72},
+      {"name": "David Raum", "position": "LB", "ovr": 85, "pac": 88, "sho": 68, "pas": 84, "dri": 80, "def": 78, "phy": 82},
+      {"name": "Willi Orbán", "position": "CB", "ovr": 86, "pac": 65, "sho": 55, "pas": 70, "dri": 62, "def": 88, "phy": 86},
+      {"name": "Castello Lukeba", "position": "CB", "ovr": 85, "pac": 82, "sho": 40, "pas": 75, "dri": 78, "def": 86, "phy": 80},
+      {"name": "Benjamin Henrichs", "position": "RB", "ovr": 83, "pac": 85, "sho": 65, "pas": 80, "dri": 80, "def": 81, "phy": 78},
+      {"name": "Brajan Gruda", "position": "RW", "ovr": 85, "pac": 89, "sho": 83, "pas": 82, "dri": 90, "def": 45, "phy": 74},
+      {"name": "Christoph Baumgartner", "position": "CAM", "ovr": 84, "pac": 81, "sho": 84, "pas": 81, "dri": 85, "def": 55, "phy": 75},
+      {"name": "Loïs Openda", "position": "ST", "ovr": 88, "pac": 95, "sho": 86, "pas": 72, "dri": 83, "def": 35, "phy": 78},
+      {"name": "Xavi Simons", "position": "CAM", "ovr": 87, "pac": 88, "sho": 78, "pas": 86, "dri": 89, "def": 45, "phy": 72},
+      {"name": "Benjamin Šeško", "position": "ST", "ovr": 85, "pac": 86, "sho": 85, "pas": 70, "dri": 80, "def": 40, "phy": 82}
+    ],
+    "liveIntelligence": {
+      "lastMatch": "Bundesliga (28.03.2026): RB Leipzig 5:0 TSG Hoffenheim",
+      "nextMatch": "Bundesliga (04.04.2026): SV Werder Bremen vs. RB Leipzig",
+      "form": "S-U-S-S-S",
+      "analyticalSummary": "Gerd V6 Analyse: Unter Interimscoach Zsolt Löw agiert Leipzig befreit. Der 5:0-Sieg gegen Hoffenheim vor der Länderspielpause war eine Machtdemonstration. Gruda und Baumgartner harmonieren blind. Fokus liegt nun auf der Sicherung von Platz 4 gegen Bremen.",
+      "tacticalNotes": "Löw-System: Aggressives Gegenpressing, Baumgartner als freier Radikal im Halbraum. Gruda-Vektor-Optimierung entscheidend.",
+      "dataPoints": [
+        {"label": "Siege", "value": 50},
+        {"label": "Remis", "value": 20},
+        {"label": "Niederl.", "value": 30},
+        {"label": "Transfer-Plus", "value": 85}
+      ],
+      "matchDetails": {
+        "scorers": ["C. Baumgartner (12', 45')", "B. Gruda (33', 78')", "B. Henrichs (56')"],
+        "possession": "58%",
+        "runningDistance": "121.2 km",
+        "passAccuracy": "91%"
+      },
+      "sources": ["[Google Search AI]", "[Kicker 2026 Archive]", "[Neural Link]"],
+      "leagueTable": [
+        {"rank": 1, "team": "Bayern München", "games": 27, "points": 65},
+        {"rank": 2, "team": "Bayer Leverkusen", "games": 27, "points": 58},
+        {"rank": 3, "team": "VfB Stuttgart", "games": 27, "points": 54},
+        {"rank": 4, "team": "RB Leipzig", "games": 27, "points": 50},
+        {"rank": 5, "team": "TSG Hoffenheim", "games": 27, "points": 50}
+      ]
+    }
+  },
+  "RasenBallsport Leipzig": {
+    "coach": "Zsolt Löw (Interim)",
+    "players": [
+      {"name": "Péter Gulácsi", "position": "GK", "ovr": 84, "pac": 45, "sho": 25, "pas": 75, "dri": 48, "def": 84, "phy": 78},
+      {"name": "Maarten Vandevoordt", "position": "GK", "ovr": 82, "pac": 50, "sho": 30, "pas": 72, "dri": 52, "def": 82, "phy": 75},
+      {"name": "Leopold Zingerle", "position": "GK", "ovr": 70, "pac": 48, "sho": 22, "pas": 65, "dri": 45, "def": 70, "phy": 72},
+      {"name": "David Raum", "position": "LB", "ovr": 85, "pac": 88, "sho": 68, "pas": 84, "dri": 80, "def": 78, "phy": 82},
+      {"name": "Willi Orbán", "position": "CB", "ovr": 86, "pac": 65, "sho": 55, "pas": 70, "dri": 62, "def": 88, "phy": 86},
+      {"name": "Castello Lukeba", "position": "CB", "ovr": 85, "pac": 82, "sho": 40, "pas": 75, "dri": 78, "def": 86, "phy": 80},
+      {"name": "Benjamin Henrichs", "position": "RB", "ovr": 83, "pac": 85, "sho": 65, "pas": 80, "dri": 80, "def": 81, "phy": 78},
+      {"name": "Brajan Gruda", "position": "RW", "ovr": 85, "pac": 89, "sho": 83, "pas": 82, "dri": 90, "def": 45, "phy": 74},
+      {"name": "Christoph Baumgartner", "position": "CAM", "ovr": 84, "pac": 81, "sho": 84, "pas": 81, "dri": 85, "def": 55, "phy": 75},
+      {"name": "Loïs Openda", "position": "ST", "ovr": 88, "pac": 95, "sho": 86, "pas": 72, "dri": 83, "def": 35, "phy": 78},
+      {"name": "Xavi Simons", "position": "CAM", "ovr": 87, "pac": 88, "sho": 78, "pas": 86, "dri": 89, "def": 45, "phy": 72},
+      {"name": "Benjamin Šeško", "position": "ST", "ovr": 85, "pac": 86, "sho": 85, "pas": 70, "dri": 80, "def": 40, "phy": 82}
+    ],
+    "liveIntelligence": {
+      "lastMatch": "Bundesliga (28.03.2026): RB Leipzig 5:0 TSG Hoffenheim",
+      "nextMatch": "Bundesliga (04.04.2026): SV Werder Bremen vs. RB Leipzig",
+      "form": "S-U-S-S-S",
+      "analyticalSummary": "Gerd V6 Analyse: Unter Interimscoach Zsolt Löw agiert Leipzig befreit. Der 5:0-Sieg gegen Hoffenheim vor der Länderspielpause war eine Machtdemonstration. Gruda und Baumgartner harmonieren blind.",
+      "tacticalNotes": "Löw-System: Aggressives Gegenpressing, Baumgartner als freier Radikal im Halbraum.",
+      "dataPoints": [
+        {"label": "Siege", "value": 50},
+        {"label": "Remis", "value": 20},
+        {"label": "Niederl.", "value": 30},
+        {"label": "Transfer-Plus", "value": 85}
+      ],
+      "matchDetails": {
+        "scorers": ["C. Baumgartner (12', 45')", "B. Gruda (33', 78')", "B. Henrichs (56')"],
+        "possession": "58%",
+        "runningDistance": "121.2 km",
+        "passAccuracy": "91%"
+      },
+      "sources": ["[Google Search AI]", "[Kicker 2026 Archive]"],
+      "leagueTable": [
+        {"rank": 1, "team": "Bayern München", "games": 27, "points": 65},
+        {"rank": 2, "team": "Bayer Leverkusen", "games": 27, "points": 58},
+        {"rank": 3, "team": "VfB Stuttgart", "games": 27, "points": 54},
+        {"rank": 4, "team": "RB Leipzig", "games": 27, "points": 50},
+        {"rank": 5, "team": "TSG Hoffenheim", "games": 27, "points": 50}
+      ]
+    }
+  },
+  "RasenBallsport Leipzig e.V.": {
+    "coach": "Zsolt Löw (Interim)",
+    "players": [
+      {"name": "Péter Gulácsi", "position": "GK", "ovr": 84, "pac": 45, "sho": 25, "pas": 75, "dri": 48, "def": 84, "phy": 78},
+      {"name": "Maarten Vandevoordt", "position": "GK", "ovr": 82, "pac": 50, "sho": 30, "pas": 72, "dri": 52, "def": 82, "phy": 75},
+      {"name": "Leopold Zingerle", "position": "GK", "ovr": 70, "pac": 48, "sho": 22, "pas": 65, "dri": 45, "def": 70, "phy": 72},
+      {"name": "David Raum", "position": "LB", "ovr": 85, "pac": 88, "sho": 68, "pas": 84, "dri": 80, "def": 78, "phy": 82},
+      {"name": "Willi Orbán", "position": "CB", "ovr": 86, "pac": 65, "sho": 55, "pas": 70, "dri": 62, "def": 88, "phy": 86},
+      {"name": "Castello Lukeba", "position": "CB", "ovr": 85, "pac": 82, "sho": 40, "pas": 75, "dri": 78, "def": 86, "phy": 80},
+      {"name": "Benjamin Henrichs", "position": "RB", "ovr": 83, "pac": 85, "sho": 65, "pas": 80, "dri": 80, "def": 81, "phy": 78},
+      {"name": "Brajan Gruda", "position": "RW", "ovr": 85, "pac": 89, "sho": 83, "pas": 82, "dri": 90, "def": 45, "phy": 74},
+      {"name": "Christoph Baumgartner", "position": "CAM", "ovr": 84, "pac": 81, "sho": 84, "pas": 81, "dri": 85, "def": 55, "phy": 75},
+      {"name": "Loïs Openda", "position": "ST", "ovr": 88, "pac": 95, "sho": 86, "pas": 72, "dri": 83, "def": 35, "phy": 78},
+      {"name": "Xavi Simons", "position": "CAM", "ovr": 87, "pac": 88, "sho": 78, "pas": 86, "dri": 89, "def": 45, "phy": 72},
+      {"name": "Benjamin Šeško", "position": "ST", "ovr": 85, "pac": 86, "sho": 85, "pas": 70, "dri": 80, "def": 40, "phy": 82}
+    ],
+    "liveIntelligence": {
+      "lastMatch": "Bundesliga (28.03.2026): RB Leipzig 5:0 TSG Hoffenheim",
+      "nextMatch": "Bundesliga (04.04.2026): SV Werder Bremen vs. RB Leipzig",
+      "form": "S-U-S-S-S",
+      "analyticalSummary": "Gerd V6 Analyse: Unter Interimscoach Zsolt Löw agiert Leipzig befreit. Fokus auf die Sicherung von Platz 4 gegen Bremen.",
+      "tacticalNotes": "Löw-System: Aggressives Gegenpressing.",
+      "dataPoints": [
+        {"label": "Siege", "value": 50},
+        {"label": "Remis", "value": 20},
+        {"label": "Niederl.", "value": 30},
+        {"label": "Transfer-Plus", "value": 85}
+      ],
+      "matchDetails": {
+        "scorers": ["C. Baumgartner (12', 45')", "B. Gruda (33', 78')", "B. Henrichs (56')"],
+        "possession": "58%",
+        "runningDistance": "121.2 km",
+        "passAccuracy": "91%"
+      },
+      "sources": ["[Google Search AI]", "[Kicker 2026 Archive]"],
+      "leagueTable": [
+        {"rank": 1, "team": "Bayern München", "games": 27, "points": 65},
+        {"rank": 2, "team": "Bayer Leverkusen", "games": 27, "points": 58},
+        {"rank": 3, "team": "VfB Stuttgart", "games": 27, "points": 54},
+        {"rank": 4, "team": "RB Leipzig", "games": 27, "points": 50},
+        {"rank": 5, "team": "TSG Hoffenheim", "games": 27, "points": 50}
+      ]
+    }
+  },
+  "Stark Elite": {
+    "coach": "Ole Werner",
+    "players": [
+      {"name": "Lukas Berg", "position": "IV", "ovr": 89, "pac": 84, "sho": 60, "pas": 85, "dri": 75, "def": 92, "phy": 90},
+      {"name": "Péter Gulácsi", "position": "GK", "ovr": 84, "pac": 45, "sho": 25, "pas": 75, "dri": 48, "def": 84, "phy": 78},
+      {"name": "Loïs Openda", "position": "ST", "ovr": 88, "pac": 95, "sho": 86, "pas": 72, "dri": 83, "def": 35, "phy": 78}
+    ],
+    "liveIntelligence": {
+      "lastMatch": "Champions League Achtelfinale (Rückspiel): Stark Elite 2:1 Arsenal",
+      "nextMatch": "Real Madrid (Champions League Viertelfinale, 18.03.2026)",
+      "form": "S-S-S-U-S",
+      "analyticalSummary": "Gerd V6 Analyse: Stark Elite agiert mit maximaler Vektor-Präzision. Real Madrid wird im Viertelfinale (18.03.2026) kognitiv herausgefordert.",
+      "tacticalNotes": "Fokus auf Umschaltmomente gegen Real."
+    }
+  }
+}
