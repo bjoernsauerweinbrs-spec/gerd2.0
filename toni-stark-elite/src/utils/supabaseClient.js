@@ -20,6 +20,7 @@ export const savePlan = async (planData) => {
                 author_id: user.id,
                 title: planData.title,
                 markdown_content: planData.markdownContent || planData.markdown_content,
+                tactic_json: planData.tactic_json || planData.tacticJson,
                 visibility: planData.visibility || 'private'
             }
         ])

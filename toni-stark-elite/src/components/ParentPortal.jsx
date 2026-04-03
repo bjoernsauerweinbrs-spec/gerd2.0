@@ -27,6 +27,23 @@ const ParentPortal = ({ truthObject, setTruthObject, activeChildId }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [supabaseMessages, setSupabaseMessages] = useState([]);
+  const [activeWeeklyPlan, setActiveWeeklyPlan] = useState(null);
+
+  useEffect(() => {
+    const fetchWeek = async () => {
+        const { data, error } = await supabase
+            .from('training_plans')
+            .select('*')
+            .eq('visibility', 'team_parents')
+            .order('created_at', { ascending: false })
+            .limit(1);
+        
+        if (data && data.length > 0) {
+            setActiveWeeklyPlan(data[0]);
+        }
+    };
+    fetchWeek();
+  }, []);
 
   React.useEffect(() => {
     if (activeChildId) {
@@ -199,26 +216,69 @@ Formatiere zwingend als JSON:
                    <Icon name="clock" size={16} className="text-redbull" /> Kalender ({child.group})
                 </h3>
                 <div className="space-y-3">
-                   <div className="flex gap-4 items-center bg-gray-50 p-2 rounded-xl">
-                      <div className="bg-white px-3 py-2 rounded-lg text-center shadow-sm w-16">
-                         <div className="text-[9px] font-black uppercase text-redbull">Morgen</div>
-                         <div className="text-xl font-black text-navy leading-none">17</div>
-                      </div>
-                      <div>
-                         <div className="text-sm font-black text-navy uppercase">Team-Training</div>
-                         <div className="text-[10px] text-gray-500 font-mono">17:30 - 19:00 Uhr am NLZ</div>
-                      </div>
-                   </div>
-                   <div className="flex gap-4 items-center bg-gray-50 p-2 rounded-xl">
-                      <div className="bg-white px-3 py-2 rounded-lg text-center shadow-sm w-16">
-                         <div className="text-[9px] font-black uppercase text-neon">Samstag</div>
-                         <div className="text-xl font-black text-navy leading-none">20</div>
-                      </div>
-                      <div>
-                         <div className="text-sm font-black text-navy uppercase">Turnier / Liga</div>
-                         <div className="text-[10px] text-gray-500 font-mono">Treffpunkt 08:30 Uhr (Auswärts)</div>
-                      </div>
-                   </div>
+                   {activeWeeklyPlan ? (
+                       <div className="animate-fade-in">
+                           <div className="text-[10px] font-black text-neon uppercase bg-navy p-2 rounded-lg mb-4 inline-block tracking-widest">
+                               Lager: {activeWeeklyPlan.title}
+                           </div>
+                           <div className="prose prose-sm max-w-none text-navy">
+                               {/* We use a simplified view for the calendar rows if we can parse it, or just showing the markdown content */}
+                               <div className="space-y-4">
+                                   {activeWeeklyPlan.markdown_content.split('##').map((section, idx) => {
+                                       if (idx === 0) return null;
+                                       const lines = section.trim().split('\n');
+                                       const title = lines[0];
+                                       const content = lines.slice(1).join('\n');
+                                       
+                                       if (title.includes('ÜBERSICHT')) {
+                                           // Extract rows from table
+                                           const rows = content.split('\n').filter(r => r.includes('|') && !r.includes('---') && !r.includes('Tag | Fokus'));
+                                           return rows.map((row, rIdx) => {
+                                               const [_, day, focus, details] = row.split('|').map(s => s.trim());
+                                               if (!day) return null;
+                                               return (
+                                                  <div key={rIdx} className="flex gap-4 items-center bg-gray-50 p-3 rounded-xl border border-gray-100 mb-2">
+                                                     <div className="bg-white px-3 py-2 rounded-lg text-center shadow-sm w-20 shrink-0">
+                                                        <div className="text-[8px] font-black uppercase text-redbull">{day}</div>
+                                                        <div className="text-xs font-black text-navy leading-tight mt-1">Sitzung</div>
+                                                     </div>
+                                                     <div>
+                                                        <div className="text-sm font-black text-navy uppercase leading-tight">{focus}</div>
+                                                        <div className="text-[9px] text-gray-500 font-medium mt-1">{details}</div>
+                                                     </div>
+                                                  </div>
+                                               );
+                                           });
+                                       }
+                                       return null;
+                                   })}
+                               </div>
+                           </div>
+                       </div>
+                   ) : (
+                       <>
+                           <div className="flex gap-4 items-center bg-gray-50 p-2 rounded-xl">
+                              <div className="bg-white px-3 py-2 rounded-lg text-center shadow-sm w-16">
+                                 <div className="text-[9px] font-black uppercase text-redbull">Morgen</div>
+                                 <div className="text-xl font-black text-navy leading-none">17</div>
+                              </div>
+                              <div>
+                                 <div className="text-sm font-black text-navy uppercase">Team-Training</div>
+                                 <div className="text-[10px] text-gray-500 font-mono">17:30 - 19:00 Uhr am NLZ</div>
+                              </div>
+                           </div>
+                           <div className="flex gap-4 items-center bg-gray-50 p-2 rounded-xl">
+                              <div className="bg-white px-3 py-2 rounded-lg text-center shadow-sm w-16">
+                                 <div className="text-[9px] font-black uppercase text-neon">Samstag</div>
+                                 <div className="text-xl font-black text-navy leading-none">20</div>
+                              </div>
+                              <div>
+                                 <div className="text-sm font-black text-navy uppercase">Turnier / Liga</div>
+                                 <div className="text-[10px] text-gray-500 font-mono">Treffpunkt 08:30 Uhr (Auswärts)</div>
+                              </div>
+                           </div>
+                       </>
+                   )}
                 </div>
              </div>
 

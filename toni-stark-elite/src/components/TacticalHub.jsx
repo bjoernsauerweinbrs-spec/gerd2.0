@@ -51,6 +51,8 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
   const [draft, setDraft] = useState({ warmup: null, main_drill: null, cooldown: null, taktischerFokus: "" });
   const [cooldownType, setCooldownType] = useState("");
   const [cloudStatus, setCloudStatus] = useState("");
+  const [planningMode, setPlanningMode] = useState('single'); // 'single' or 'week'
+  const [weeklyPlanMarkdown, setWeeklyPlanMarkdown] = useState("");
   
   const [handbuch, setHandbuch] = useState([]);
 
@@ -243,6 +245,54 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
       setIsGenerating(false); setPhase('summary');
   };
 
+  const generateWeeklyPlan = async () => {
+      setPhase('generating_week'); setIsGenerating(true);
+      const dept = isNlzTheme ? "NLZ" : "Senioren";
+      const prompt = `Du bist Gerd 2.0. Erstelle einen EXKLUSIVEN WOCHENPLAN für das Team "${ageGroup || clubName}".
+Fokus: 3 Trainingstage (Montag, Mittwoch, Freitag) + 1 Testspiel am Wochenende gegen ein höherklassiges Team.
+Das Ziel ist maximale Transparenz für die Eltern und höchste pädagogische Qualität (B-Jugend Niveau).
+
+Antworte in diesem EXAKTEN Format:
+# WOCHENPLAN: [TEAMNAME]
+## 📅 ÜBERSICHT
+| Tag | Fokus | Details |
+|---|---|---|
+| Montag | ... | ... |
+| Mittwoch | ... | ... |
+| Freitag | ... | ... |
+| Wochenende | MATCHDAY (Testspiel) | ... gegen [Gegner] |
+
+## 🎙️ STRATEGISCHES BRIEFING
+[Beschreibe kurz das Ziel der Woche für die Eltern - ca. 50 Wörter]
+
+## ⚽️ DETAIL-FOKUS DER SESSIONS
+**Montag:** [Detaillierter Fokus]
+**Mittwoch:** [Detaillierter Fokus]
+**Freitag:** [Detaillierter Fokus]
+**Matchday:** [Taktische Marschroute gegen den stärkeren Gegner]`;
+
+      try {
+          const data = await askAi(prompt, false, 0.3, dept);
+          setWeeklyPlanMarkdown(data.markdownText);
+          setPhase('weekly_summary');
+      } catch (e) { console.error(e); }
+      setIsGenerating(false);
+  };
+
+  const handleSaveWeeklySchedule = async () => {
+      setCloudStatus("Uploading Week...");
+      const result = await savePlan({
+          team_id: isNlzTheme ? 'youth' : 'seniors',
+          title: `Wochenplan: ${ageGroup || clubName}`,
+          markdown_content: weeklyPlanMarkdown,
+          visibility: 'team_parents'
+      });
+      if (result.success) {
+          setCloudStatus("Wochenplan Live!");
+          setGerdFeedback("Wochenplan erfolgreich für Eltern veröffentlicht!");
+      }
+  };
+
   const AnalyticalDrillCard = ({ phase, phaseKey, iconName, iconColor, isMainDrill = false }) => {
       if (!phase) return null;
       return (
@@ -351,25 +401,52 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
           );
       }
 
-      if (phase === 'summary') {
+      if (phase === 'summary' || phase === 'weekly_summary') {
           return (
               <div className="flex flex-col gap-10 mt-6 animate-fade-in w-full">
                   <div className="bg-neon/10 border border-neon/30 p-8 rounded-3xl flex flex-col md:flex-row gap-6 items-center">
                      <div className="w-20 h-20 bg-neon/20 rounded-full flex items-center justify-center border border-neon text-neon"><Icon name="check" size={40} /></div>
                      <div className="flex-1">
-                        <h3 className="text-2xl font-black text-white uppercase mb-2">Plan Bereit</h3>
-                        <p className="text-white/80">{clubName} | Fokus: {draft.taktischerFokus}</p>
+                        <h3 className="text-2xl font-black text-white uppercase mb-2">{phase === 'summary' ? 'Plan Bereit' : 'Wochenplan Bereit'}</h3>
+                        <p className="text-white/80">{clubName} | {phase === 'summary' ? `Fokus: ${draft.taktischerFokus}` : `Zeitraum: Aktuelle Woche`}</p>
                      </div>
                       <div className="flex gap-3">
-                         <button onClick={saveToHandbuch} className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-black uppercase text-[10px] tracking-widest border border-white/10">Lokal Speichern</button>
-                         <button onClick={handleCloudSave} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">
-                            {cloudStatus || "Cloud Sync (Supabase)"}
-                         </button>
+                         {phase === 'summary' ? (
+                            <>
+                               <button onClick={saveToHandbuch} className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-black uppercase text-[10px] tracking-widest border border-white/10">Lokal Speichern</button>
+                               <button onClick={handleCloudSave} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">
+                                  {cloudStatus || "Cloud Sync (Supabase)"}
+                               </button>
+                            </>
+                         ) : (
+                            <button onClick={handleSaveWeeklySchedule} className="px-8 py-4 bg-neon text-black rounded-xl font-black uppercase text-xs tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">
+                                {cloudStatus || "Wochenplan Veröffentlichen"}
+                            </button>
+                         )}
                       </div>
                   </div>
-                  <AnalyticalDrillCard phase={draft.warmup} iconName="thermometer" iconColor="from-neon/20 to-transparent text-neon" isMainDrill={true} />
-                  <AnalyticalDrillCard phase={draft.main_drill} iconName="crosshair" iconColor="from-red-500/20 to-transparent text-red-500" isMainDrill={true} />
-                  <AnalyticalDrillCard phase={draft.cooldown} iconName="wind" iconColor="from-blue-500/20 to-transparent text-blue-400" isMainDrill={true} />
+                  
+                  {phase === 'summary' ? (
+                    <>
+                        <AnalyticalDrillCard phase={draft.warmup} iconName="thermometer" iconColor="from-neon/20 to-transparent text-neon" isMainDrill={true} />
+                        <AnalyticalDrillCard phase={draft.main_drill} iconName="crosshair" iconColor="from-red-500/20 to-transparent text-red-500" isMainDrill={true} />
+                        <AnalyticalDrillCard phase={draft.cooldown} iconName="wind" iconColor="from-blue-500/20 to-transparent text-blue-400" isMainDrill={true} />
+                    </>
+                  ) : (
+                    <div className="bg-[#0b1324]/50 p-10 rounded-3xl border border-white/10 max-w-5xl mx-auto w-full text-white">
+                        <ReactMarkdown components={{
+                            h1: ({node, ...props}) => <h1 className="text-3xl font-black text-neon mb-8 uppercase tracking-widest border-b border-neon/30 pb-4" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-xl font-bold text-white mt-10 mb-4 uppercase tracking-widest border-l-4 border-neon/50 pl-4" {...props} />,
+                            table: ({node, ...props}) => <div className="overflow-x-auto my-8"><table className="w-full border-collapse border border-white/10" {...props} /></div>,
+                            th: ({node, ...props}) => <th className="bg-white/5 border border-white/10 p-4 text-left font-black uppercase text-[10px] tracking-widest text-neon" {...props} />,
+                            td: ({node, ...props}) => <td className="border border-white/10 p-4 text-sm" {...props} />,
+                            p: ({node, ...props}) => <p className="mb-4 leading-relaxed opacity-90" {...props} />,
+                            strong: ({node, ...props}) => <strong className="text-neon" {...props} />,
+                        }}>
+                             {weeklyPlanMarkdown}
+                        </ReactMarkdown>
+                    </div>
+                  )}
               </div>
           );
       }
@@ -383,7 +460,10 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
                           <Icon name="cpu" size={48} />
                       </div>
                       <h2 className="text-3xl font-black text-white uppercase tracking-widest">Gerd 2.0 Intelligence</h2>
-                      <button onClick={() => setPhase('intro')} className="px-8 py-4 bg-neon text-black rounded-full font-black uppercase">Neue Session</button>
+                      <div className="flex flex-col md:flex-row gap-4">
+                          <button onClick={() => { setPhase('intro'); setPlanningMode('single'); }} className="px-8 py-4 bg-neon text-black rounded-full font-black uppercase text-xs tracking-widest">Einzeltraining</button>
+                          <button onClick={() => { setPhase('intro'); setPlanningMode('week'); }} className="px-8 py-4 border border-neon text-neon hover:bg-neon hover:text-black rounded-full font-black uppercase text-xs tracking-widest transition-all">Wochenplaner</button>
+                      </div>
                       {handbuch.length > 0 && (
                           <div className="w-full mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
                              {handbuch.map(h => (
@@ -413,7 +493,18 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
                       addChatMessage('gerd', `Verstanden, Coach ${n}. Für welche Altersklasse oder Mannschaft planen wir heute? (z.B. ${isNlzTheme ? 'U14, U19' : '1. Herren, Profis'})`); 
                   }} buttonText="Senden" />}
                   {phase === 'verein' && <TextInput placeholder={isNlzTheme ? "Altersklasse (z.B. U14)..." : "Mannschaft (z.B. 1. Herren)..."} onSubmit={(c) => { addChatMessage('coach', c); analyzeClub(c); }} buttonText="Senden" />}
-                  {phase === 'club_analysis' && <button onClick={() => { addChatMessage('coach', "Start"); generateWarmups(); }} className="px-6 py-3 bg-neon text-black rounded-full font-black uppercase text-xs">Warmup Generieren</button>}
+                  {phase === 'club_analysis' && (
+                       <button 
+                            onClick={() => { 
+                                addChatMessage('coach', "Füge Pläne hinzu"); 
+                                if (planningMode === 'week') generateWeeklyPlan();
+                                else generateWarmups(); 
+                            }} 
+                            className="px-6 py-3 bg-neon text-black rounded-full font-black uppercase text-xs"
+                        >
+                            {planningMode === 'week' ? 'Wochenplan Generieren' : 'Warmup Generieren'}
+                       </button>
+                   )}
                   {phase === 'warmup_options' && <PillSelect options={warmupOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, warmup: warmupOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('focus_selection'); }} />}
                   {phase === 'focus_selection' && <TextInput placeholder="Fokus..." onSubmit={(f) => { addChatMessage('coach', f); generateMainDrills(f); }} buttonText="Generieren" />}
                   {phase === 'main_options' && <PillSelect options={mainOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, main_drill: mainOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('cooldown_selection'); }} />}
