@@ -1,0 +1,20 @@
+[dotenv@17.3.1] injecting env (2) from .env -- tip: ⚙️  override existing env vars with { override: true }
+Proxy on port 3001
+[SCRAPER] Incoming request for: RB Leipzig (Direct-AI: false)
+[SCRAPER] Falling back to AI-Hydration for RB Leipzig: INCOMPLETE_ROSTER
+[SCRAPER] Table Data Length: 30
+[SCRAPER] Schedule Data Length: 27
+[SCRAPER] Samples: --- AKTUELLER SPIELTAG ---
+
+[AI-FALLBACK] gemini-2.0-flash (v1beta) failed: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[AI-FALLBACK] gemini-2.0-flash (v1) failed: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1/models/
+[SCRAPER] AI Hydration FATAL: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent: [404 Not Found] models/gemini-1.5-pro-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+[SCRAPER] Incoming request for: RB Leipzig (Direct-AI: false)
+[SCRAPER] Falling back to AI-Hydration for RB Leipzig: INCOMPLETE_ROSTER
+[SCRAPER] Table Data Length: 30
+[SCRAPER] Schedule Data Length: 27
+[SCRAPER] Samples: --- AKTUELLER SPIELTAG ---
+
+[AI-FALLBACK] gemini-2.0-flash (v1beta) failed: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/mod
+[AI-FALLBACK] gemini-2.0-flash (v1) failed: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1/models/
+[SCRAPER] AI Hydration FATAL: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent: [404 Not Found] models/gemini-1.5-pro-latest is not found for API version v1, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.

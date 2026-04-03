@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/gerd2.0/', 
   plugins: [react(), tailwindcss()],
   server: {
     port: 3000,
