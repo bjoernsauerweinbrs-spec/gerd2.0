@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+// Version: 2.1.0 - NLZ Update 2026-04-03
 import Icon from './Icon';
 import TacticalHub from './TacticalHub';
 import { getAiConfig, sendAiRequest, extractPlayersFromImage } from '../utils/aiConfig';
