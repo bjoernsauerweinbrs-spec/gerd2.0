@@ -320,6 +320,15 @@ Antworte zwingend im JSON Format: {"score": [Zahl 0-100], "report": "[1 Satz Beg
     }));
   };
 
+  const handleUpdatePlayer = (id, field, value) => {
+    setTruthObject(prev => ({
+      ...prev,
+      nlz_squad: (prev.nlz_squad || []).map(p => 
+        p.id === id ? { ...p, [field]: value } : p
+      )
+    }));
+  };
+
   const handleDeletePlayer = (e, id) => {
     e.stopPropagation();
     if (window.confirm("Spieler wirklich aus dem NLZ-Kader entfernen?")) {
@@ -1228,7 +1237,17 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                             <span className={`text-[10px] font-black uppercase tracking-widest ${pot >= 90 ? "text-navy/60" : "text-white/80"}`}>OVR</span>
                             <div className={`w-8 h-px my-1 ${pot >= 90 ? "bg-navy/10" : "bg-white/20"}`} />
                             <span className={`text-sm font-black italic ${pot >= 90 ? "text-navy/80" : "text-white"}`}>{p.position}</span>
-                            {p.dob && <span className={`text-[8px] font-black opacity-60 ${pot >= 90 ? "text-navy" : "text-white"}`}>* {p.dob}</span>}
+                            <div className="flex items-center">
+                                <span className={`text-[8px] font-black opacity-60 ${pot >= 90 ? "text-navy" : "text-white"} mr-1`}>*</span>
+                                <input 
+                                    type="text"
+                                    value={p.dob || ""}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => handleUpdatePlayer(p.id, 'dob', e.target.value)}
+                                    placeholder="DD.MM.YYYY"
+                                    className={`w-16 bg-transparent text-[8px] font-black outline-none focus:bg-black/10 rounded ${pot >= 90 ? "text-navy opacity-80" : "text-white opacity-80"}`}
+                                />
+                            </div>
                             <div className="mt-1">
                                 <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${pot >= 90 ? "bg-navy text-white text-[7px]" : "bg-white/20 text-white text-[7px]"}`}>{p.group}</span>
                             </div>
@@ -1265,7 +1284,14 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                         {/* Name & Player Info Plate */}
                         <div className="absolute bottom-[23%] inset-x-0 flex flex-col items-center z-30 px-4">
                              <div className={`w-full py-1.5 bg-black/40 backdrop-blur-md rounded-lg border border-white/10 shadow-lg text-center transform transition-transform group-hover:scale-101 border-b-2 border-b-white/5`}>
-                                 <h4 className="text-xs font-black italic tracking-widest text-white uppercase truncate px-2 leading-tight">{p.name}</h4>
+                                 <input 
+                                     type="text"
+                                     value={p.name || ""}
+                                     onClick={(e) => e.stopPropagation()}
+                                     onChange={(e) => handleUpdatePlayer(p.id, 'name', e.target.value)}
+                                     placeholder="Name"
+                                     className="w-full text-center text-[10px] sm:text-xs font-black italic tracking-widest text-white uppercase px-1 leading-tight bg-transparent focus:bg-white/20 outline-none rounded truncate" 
+                                 />
                              </div>
                              
                               {/* Enhanced Stats Grid (2x3 for high legibility) */}
@@ -1284,7 +1310,7 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                                             type="number" 
                                             value={p[stat.key] || 50}
                                             onClick={(e) => e.stopPropagation()}
-                                            onChange={(e) => handleStatUpdate(p.id, stat.key, parseInt(e.target.value) || 0)}
+                                            onChange={(e) => handleUpdatePlayer(p.id, stat.key, parseInt(e.target.value) || 0)}
                                             className="w-10 bg-transparent text-right text-[13px] font-black text-white focus:bg-white/10 outline-none rounded cursor-text transition-all"
                                         />
                                     </div>

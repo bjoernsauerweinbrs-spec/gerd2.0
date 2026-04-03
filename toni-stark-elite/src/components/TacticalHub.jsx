@@ -39,6 +39,7 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
   // Session Data
   const [trainerName, setTrainerName] = useState("");
   const [clubName, setClubName] = useState(truthObject?.club_info?.name || "");
+  const [ageGroup, setAgeGroup] = useState("");
   const [clubAnalysis, setClubAnalysis] = useState("");
   const [targetDay, setTargetDay] = useState("Mittwoch"); 
   
@@ -167,9 +168,11 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
       }
   };
 
-  const analyzeClub = async (club) => {
-      setClubName(club); setPhase('generating_club'); setIsGenerating(true);
-      const prompt = `Analysiere die taktische DNA von "${club}". RB-DNA, Gegenpressing oder Positionsspiel? Max 70 Wörter. Direkt zum Trainer ${trainerName}.`;
+  const analyzeClub = async (info) => {
+      setAgeGroup(info); setPhase('generating_club'); setIsGenerating(true);
+      const prompt = isNlzTheme
+        ? `Analysiere die pädagogischen und taktischen Kern-Anforderungen für die Altersklasse "${info}" im Verein "${clubName}". Berücksichtige diese Altersklasse extrem professionell für alle weiteren Übungen. Direkt zum Trainer ${trainerName}. Max 70 Wörter.`
+        : `Analysiere die taktische DNA und Ausrichtung für das Team "${info}" im Verein "${clubName}". Direkt zum Trainer ${trainerName}. Max 70 Wörter.`;
       try {
           const data = await askAi(prompt);
           const res = data.markdownText || "";
@@ -403,8 +406,13 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
           
           {phase !== 'handbuch_or_new' && !isGenerating && (
               <div className="pt-6 border-t border-white/10">
-                  {phase === 'intro' && <TextInput placeholder="Dein Name..." onSubmit={(n) => { setTrainerName(n); addChatMessage('coach', n); setPhase('verein'); }} buttonText="Senden" />}
-                  {phase === 'verein' && <TextInput placeholder="Verein..." onSubmit={(c) => { addChatMessage('coach', c); analyzeClub(c); }} buttonText="Senden" />}
+                  {phase === 'intro' && <TextInput placeholder="Dein Name..." onSubmit={(n) => { 
+                      setTrainerName(n); 
+                      addChatMessage('coach', n); 
+                      setPhase('verein'); 
+                      addChatMessage('gerd', `Verstanden, Coach ${n}. Für welche Altersklasse oder Mannschaft planen wir heute? (z.B. ${isNlzTheme ? 'U14, U19' : '1. Herren, Profis'})`); 
+                  }} buttonText="Senden" />}
+                  {phase === 'verein' && <TextInput placeholder={isNlzTheme ? "Altersklasse (z.B. U14)..." : "Mannschaft (z.B. 1. Herren)..."} onSubmit={(c) => { addChatMessage('coach', c); analyzeClub(c); }} buttonText="Senden" />}
                   {phase === 'club_analysis' && <button onClick={() => { addChatMessage('coach', "Start"); generateWarmups(); }} className="px-6 py-3 bg-neon text-black rounded-full font-black uppercase text-xs">Warmup Generieren</button>}
                   {phase === 'warmup_options' && <PillSelect options={warmupOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, warmup: warmupOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('focus_selection'); }} />}
                   {phase === 'focus_selection' && <TextInput placeholder="Fokus..." onSubmit={(f) => { addChatMessage('coach', f); generateMainDrills(f); }} buttonText="Generieren" />}
