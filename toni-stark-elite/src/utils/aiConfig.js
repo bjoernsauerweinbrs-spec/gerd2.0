@@ -96,12 +96,43 @@ export const generateTactic = async (promptText, department = "Senioren", player
 export const scrapeClubData = async (team, apiKey = "", directAi = false) => {
     const finalKey = apiKey || localStorage.getItem('stark_gemini_key') || "";
     const url = `http://localhost:3001/api/scrape?team=${encodeURIComponent(team)}&apiKey=${finalKey}&directAi=${directAi}`;
-    const res = await fetch(url);
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Scraping failed" }));
-        throw new Error(err.error);
+    
+    try {
+        const res = await fetch(url);
+        if (res.ok) return await res.json();
+    } catch (e) {
+        console.warn("Proxy scrape failed, falling back to direct AI hydration...");
     }
-    return await res.json();
+
+    // Direct AI Fallback: Use Gemini 1.5 Pro to simulate the club data
+    if (!finalKey) throw new Error("KEIN API KEY: Scraper & AI-Fallback blockiert.");
+    
+    const prompt = `Du bist ein FIFA Elite Scout. Hydriere den Kader für den Verein "${team}".
+Erstelle 20 fiktive aber extrem realistische Spieler (NLZ-Niveau U15-U19).
+Antworte AUSSCHLIESSLICH als JSON: 
+{
+  "success": true,
+  "source": "AI_HYDRATION",
+  "club_info": { "name": "${team}", "stadium": "Elite Arena", "colors": ["#00f3ff", "#000000"] },
+  "players": [
+    { "id": "p1", "name": "...", "position": "ST", "dob": "01.01.2010", "pac": 80, "sho": 75, "pas": 70, "dri": 78, "def": 40, "phy": 65, "pot": 88 }
+  ]
+}`;
+
+    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${finalKey}`;
+    const resp = await fetch(geminiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(`Google API Error: ${data.error.message}`);
+    
+    let aiText = data.candidates[0].content.parts[0].text.trim();
+    if (aiText.startsWith("```json")) aiText = aiText.replace(/^```json/, "").replace(/```$/, "").trim();
+    else if (aiText.startsWith("```")) aiText = aiText.replace(/^```/, "").replace(/```$/, "").trim();
+    
+    return JSON.parse(aiText);
 };
 
 export const searchLogistics = async (query, clubInfo) => {
