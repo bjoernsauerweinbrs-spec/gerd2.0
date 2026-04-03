@@ -53,6 +53,8 @@ const NlzAcademy = ({ truthObject, setTruthObject, activeRole }) => {
     e.stopPropagation();
     setEditingStatsPlayer(player);
     setTempStats({
+      name: player.name || "",
+      dob: player.dob || "",
       pac: player.pac || 50,
       sho: player.sho || 50,
       pas: player.pas || 50,
@@ -2386,6 +2388,26 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                  </div>
                  
                  <div className="p-8 space-y-6">
+                    <div className="flex flex-col gap-4 mb-4 pb-4 border-b border-gray-100">
+                       <div>
+                           <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1 block">Spielername</label>
+                           <input 
+                               type="text" 
+                               value={tempStats.name || ""} 
+                               onChange={(e) => setTempStats({...tempStats, name: e.target.value})}
+                               className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm font-bold text-navy focus:border-redbull focus:outline-none"
+                           />
+                       </div>
+                       <div>
+                           <label className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1 block">Geburtsdatum (DD.MM.YYYY)</label>
+                           <input 
+                               type="text" 
+                               value={tempStats.dob || ""} 
+                               onChange={(e) => setTempStats({...tempStats, dob: e.target.value})}
+                               className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm font-bold text-navy focus:border-redbull focus:outline-none"
+                           />
+                       </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-6">
                        {['pac', 'sho', 'pas', 'dri', 'def', 'phy'].map(stat => (
                           <div key={stat}>
