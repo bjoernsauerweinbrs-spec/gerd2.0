@@ -1330,6 +1330,7 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                                   </span>
                                 )}
                                  <button 
+                                   id="gen-pin-button"
                                    onClick={(e) => { e.stopPropagation(); handleGenerateParentPin(e, p.id); }}
                                    className="text-[9px] font-black uppercase text-gray-500 hover:text-navy px-1.5 transition-colors"
                                  >
