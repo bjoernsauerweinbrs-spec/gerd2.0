@@ -1,0 +1,1 @@
+import{c as e}from"./src-DNd1jfj7-C1Qd2hpA.js";var t=class{constructor(e){this.init=e,this.records=this.init()}static{e(this,`ImperativeState`)}reset(){this.records=this.init()}};export{t};

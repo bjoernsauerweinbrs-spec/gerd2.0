@@ -162,7 +162,7 @@ const Login = ({ onLogin, truthObject }) => {
                      <div className="flex-1">
                         <h3 className={`text-lg font-black uppercase tracking-[0.2em] ${isAiConnected ? 'text-neon' : 'text-white/60'}`}>
                           {scrapingResult ? 'SYSTEM VOLL HYDRIERT' : (isScraping ? 'INITIALISIERE CORE...' : 'AI CORE & CLUB IDENT')}
-                          <span className="ml-2 text-[10px] opacity-30">V 2.5</span>
+                          <span className="ml-2 text-[10px] opacity-30">V 2.6</span>
                         </h3>
                         <p className="text-[11px] text-white/40 font-mono mt-1 uppercase tracking-widest leading-relaxed">
                           {initMessage || "Geben Sie den API Key und Ihren Verein ein, um die Live-Match-Intelligence zu aktivieren."}
@@ -286,6 +286,7 @@ const Login = ({ onLogin, truthObject }) => {
                     <div>
                       <div className="font-black text-white uppercase tracking-wider text-lg mb-0.5 group-hover:text-white transition-colors">{r.name}</div>
                       <div className="text-[10px] text-white/40 font-mono line-clamp-1">{r.description}</div>
+                      <div className="text-white/20 text-[10px] absolute bottom-4 right-4 font-mono select-none">V 2.6</div>
                     </div>
                   </div>
                 </button>

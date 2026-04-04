@@ -1,0 +1,1 @@
+import{x as e}from"./_baseUniq-MpDXTHgb-D3BcQAxB.js";var t=4;function n(n){return e(n,t)}export{n as t};

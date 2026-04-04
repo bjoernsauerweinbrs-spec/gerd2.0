@@ -35,15 +35,15 @@ const INITIAL_TRUTH = {
   },
   match_day_manifesto: { strategy: "Offensive Power", intensity_level: 95 },
   nlz_squad: [
-    { id: "ai_squad_1", name: "Max Berge", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 91, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.32 },
-    { id: "ai_squad_2", name: "Daniel Cernobrisov", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 88, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.40 },
-    { id: "ai_squad_3", name: "Yanis Dardouri", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 94, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.47 },
-    { id: "ai_squad_4", name: "Julian Geier", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 89, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.55 },
-    { id: "ai_squad_5", name: "Matheo Heyer", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 92, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.63 },
-    { id: "ai_squad_6", name: "Lionel Opl", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 87, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.71 },
-    { id: "ai_squad_7", name: "David Luiz Sauerwein", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 95, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.78 },
-    { id: "ai_squad_8", name: "Leonas Schmidt", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 90, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.86 },
-    { id: "ai_squad_9", name: "Carl Sabastzäka", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 86, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.93 }
+    { id: "ai_squad_1", name: "Max Berge", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 91, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.32, parentPin: "1234" },
+    { id: "ai_squad_2", name: "Daniel Cernobrisov", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 88, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.40, parentPin: "1234" },
+    { id: "ai_squad_3", name: "Yanis Dardouri", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 94, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.47, parentPin: "1234" },
+    { id: "ai_squad_4", name: "Julian Geier", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 89, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.55, parentPin: "1234" },
+    { id: "ai_squad_5", name: "Matheo Heyer", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 92, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.63, parentPin: "1234" },
+    { id: "ai_squad_6", name: "Lionel Opl", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 87, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.71, parentPin: "1234" },
+    { id: "ai_squad_7", name: "David Luiz Sauerwein", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 95, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.78, parentPin: "1234" },
+    { id: "ai_squad_8", name: "Leonas Schmidt", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 90, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.86, parentPin: "1234" },
+    { id: "ai_squad_9", name: "Carl Sabastzäka", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 86, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.93, parentPin: "1234" }
   ],
   players: [
     { id: 99, name: "Lukas Berg (C)", position: "IV", ovr: 89, readiness: 94, isInjured: false, pac: 84, sho: 60, pas: 85, dri: 75, def: 92, phy: 90, inSquad: true },

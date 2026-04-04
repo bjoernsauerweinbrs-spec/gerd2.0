@@ -455,25 +455,47 @@ Antworte in diesem EXAKTEN Format:
       <div className="w-full max-w-5xl mx-auto mt-4 bg-[#050914]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl flex flex-col min-h-[700px]">
           <div className="relative z-10 flex flex-col flex-1 overflow-y-auto pr-2 custom-scrollbar pb-10">
               {phase === 'handbuch_or_new' ? (
-                  <div className="flex flex-col gap-8 items-center justify-center h-full animate-fade-in mt-10">
-                      <div className="w-24 h-24 bg-neon/10 border border-neon/30 rounded-3xl flex items-center justify-center text-neon">
-                          <Icon name="cpu" size={48} />
-                      </div>
-                      <h2 className="text-3xl font-black text-white uppercase tracking-widest">Gerd 2.0 Intelligence</h2>
-                      <div className="flex flex-col md:flex-row gap-4">
-                          <button onClick={() => { setPhase('intro'); setPlanningMode('single'); }} className="px-8 py-4 bg-neon text-black rounded-full font-black uppercase text-xs tracking-widest">Einzeltraining</button>
-                          <button onClick={() => { setPhase('intro'); setPlanningMode('week'); }} className="px-8 py-4 border border-neon text-neon hover:bg-neon hover:text-black rounded-full font-black uppercase text-xs tracking-widest transition-all">Wochenplaner</button>
-                      </div>
-                      {handbuch.length > 0 && (
-                          <div className="w-full mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
-                             {handbuch.map(h => (
-                                 <div key={h.id} onClick={() => setViewingSavedSession(h)} className="bg-white/5 border border-white/10 p-5 rounded-xl hover:border-neon cursor-pointer transition-all">
-                                     <div className="text-neon text-[10px] uppercase mb-1">{h.date}</div>
-                                     <div className="text-white font-bold">{h.title}</div>
-                                 </div>
-                             ))}
+                  <div className="flex flex-col gap-10 mt-6 animate-fade-in w-full pb-20">
+                      <div className="bg-[#0b1324]/80 backdrop-blur-xl border border-neon/30 p-12 rounded-[40px] flex flex-col items-center justify-center text-center max-w-4xl mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                          <div className="w-24 h-24 bg-neon/10 border border-neon/30 rounded-3xl flex items-center justify-center text-neon mb-6">
+                              <Icon name="cpu" size={48} />
                           </div>
-                      )}
+                          <h2 className="text-4xl font-black text-white uppercase tracking-[0.2em] mb-4">Gerd 2.0 Intelligence</h2>
+                          <p className="text-white/50 text-xs uppercase tracking-widest mb-10">Wähle deinen Planungs-Modus</p>
+                          
+                          <div className="flex flex-col md:flex-row gap-6 w-full max-w-xl">
+                              <button 
+                                onClick={() => { setPhase('intro'); setPlanningMode('single'); }} 
+                                className="flex-1 px-8 py-8 bg-white/5 hover:bg-neon hover:text-black border border-white/10 hover:border-neon rounded-2xl font-black uppercase text-sm tracking-widest transition-all group flex flex-col items-center gap-4"
+                              >
+                                <Icon name="target" size={32} className="group-hover:scale-110 transition-transform" />
+                                <span>Einzeltraining</span>
+                              </button>
+                              
+                              <button 
+                                id="wochenplaner-btn"
+                                onClick={() => { setPhase('intro'); setPlanningMode('week'); }} 
+                                className="flex-1 px-8 py-8 bg-neon/10 hover:bg-neon hover:text-black border border-neon/30 hover:border-neon rounded-2xl font-black uppercase text-sm tracking-widest transition-all group text-neon flex flex-col items-center gap-4"
+                              >
+                                <Icon name="calendar" size={32} className="group-hover:scale-110 transition-transform text-inherit" />
+                                <span>Wochenplaner</span>
+                              </button>
+                          </div>
+
+                          {handbuch.length > 0 && (
+                              <div className="w-full mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                 {handbuch.map(h => (
+                                    <div key={h.id} className="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center group hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setViewingSavedSession(h)}>
+                                       <div className="text-left">
+                                          <div className="text-[10px] text-neon font-black uppercase tracking-widest">{h.club}</div>
+                                          <div className="text-xs text-white font-bold">{h.title}</div>
+                                       </div>
+                                       <Icon name="chevron-right" size={16} className="text-white/20 group-hover:text-neon transition-colors" />
+                                    </div>
+                                 ))}
+                              </div>
+                          )}
+                      </div>
                   </div>
               ) : (
                   <div className="flex flex-col gap-6">
