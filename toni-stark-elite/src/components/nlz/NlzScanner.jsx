@@ -28,7 +28,7 @@ const NlzScanner = ({ onScanComplete }) => {
 
     try {
       const geminiKey = localStorage.getItem('stark_gemini_key');
-      const response = await fetch('http://localhost:3001/api/nlz/scan-schedule', {
+      const response = await fetch('/api/nlz/scan-schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

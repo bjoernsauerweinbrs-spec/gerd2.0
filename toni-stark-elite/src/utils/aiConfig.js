@@ -36,7 +36,7 @@ export const generateLineup = async (text) => {
         }
 
         console.log("[AI] Generating Lineup via Proxy (3001)...");
-        const response = await fetch("http://localhost:3001/api/generate-lineup", {
+        const response = await fetch("/api/generate-lineup", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -65,7 +65,7 @@ export const generateTactic = async (promptText, department = "Senioren", player
         }
 
         console.log("[AI] Generating Tactic via Proxy (3001)...");
-        const response = await fetch("http://localhost:3001/api/generate-tactic", {
+        const response = await fetch("/api/generate-tactic", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -96,7 +96,7 @@ export const generateTactic = async (promptText, department = "Senioren", player
 
 export const scrapeClubData = async (team, apiKey = "", directAi = false) => {
     const finalKey = apiKey || localStorage.getItem('stark_gemini_key') || "";
-    const url = `http://localhost:3001/api/scrape?team=${encodeURIComponent(team)}&apiKey=${finalKey}&directAi=${directAi}`;
+    const url = `/api/scrape?team=${encodeURIComponent(team)}&apiKey=${finalKey}&directAi=${directAi}`;
     
     try {
         const res = await fetch(url);
@@ -143,7 +143,7 @@ Antworte AUSSCHLIESSLICH als JSON:
 
 export const searchLogistics = async (query, clubInfo) => {
     const geminiKey = localStorage.getItem('stark_gemini_key') || "";
-    const res = await fetch("http://localhost:3001/api/logistics-search", {
+    const res = await fetch("/api/logistics-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, apiKey: geminiKey, clubInfo })
@@ -154,7 +154,7 @@ export const searchLogistics = async (query, clubInfo) => {
 
 export const generateSponsorInquiry = async (sponsorName, materialName, clubInfo) => {
     const geminiKey = localStorage.getItem('stark_gemini_key') || "";
-    const res = await fetch("http://localhost:3001/api/sponsor-inquiry", {
+    const res = await fetch("/api/sponsor-inquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sponsorName, materialName, clubInfo, apiKey: geminiKey })
@@ -165,7 +165,7 @@ export const generateSponsorInquiry = async (sponsorName, materialName, clubInfo
 };
 
 export const uploadScoutingReport = async (formData) => {
-    const res = await fetch('http://localhost:3001/api/upload-scouting', {
+    const res = await fetch('/api/upload-scouting', {
         method: 'POST',
         body: formData
     });
@@ -185,7 +185,7 @@ export const sendAiRequest = async (systemPrompt, contextOverride = null) => {
 
         // 2. Always try the proxy first for centralized context and intelligence
         console.log("[AI] Requesting via Proxy (3001)...");
-        const response = await fetch("http://localhost:3001/api/ai-chat", {
+        const response = await fetch("/api/ai-chat", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -246,7 +246,7 @@ WICHTIG: Ignoriere Browser-Leisten, Tabs und das Dock! Suche NUR in der Tabelle.
 ACHTUNG: Das Gesicht ist sehr klein (ca. 2-5% der Breite). Die X-Koordinate liegt meist ganz links (0.02 - 0.05).
 Antworte AUSSCHLIESSLICH als JSON: [{"name": "...", "dob": "...", "xPosition": 0.024, "yPosition": 0.31}]`;
 
-        const resp = await fetch("http://localhost:3001/api/extract-roster", {
+        const resp = await fetch("/api/extract-roster", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

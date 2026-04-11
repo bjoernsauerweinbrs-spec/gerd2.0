@@ -32,7 +32,7 @@ const AiSettingsWidget = ({ context, onClose }) => {
     setVerifyStatus({ state: 'loading', message: 'Wird verifiziert...' });
     
     try {
-      const resp = await fetch('http://localhost:3001/api/verify-gemini', {
+      const resp = await fetch('/api/verify-gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: geminiKey })

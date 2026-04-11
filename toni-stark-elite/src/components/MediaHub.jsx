@@ -31,7 +31,7 @@ const MediaHub = ({ truthObject }) => {
         try {
             const contextPayload = `Nächstes Spiel: ${nextMatch}. Letztes Ergebnis: ${lastMatch}. Taktik-Fokus: ${tacticalNotes}`;
 
-            const response = await fetch('http://localhost:3001/api/generate-media', {
+            const response = await fetch('/api/generate-media', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

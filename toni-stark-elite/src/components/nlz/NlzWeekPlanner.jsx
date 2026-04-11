@@ -33,7 +33,7 @@ const NlzWeekPlanner = ({ clubInfo }) => {
     setActivePress(null);
     try {
       const geminiKey = localStorage.getItem('stark_gemini_key');
-      const response = await fetch('http://localhost:3001/api/nlz/generate-plan', {
+      const response = await fetch('/api/nlz/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -57,7 +57,7 @@ const NlzWeekPlanner = ({ clubInfo }) => {
     setIsGenerating(true);
     try {
       const geminiKey = localStorage.getItem('stark_gemini_key');
-      const response = await fetch('http://localhost:3001/api/nlz/generate-press', {
+      const response = await fetch('/api/nlz/generate-press', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
