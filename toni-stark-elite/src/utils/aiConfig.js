@@ -99,7 +99,12 @@ export const scrapeClubData = async (team, apiKey = "", directAi = false) => {
     const url = `/api/scrape?team=${encodeURIComponent(team)}&apiKey=${finalKey}&directAi=${directAi}`;
     
     try {
-        const res = await fetch(url);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s Timeout for Vercel
+
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (res.ok) return await res.json();
         
         // If the proxy returns an error (e.g. 403 or 500), but is reachable, 
