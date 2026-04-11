@@ -11,6 +11,9 @@ mermaid.initialize({ startOnLoad: false, theme: 'dark' });
 
 const GERD_MASTER_PROMPT = `Du bist „Gerd 2.0“, der weltweit führende High-Performance Director und Taktik-Mentor. Dein Analyse- und Beratungsniveau entspricht der absoluten Weltspitze (Nagelsmann/Klopp). Du kommunizierst im direkten, hochprofessionellen Dialog mit dem Trainer auf Augenhöhe.
 
+WICHTIG FÜR NLZ / JUGEND (FALLS ZUTREFFEND):
+Wenn du für eine Jugendmannschaft (U7, U14, U19 etc.) planst, agiere als "Expert Youth Training Architect". Deine Übungen müssen pädagogisch wertvoll, altersgerecht und auf die motorische/kognitive Entwicklung der jeweiligen Altersklasse zugeschnitten sein. Bei U7 Fokus auf Spiel, Spaß und Grundlagen; bei U19 Fokus auf professionelle Intensität und taktische Komplexität.
+
 DAS FORMAT (CHAT-FIRST & TEXT-ONLY):
 Du bist ein Chat-Assistent. Du generierst KEINEN Code, KEINE JSON-Daten und KEINE Bilder/SVGs. Du nutzt sauberes Markdown (Fettungen, Listen, Absätze) für perfekte Lesbarkeit. Deine Beschreibungen müssen so millimetergenau sein, dass im Kopf des Trainers sofort ein visuelles „Kopfkino“ entsteht.
 
@@ -25,21 +28,33 @@ PFLICHT-STRUKTUR FOR JEDE TRAININGSÜBUNG:
 5. 🧠 WISSENSCHAFTLICHER NUTZEN: Begründung aus neurologischer/physischer Sicht (z.B. Perception-Action-Coupling).`;
 
 
-const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targetPlayers, targetPositions, setTargetPositions }) => {
+const TacticalHub = ({ 
+  truthObject, 
+  setTruthObject, 
+  activeRole, 
+  isNlzTheme, 
+  targetPlayers, 
+  targetPositions, 
+  setTargetPositions,
+  prefilledTrainerName = "",
+  prefilledClubName = "",
+  prefilledAgeGroup = "",
+  shouldSkipIntro = false
+}) => {
   // Removed unused activeKey/endpoint/modelString/aiProvider assignments to standardize AI handling
   
   // State Machine
   const [phase, setPhase] = useState('handbuch_or_new'); 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [gerdFeedback, setGerdFeedback] = useState("");
+  const [canResearch, setCanResearch] = useState(false);
+  const [isNeuralResearchActive, setIsNeuralResearchActive] = useState(false);
   const [viewingSavedSession, setViewingSavedSession] = useState(null);
   const [chatHistory, setChatHistory] = useState([]); 
   const endRef = useRef(null);
   
   // Session Data
-  const [trainerName, setTrainerName] = useState("");
-  const [clubName, setClubName] = useState(truthObject?.club_info?.name || "");
-  const [ageGroup, setAgeGroup] = useState("");
+  const [trainerName, setTrainerName] = useState(prefilledTrainerName || "");
+  const [clubName, setClubName] = useState(prefilledClubName || truthObject?.club_info?.name || "");
+  const [ageGroup, setAgeGroup] = useState(prefilledAgeGroup || "");
   const [clubAnalysis, setClubAnalysis] = useState("");
   const [targetDay, setTargetDay] = useState("Mittwoch"); 
   
@@ -97,9 +112,14 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
 
   useEffect(() => {
     if (phase === 'intro' && chatHistory.length === 0) {
-        setChatHistory([{ sender: 'gerd', text: "Willkommen im Elite Architect, Coach. Ich bin Gerd 2.0. Lass uns diese Einheit auf A-Lizenz Niveau hieven. Wie ist dein Name?" }]);
+        if (shouldSkipIntro && trainerName && ageGroup) {
+            addChatMessage('gerd', `Willkommen zurück, Coach ${trainerName}. Ich habe das System für die ${ageGroup} von ${clubName} bereits kalibriert. Lassen Sie uns direkt in die Analyse gehen.`);
+            analyzeClub(ageGroup);
+        } else {
+            setChatHistory([{ sender: 'gerd', text: "Willkommen im Elite Architect, Coach. Ich bin Gerd 2.0. Lass uns diese Einheit auf A-Lizenz Niveau hieven. Wie ist dein Name?" }]);
+        }
     }
-  }, [phase]);
+  }, [phase, shouldSkipIntro]);
 
   const addChatMessage = (sender, text) => {
     setChatHistory(prev => [...prev, { sender, text }]);
@@ -164,23 +184,40 @@ const TacticalHub = ({ truthObject, setTruthObject, activeRole, isNlzTheme, targ
       } catch (err) {
           console.error("Tactical AI Proxy failure:", err);
           return {
-             markdownText: `### GERD-ANALYSE: ${promptText}\n\n**STATUS: OFFLINE-MODE (DEMO)**\n\nDie Verbindung zur Cloud-Intelligence (Gemini) ist aktuell unterbrochen. Ich nutze meine lokalen taktischen Muster, um dir trotzdem eine Einheit auf A-Lizenz Niveau zu erstellen.\n\n**Tipp:** Prüfe deinen API-Key in den Einstellungen (Gears Icon oben rechts).`,
+             markdownText: `### 🧠 GERD 2.0 — LOCAL NEURAL SYNC\n\n**STATUS:** Offline-Modus / Lokale Taktik-Datenbank aktiv.\n\nIch konnte keine Verbindung zur Cloud-Intelligence (Gemini) herstellen. Ich nutze daher meine lokalen taktischen Muster von **${clubName || "JFV Batherfeld"}**, um dir trotzdem eine Einheit auf A-Lizenz Niveau zu erstellen.\n\n**Tipp:** Prüfe deinen API-Key in den Einstellungen (Gears Icon oben rechts).`,
              tacticJson: { players: [], cones: [], balls: [], paths: [] }
           };
       }
   };
 
-  const analyzeClub = async (info) => {
+  const analyzeClub = async (info, forceAi = false) => {
       setAgeGroup(info); setPhase('generating_club'); setIsGenerating(true);
+      if (forceAi) setIsNeuralResearchActive(true);
+      
       const prompt = isNlzTheme
         ? `Analysiere die pädagogischen und taktischen Kern-Anforderungen für die Altersklasse "${info}" im Verein "${clubName}". Berücksichtige diese Altersklasse extrem professionell für alle weiteren Übungen. Direkt zum Trainer ${trainerName}. Max 70 Wörter.`
         : `Analysiere die taktische DNA und Ausrichtung für das Team "${info}" im Verein "${clubName}". Direkt zum Trainer ${trainerName}. Max 70 Wörter.`;
+      
       try {
-          const data = await askAi(prompt);
+          // If TM is blocked, we use directAi research in the proxy
+          const data = await generateTactic(prompt, isNlzTheme ? "NLZ" : "Senioren", "", null, "", null, isNlzTheme, info, forceAi);
           const res = data.markdownText || "";
-          setClubAnalysis(res); addChatMessage('gerd', res); setPhase('club_analysis');
-      } catch (e) { setPhase('club_analysis'); }
+          
+          setClubAnalysis(res); 
+          addChatMessage('gerd', res); 
+          setPhase('club_analysis');
+          
+          // If the proxy says it was a neural research or if we forced it, track it
+          if (data.isNeuralResearch || forceAi) setCanResearch(false);
+          else setCanResearch(true);
+
+      } catch (e) { 
+          console.error("Club analysis failed:", e);
+          setPhase('club_analysis'); 
+          setCanResearch(true);
+      }
       setIsGenerating(false);
+      setIsNeuralResearchActive(false);
   };
 
   const generateWarmups = async () => {
@@ -506,7 +543,38 @@ Antworte in diesem EXAKTEN Format:
               )}
           </div>
           
-          {phase !== 'handbuch_or_new' && !isGenerating && (
+          {phase === 'club_analysis' && (
+              <div className="pt-6 border-t border-white/10 flex flex-col gap-4">
+                  {canResearch && (
+                      <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4">
+                          <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center text-red-500">
+                                  <Icon name="alert-triangle" size={20} />
+                              </div>
+                              <div>
+                                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400">Transfermarkt Blockiert</div>
+                                  <div className="text-xs text-white/70">Live-Daten wurden eingeschränkt. AI-Suche starten?</div>
+                              </div>
+                          </div>
+                          <button 
+                             onClick={() => analyzeClub(ageGroup, true)}
+                             disabled={isNeuralResearchActive}
+                             className="px-6 py-3 bg-neon text-black rounded-lg font-black uppercase text-[10px] tracking-widest shadow-[0_0_15px_rgba(0,243,255,0.3)] hover:scale-105 transition-all flex items-center gap-2"
+                          >
+                             {isNeuralResearchActive ? <Icon name="loader" size={14} className="animate-spin" /> : <Icon name="search" size={14} />}
+                             AI RE-SEARCH (Gemini 1.5)
+                          </button>
+                      </div>
+                  )}
+                  
+                  <div className="flex flex-wrap gap-3">
+                      <button onClick={generateWarmups} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">Warmup Generieren</button>
+                      <button onClick={generateWeeklySchedule} className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-black uppercase text-[10px] tracking-widest border border-white/10 transition-all">Wochenplaner Starten</button>
+                  </div>
+              </div>
+          )}
+          
+          {phase !== 'handbuch_or_new' && phase !== 'club_analysis' && !isGenerating && (
               <div className="pt-6 border-t border-white/10">
                   {phase === 'intro' && <TextInput placeholder="Dein Name..." onSubmit={(n) => { 
                       setTrainerName(n); 

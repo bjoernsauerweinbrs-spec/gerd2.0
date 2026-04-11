@@ -12,6 +12,10 @@ const ParentPortal = ({ truthObject, setTruthObject, activeChildId }) => {
   const childRaw = truthObject?.nlz_squad?.find(p => p.id === activeChildId) || {};
   const calculatedOvr = Math.round(((childRaw.pac || 50) + (childRaw.sho || 50) + (childRaw.pas || 50) + (childRaw.dri || 50) + (childRaw.def || 50) + (childRaw.phy || 50)) / 6);
 
+  // Pro-Sync Data extraction
+  const medicalInfo = truthObject?.nlz_medical_records?.find(m => m.playerId === activeChildId);
+  const academicInfo = truthObject?.nlz_academic_records?.filter(a => a.playerId === activeChildId) || [];
+
   const child = {
     name: childRaw.name || "UNBEKANNT",
     group: (childRaw.group || "NK").toUpperCase(),
@@ -93,13 +97,17 @@ const ParentPortal = ({ truthObject, setTruthObject, activeChildId }) => {
 Erstelle ein persönliches Feedback für die Eltern des Spielers ${child.name} (${child.group}, Overall Rating: ${child.ovr}).
 Das nächste Training fokussiert sich auf: "${child.nextTraining.focus}".
 
-Schreibe ein kurzes, wertschätzendes, aber ehrliches Feedback.
+${medicalInfo ? `KONTEXT MEDIZIN: Der Spieler ist aktuell in der Reha (${medicalInfo.type}, Status: ${medicalInfo.status}). Prognose Rückkehr: ${medicalInfo.return_date}.` : ''}
+${academicInfo.length > 0 ? `KONTEXT SCHULE: Der Spieler erzielt aktuell folgende Noten: ${academicInfo.map(r => `${r.subject}: ${r.grade}`).join(', ')}.` : ''}
+
+Schreibe ein kurzes, wertschätzendes, aber ehrliches Feedback. Gehe kurz auf den medizinischen/schulischen Stand ein, falls relevant.
 Formatiere zwingend als JSON:
 {
   "strengths": "[Was hat der Spieler in den letzten Wochen extrem gut gemacht? Kurz und knackig, lobend]",
   "improvements": "[Wo muss der Spieler im nächsten Training zulegen? (Fokus auf Mentalität oder Technik)]",
-  "homework": "[Eine konkrete, einfache Hausaufgabe für den Garten/Zuhause. z.B. 10 Minuten Ball hochhalten oder Video schauen]"
-}`;
+  "homework": "[Eine konkrete, einfache Hausaufgabe für Zuhause. Falls verletzt: Eine mentale/taktische Aufgabe (Video schauen)]"
+}
+Beschränke dich auf Deutsch.`;
 
       try {
           let raw = await sendAiRequest(prompt);
@@ -143,6 +151,34 @@ Formatiere zwingend als JSON:
           {/* Main Content Dashboard */}
           <div className="p-6 space-y-6 -mt-4 relative z-20">
              
+             {/* PRO-SYNC: Medical & Education Cards */}
+             {medicalInfo && (
+                <div className="bg-red-500 rounded-2xl p-4 text-white shadow-lg animate-pulse border-2 border-white/20">
+                   <div className="flex justify-between items-center mb-2">
+                      <div className="text-[10px] font-black uppercase tracking-widest opacity-80">Medizinischer Status</div>
+                      <Icon name="activity" size={14} />
+                   </div>
+                   <div className="text-lg font-black uppercase italic">{medicalInfo.status}: {medicalInfo.type}</div>
+                   <div className="text-[9px] mt-1 font-medium italic opacity-90 leading-tight">"{medicalInfo.notes}"</div>
+                </div>
+             )}
+
+             {academicInfo.length > 0 && (
+                <div className="bg-white rounded-2xl p-4 shadow-xl border border-gray-100">
+                   <div className="flex justify-between items-center mb-3">
+                      <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">Schulische Leistungen</div>
+                      <Icon name="book" size={14} className="text-gold" />
+                   </div>
+                   <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                      {academicInfo.map(rec => (
+                        <div key={rec.id} className="min-w-[100px] bg-gray-50 p-2 rounded-xl border border-gray-100 flex justify-between items-center">
+                           <div className="text-[8px] font-black uppercase text-navy/60 truncate mr-2">{rec.subject}</div>
+                           <div className="bg-navy text-white w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs italic">{rec.grade}</div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             )}
              {/* AI Settings Wrapper for Parents */}
              <AiSettingsWidget context="parent" />
 

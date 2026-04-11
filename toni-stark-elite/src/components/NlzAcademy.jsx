@@ -7,6 +7,7 @@ import { saveLogisticsEntry, savePlan, fetchLogistics, supabase } from '../utils
 import { speakGerd } from '../utils/audioUtils';
 import NlzScanner from './nlz/NlzScanner';
 import NlzWeekPlanner from './nlz/NlzWeekPlanner';
+import BiometricDiagnostics from './nlz/BiometricDiagnostics';
 
 const NlzAcademy = ({ truthObject, setTruthObject, activeRole }) => {
   const [activeNlzView, setActiveNlzView] = useState("finance");
@@ -986,6 +987,9 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                   { id: 'character', label: 'Character', icon: 'target', color: 'text-navy' },
                   { id: 'finance', label: 'Budget / Finanzen', icon: 'dollar-sign', color: 'text-gold' },
                   { id: 'logistics', label: 'Logistik Hub', icon: 'package', color: 'text-[#00f3ff]' },
+                  { id: 'performance', label: 'Leistung & PHV', icon: 'zap', color: 'text-neon' },
+                  { id: 'medical', label: 'Medizin & Reha', icon: 'activity', color: 'text-redbull' },
+                  { id: 'education', label: 'Schule & Karriere', icon: 'book', color: 'text-gold' },
                   { id: 'biomechanics', label: 'Biomechanik', icon: 'activity', color: 'text-redbull' },
                   { id: 'training', label: 'Training Lab', icon: 'cpu', color: 'text-neon' },
                   { id: 'board', label: 'Taktik Board', icon: 'layout', color: 'text-neon' },
@@ -1752,6 +1756,142 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
           </div>
         )}
 
+        {/* === PERFORMANCE DIAGNOSTICS === */}
+        {activeNlzView === "performance" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in pb-20">
+            <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl text-navy">
+               <h3 className="text-xl font-black uppercase text-navy border-b border-gray-100 pb-4 mb-6 flex items-center gap-3">
+                  <Icon name="zap" className="text-neon" /> Athletik-Tests (30m, Yo-Yo)
+               </h3>
+               <div className="space-y-4">
+                  {(truthObject.nlz_performance_tests || []).map(test => (
+                    <div key={test.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-neon transition-colors">
+                       <div>
+                          <div className="text-[10px] font-black uppercase text-gray-400">Spieler-ID: {test.playerId} • {test.date}</div>
+                          <div className="text-lg font-black text-navy uppercase italic">{test.test}</div>
+                       </div>
+                       <div className="text-2xl font-black text-redbull italic">{test.result}</div>
+                    </div>
+                  ))}
+               </div>
+            </div>
+            <div className="bg-navy rounded-[2rem] p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-40 h-40 bg-neon/10 rounded-bl-full pointer-events-none"></div>
+               <h3 className="text-xl font-black uppercase text-white border-b border-white/10 pb-4 mb-6 flex items-center gap-3">
+                  <Icon name="bar-chart-2" className="text-gold" /> Bio-Banding & PHV
+               </h3>
+               <div className="space-y-6">
+                  <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+                     <div className="text-[10px] font-black uppercase text-white/50 mb-4 tracking-widest">Growth Curve Analysis (Peak Height Velocity)</div>
+                     <div className="flex items-end gap-1 h-32">
+                        {[40, 60, 45, 90, 75, 40, 30].map((h, i) => (
+                          <div key={i} className="flex-1 bg-neon/30 hover:bg-neon transition-all rounded-t-lg" style={{ height: `${h}%` }}></div>
+                        ))}
+                     </div>
+                     <p className="text-[10px] text-white/40 mt-4 leading-relaxed uppercase tracking-wider">
+                        Physische Reife (PHV) wird basierend auf anthropometrischen Daten kalkuliert. Nächster Wachstumsschub prognostiziert für: <span className="text-neon">Q3 2026</span>
+                     </p>
+                  </div>
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* === MEDICAL & REHA HUB === */}
+        {activeNlzView === "medical" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in pb-20">
+            <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl text-navy">
+               <h3 className="text-xl font-black uppercase text-navy border-b border-gray-100 pb-4 mb-6 flex items-center gap-3">
+                  <Icon name="activity" className="text-redbull" /> Verletzungs-Management
+               </h3>
+               <div className="space-y-4">
+                  {(truthObject.nlz_medical_records || []).map(record => (
+                    <div key={record.id} className="p-6 bg-redbull/5 border border-redbull/10 rounded-2xl relative group hover:bg-redbull/10 transition-colors">
+                       <div className="absolute top-4 right-4 bg-redbull text-white text-[9px] px-2 py-1 rounded font-black uppercase tracking-tighter shadow-lg group-hover:scale-110 transition-transform">
+                          {record.status}
+                       </div>
+                       <div className="text-[10px] font-black uppercase text-gray-400 mb-1">Spieler-ID: {record.playerId}</div>
+                       <div className="text-xl font-black text-navy uppercase italic mb-2">{record.type} ({record.severity})</div>
+                       <div className="text-sm text-navy/70 leading-relaxed font-medium bg-white/50 p-3 rounded-xl border border-redbull/5 italic">
+                          "{record.notes}"
+                       </div>
+                       <div className="flex gap-4 mt-4">
+                          <div className="flex flex-col">
+                             <span className="text-[9px] font-black uppercase text-gray-400">Prognose (Return)</span>
+                             <span className="font-black text-navy uppercase tracking-widest">{record.return_date}</span>
+                          </div>
+                       </div>
+                    </div>
+                  ))}
+               </div>
+            </div>
+            <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl text-navy">
+               <h3 className="text-xl font-black uppercase text-navy border-b border-gray-100 pb-4 mb-6 flex items-center gap-3">
+                  <Icon name="smile" className="text-gold" /> Daily Wellness Monitor
+               </h3>
+               <div className="space-y-6">
+                  <div className="bg-gold/5 p-6 rounded-2xl border border-gold/10">
+                     <div className="text-[10px] font-black uppercase text-gray-400 mb-6 tracking-widest">Team Availability & Readiness (Last 24h)</div>
+                     <div className="flex justify-between items-center">
+                        <div className="text-center">
+                           <div className="text-4xl font-black text-navy">92%</div>
+                           <div className="text-[9px] font-black uppercase text-green-500">Fit to Train</div>
+                        </div>
+                        <div className="text-center border-l border-gold/20 pl-8">
+                           <div className="text-4xl font-black text-redbull">1</div>
+                           <div className="text-[9px] font-black uppercase text-redbull">Injured</div>
+                        </div>
+                        <div className="text-center border-l border-gold/20 pl-8">
+                           <div className="text-4xl font-black text-gold">2</div>
+                           <div className="text-[9px] font-black uppercase text-gold">Sore / Fatigue</div>
+                        </div>
+                     </div>
+                  </div>
+                  <p className="text-[10px] text-gray-400 italic px-4">
+                     Wellness-Daten werden täglich via Parent/Player-App erhoben. RPE-Monitoring (Rate of Perceived Exertion) korreliert mit Trainingsintensität.
+                  </p>
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* === EDUCATION & DUAL CAREER === */}
+        {activeNlzView === "education" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in pb-20">
+            <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl col-span-1 lg:col-span-2 text-navy">
+               <div className="flex justify-between items-center border-b border-gray-100 pb-6 mb-8">
+                  <h3 className="text-2xl font-black uppercase text-navy flex items-center gap-3">
+                     <Icon name="book" className="text-gold" /> Akademisches Monitoring (Elite-Schule)
+                  </h3>
+                  <div className="bg-green-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest animate-pulse">
+                     Dual-Career Sync Active
+                  </div>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {(truthObject.nlz_academic_records || []).map(record => (
+                    <div key={record.id} className="p-6 bg-gray-50 rounded-3xl border border-gray-100 hover:border-gold transition-all hover:shadow-xl hover:-translate-y-1">
+                       <div className="flex justify-between items-start mb-4">
+                          <div>
+                             <div className="text-[10px] font-black uppercase text-gray-400">Spieler-ID: {record.playerId}</div>
+                             <div className="text-xl font-black text-navy uppercase italic">{record.subject}</div>
+                          </div>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl font-black italic border-2 ${
+                            record.grade > 3 ? 'bg-redbull/10 border-redbull text-redbull' : 'bg-gold/10 border-gold text-navy'
+                          }`}>
+                             {record.grade}
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${record.status === 'Stable' ? 'bg-green-500' : 'bg-redbull animate-pulse'}`}></div>
+                          <span className="text-[10px] font-black uppercase text-navy/60">{record.status}</span>
+                       </div>
+                    </div>
+                  ))}
+               </div>
+            </div>
+          </div>
+        )}
+
         {/* === BIOMECHANIK === */}
         {activeNlzView === "biomechanics" && (
           <div className="space-y-6 animate-fade-in pl-2 pr-2 pb-10">
@@ -1915,6 +2055,10 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
               targetPositions={nlzPlayerPositions}
               setTargetPositions={setNlzPlayerPositions}
               isNlzTheme={true}
+              prefilledTrainerName={truthObject?.user_name || "Academy Coach"}
+              prefilledClubName={truthObject?.club_info?.name || "Stark Elite"}
+              prefilledAgeGroup={activeYouthTeam}
+              shouldSkipIntro={true}
             />
         )}
 
@@ -2252,125 +2396,8 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
           </div>
         )}
 
-        {/* Custom API Upload Modal Overlay */}
-        {showUploadModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-                <div className="bg-navy border border-neon/30 w-full max-w-2xl rounded-2xl shadow-[0_0_50px_rgba(0,243,255,0.1)] flex flex-col overflow-hidden animate-fade-in">
-                    <div className="flex justify-between items-center bg-black/30 p-6 border-b border-white/5">
-                        <h3 className="text-white font-black uppercase tracking-widest text-lg flex items-center gap-3">
-                            <Icon name="cpu" className="text-neon" size={24} /> 
-                            Live OpenAI Video-Teardown
-                        </h3>
-                        <button onClick={() => setShowUploadModal(false)} className="text-white/40 hover:text-white transition-colors">
-                            <Icon name="x" size={24} />
-                        </button>
-                    </div>
-                    
-                    <div className="p-6 space-y-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
-                        <div className="flex flex-col gap-6 p-2">
-                            {/* Giant File Upload Area */}
-                            <div className="bg-neon/10 border-2 border-neon/30 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all hover:bg-neon/20 hover:border-neon group relative overflow-hidden">
-                                <Icon name="upload-cloud" size={48} className="text-neon mb-4 group-hover:-translate-y-2 transition-transform duration-300" />
-                                <h4 className="text-white font-black uppercase tracking-widest text-lg mb-2">Screenshot / Video Dropzone</h4>
-                                <p className="text-white/50 text-xs max-w-[250px] mb-6">Screenshot (.png, .jpg) oder Video (.mp4) vom Endgerät hier ablegen oder auswählen.</p>
-                                
-                                <input 
-                                    type="file" 
-                                    accept="image/*,video/mp4,video/quicktime,video/webm"
-                                    onChange={(e) => {
-                                        const file = e.target.files[0];
-                                        if (file) {
-                                           setNewVideoUrl(URL.createObjectURL(file));
-                                           if (!newTitle) setNewTitle(file.name.split('.')[0] || "KI Übung");
-                                        }
-                                    }}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    title="Datei hochladen"
-                                />
-                                <div className="bg-neon text-navy px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs pointer-events-none group-hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,243,255,0.4)]">
-                                    {newVideoUrl ? "Video ausgewählt ✓" : "Datei auswählen"}
-                                </div>
-                            </div>
-
-                            {/* Essential AI Context Fields */}
-                            <div className="bg-black/40 border border-white/10 rounded-2xl p-6 flex flex-col gap-5">
-                                <div className="flex items-start gap-4 pb-4 border-b border-white/5">
-                                    <div className="bg-neon/10 p-3 rounded-xl">
-                                        <Icon name="cpu" size={24} className="text-neon" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-white font-black uppercase tracking-widest text-xs">KI-Fokus (Erforderlich)</h4>
-                                        <p className="text-white/40 text-[10px] mt-1 leading-relaxed">Damit GERD das Video auf A-Lizenz Niveau analysieren kann, braucht die Text-KI zwingend das Thema der Übung und das Alter. Die Fehler in der Datei selbst ('API Key prüfen') zeigt dir das System erst an, wenn du auf Erstellen drückst.</p>
-                                    </div>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                    <div>
-                                        <label className="text-[10px] text-neon font-black uppercase tracking-widest mb-2 block">Thema (Titel)</label>
-                                        <input 
-                                            type="text" 
-                                            value={newTitle}
-                                            onChange={(e) => setNewTitle(e.target.value)}
-                                            placeholder="z.B. Ajax Dreiecksbildung"
-                                            className="w-full bg-black/60 border border-white/10 hover:border-white/30 rounded-xl px-4 py-3 text-white text-xs focus:border-neon outline-none transition-colors"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] text-neon font-black uppercase tracking-widest mb-2 block">Altersklasse</label>
-                                        <select 
-                                            value={newAgeRange}
-                                            onChange={(e) => setNewAgeRange(e.target.value)}
-                                            className="w-full bg-black/60 border border-white/10 hover:border-white/30 rounded-xl px-4 py-3 text-white text-xs focus:border-neon outline-none transition-colors appearance-none"
-                                        >
-                                            <option value="U7">U7 (Grundlagen)</option>
-                                            <option value="U10">U10 (Aufbau)</option>
-                                            <option value="U14">U14 (Leistung)</option>
-                                            <option value="U19">U19 (Profi)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-1 block">Altersklasse</label>
-                            <select 
-                                value={newAgeRange}
-                                onChange={(e) => setNewAgeRange(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:border-neon outline-none"
-                            >
-                                <option value="U7">U7</option>
-                                <option value="U10">U10</option>
-                                <option value="U14">U14</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div className="p-6 border-t border-white/5 bg-black/20 flex justify-end gap-3">
-                        <button 
-                            onClick={() => setShowUploadModal(false)}
-                            className="px-6 py-3 rounded-lg border border-white/10 text-white/50 font-black uppercase text-[10px] tracking-widest hover:bg-white/5 transition-colors"
-                        >
-                            Abbrechen
-                        </button>
-                        <button 
-                            disabled={isGenerating}
-                            onClick={generateCustomTeardown}
-                            className="bg-neon text-navy px-6 py-3 rounded-lg font-black uppercase text-[10px] tracking-widest hover:bg-white transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(0,243,255,0.4)] disabled:opacity-50"
-                        >
-                            {isGenerating ? (
-                                <>
-                                    <Icon name="loader" size={14} className="animate-spin" />
-                                    Generiere KI Profil...
-                                </>
-                            ) : (
-                                "KI Teardown Erstellen"
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )}
+        {/* Custom API Upload Modal Overlay - Now Powered by MediaPipe */}
+        {showUploadModal && <BiometricDiagnostics onClose={() => setShowUploadModal(false)} />}
 
         {/* Stat Edit Modal */}
         {showStatEditModal && editingStatsPlayer && (

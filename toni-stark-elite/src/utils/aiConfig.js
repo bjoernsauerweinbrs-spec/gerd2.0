@@ -57,7 +57,7 @@ export const generateLineup = async (text) => {
     }
 };
 
-export const generateTactic = async (promptText, department = "Senioren", playerContext = "", smId = null, fde = "", clubContext = null, isNlz = false, ageGroup = "") => {
+export const generateTactic = async (promptText, department = "Senioren", playerContext = "", smId = null, fde = "", clubContext = null, isNlz = false, ageGroup = "", forceAi = false) => {
     try {
         const geminiKey = localStorage.getItem('stark_gemini_key') || "";
         if (!geminiKey) {
@@ -77,7 +77,8 @@ export const generateTactic = async (promptText, department = "Senioren", player
                 fussballDeUrl: fde,
                 clubContext,
                 isNlz,
-                ageGroup
+                ageGroup,
+                forceAi
             })
         });
 
@@ -100,8 +101,13 @@ export const scrapeClubData = async (team, apiKey = "", directAi = false) => {
     try {
         const res = await fetch(url);
         if (res.ok) return await res.json();
+        
+        // If the proxy returns an error (e.g. 403 or 500), but is reachable, 
+        // we should throw to the catch block or handle the error JSON.
+        const err = await res.json().catch(() => ({}));
+        if (err.error) throw new Error(err.message || err.error);
     } catch (e) {
-        console.warn("Proxy scrape failed, falling back to direct AI hydration...");
+        console.warn("Proxy research failed:", e.message);
     }
 
     // Direct AI Fallback: Use Gemini 1.5 Pro to simulate the club data
@@ -263,7 +269,12 @@ Antworte AUSSCHLIESSLICH als JSON: [{"name": "...", "dob": "...", "xPosition": 0
         if (aiText.startsWith("```json")) aiText = aiText.replace(/^```json/, "").replace(/```$/, "").trim();
         else if (aiText.startsWith("```")) aiText = aiText.replace(/^```/, "").replace(/```$/, "").trim();
         
-        return JSON.parse(aiText);
+        try {
+            return JSON.parse(aiText);
+        } catch (jsonErr) {
+            console.error("JSON Parse Error. The image might not be a roster.", aiText);
+            throw new Error("FEHLER: Bild konnte nicht als Taktiktafel/Kader erkannt werden. Bitte ein klares Tabellen-Foto hochladen.");
+        }
     } catch (e) {
         console.error("Failed to extract players from image:", e);
         throw e;

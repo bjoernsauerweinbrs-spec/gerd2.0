@@ -3,7 +3,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ManagementHub from './components/ManagementHub';
 import UnifiedCoachHub from './components/UnifiedCoachHub';
-import StadionKurier from './components/StadionKurier';
+import MediaHub from './components/MediaHub';
 import MedicalLab from './components/MedicalLab';
 import CfoBoard from './components/CfoBoard';
 import NlzAcademy from './components/NlzAcademy';
@@ -15,35 +15,35 @@ import CalendarHub from './components/CalendarHub';
 import ParentPortal from './components/ParentPortal';
 import TrainingLab from './components/TrainingLab';
 import { scrapeClubData, uploadScoutingReport, searchLogistics, generateSponsorInquiry } from './utils/aiConfig';
+import { supabase } from './utils/supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
 
 // ---- MAGIC FILL INITIAL DATA ----
 const INITIAL_TRUTH = {
-  club_info: { name: "RB Leipzig", teams: ["1. Mannschaft"], league: "Bundesliga", philosophy: "Ballbesitz & Pressing", identity_score: 85, isAmateurMode: false },
+  club_info: { name: "JFV Batherfeld", teams: ["U7 Junioren"], league: "Kreisklasse", philosophy: "Spaß & Grundlagen", identity_score: 90, isAmateurMode: true },
   financials: { current_budget: 25000000, active_targets: 3 },
   tactical_setup: { formation_home: "4-4-2", formation_away: "3-4-3" },
   training_lab: { 
     schedule: [
-      { id: 1, day: "Montag", type: "Regeneration", intensity: 30, time: "10:00 - 11:30", completed: true, hasSim: false },
-      { id: 2, day: "Dienstag", type: "Athletik & Kraft", intensity: 85, time: "10:00 - 12:00", completed: true, hasSim: false },
-      { id: 3, day: "Mittwoch", type: "Taktik (Defensive)", intensity: 60, time: "14:00 - 16:00", completed: false, hasSim: false },
-      { id: 4, day: "Donnerstag", type: "Rondo (5v2)", intensity: 75, time: "10:00 - 12:00", completed: false, hasSim: true, simData: { name: "Rondo (5v2)", type: "rondo", focus: "Passspiel & Pressingresistenz" } },
-      { id: 5, day: "Freitag", type: "Abschlusstraining", intensity: 50, time: "15:00 - 16:30", completed: false, hasSim: false },
-      { id: 6, day: "Samstag", type: "MATCHDAY (Bundesliga)", intensity: 100, time: "15:30 Anpfiff", completed: false, hasSim: false, isMatchday: true },
-      { id: 7, day: "Sonntag", type: "Spielersatz-Training & REHA", intensity: 40, time: "10:00 - 11:30", completed: false, hasSim: false }
+      { id: 1, day: "Montag", type: "Grundlagen-Training", intensity: 40, time: "16:30 - 18:00", completed: false, hasSim: true, simData: { name: "Ballannahme (U7)", type: "drill", focus: "Erster Kontakt" } },
+      { id: 2, day: "Dienstag", type: "RECOVERY", intensity: 10, time: "Frei", completed: false, hasSim: false },
+      { id: 3, day: "Mittwoch", type: "Spielform (Mini-Fußball)", intensity: 60, time: "16:30 - 18:00", completed: false, hasSim: true, simData: { name: "3 gegen 3", type: "game", focus: "Dribbling & Tore" } },
+      { id: 4, day: "Donnerstag", type: "RECOVERY", intensity: 10, time: "Frei", completed: false, hasSim: false },
+      { id: 5, day: "Freitag", type: "Abschluss-Training", intensity: 50, time: "16:30 - 18:00", completed: false, hasSim: true, simData: { name: "Torschuss-König", type: "drill", focus: "Abschlussstimmung" } },
+      { id: 6, day: "Samstag", type: "FREI", intensity: 0, time: "Vorbereitung", completed: false, hasSim: false },
+      { id: 7, day: "Sonntag", type: "SPIELTAG vs. SV Batherfeld", intensity: 100, time: "10:30 Anpfiff", completed: false, hasSim: false, isMatchday: true }
     ], 
-    intensity: 80 
+    intensity: 60 
   },
   match_day_manifesto: { strategy: "Offensive Power", intensity_level: 95 },
   nlz_squad: [
-    { id: "ai_squad_1", name: "Max Berge", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 91, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.32, parentPin: "1234" },
-    { id: "ai_squad_2", name: "Daniel Cernobrisov", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 88, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.40, parentPin: "1234" },
-    { id: "ai_squad_3", name: "Yanis Dardouri", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 94, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.47, parentPin: "1234" },
-    { id: "ai_squad_4", name: "Julian Geier", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 89, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.55, parentPin: "1234" },
-    { id: "ai_squad_5", name: "Matheo Heyer", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 92, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.63, parentPin: "1234" },
-    { id: "ai_squad_6", name: "Lionel Opl", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 87, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.71, parentPin: "1234" },
-    { id: "ai_squad_7", name: "David Luiz Sauerwein", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 95, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.78, parentPin: "1234" },
-    { id: "ai_squad_8", name: "Leonas Schmidt", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 90, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.86, parentPin: "1234" },
-    { id: "ai_squad_9", name: "Carl Sabastzäka", position: "ANY", group: "G-Jugend", pac: 55, dri: 55, sho: 55, def: 55, pas: 55, phy: 55, pot: 86, focus: 6, frustration: 4, imageUrl: "/g_jugend_roster.png", yPosition: 0.93, parentPin: "1234" }
+    { id: "p_1", name: "Max Mustermann", position: "ST", group: "U7", pac: 55, dri: 60, sho: 65, def: 30, pas: 45, phy: 40, pot: 95, focus: 8, frustration: 2, parentPin: "4321" },
+    { id: "p_2", name: "Julian Talent", position: "ZM", group: "U7", pac: 50, dri: 55, sho: 50, def: 50, pas: 60, phy: 40, pot: 90, focus: 7, frustration: 3, parentPin: "4321" },
+    { id: "p_3", name: "Leon Blitz", position: "RM", group: "U7", pac: 75, dri: 50, sho: 45, def: 35, pas: 40, phy: 40, pot: 88, focus: 6, frustration: 5, parentPin: "4321" },
+    { id: "p_4", name: "Mika Mauer", position: "IV", group: "U7", pac: 40, dri: 35, sho: 30, def: 70, pas: 40, phy: 60, pot: 85, focus: 9, frustration: 1, parentPin: "4321" },
+    { id: "p_5", name: "Paul Panther", position: "TW", group: "U7", pac: 45, dri: 30, sho: 20, def: 65, pas: 55, phy: 50, pot: 92, focus: 9, frustration: 2, parentPin: "4321" },
+    { id: "p_6", name: "Sami Sauber", position: "LM", group: "U7", pac: 60, dri: 55, sho: 50, def: 45, pas: 50, phy: 40, pot: 87, focus: 7, frustration: 3, parentPin: "4321" },
+    { id: "p_7", name: "Toni Torjäger", position: "ST", group: "U7", pac: 65, dri: 60, sho: 75, def: 20, pas: 40, phy: 45, pot: 96, focus: 8, frustration: 4, parentPin: "4321" }
   ],
   players: [
     { id: 99, name: "Lukas Berg (C)", position: "IV", ovr: 89, readiness: 94, isInjured: false, pac: 84, sho: 60, pas: 85, dri: 75, def: 92, phy: 90, inSquad: true },
@@ -71,6 +71,18 @@ const INITIAL_TRUTH = {
   matchday_roster: null,
   latest_interview: null,
   training_handbuch: [],
+  nlz_medical_records: [
+    { id: "m_1", playerId: "p_1", type: "Hamstring", severity: "Medium", status: "Rehabilitating", return_date: "2026-04-20", notes: "Leichtes Lauftraining gestartet." }
+  ],
+  nlz_performance_tests: [
+    { id: "t_1", playerId: "p_1", test: "30m Sprint", result: "4.2s", date: "2026-03-28" },
+    { id: "t_2", playerId: "p_1", test: "Yo-Yo IR1", result: "Level 16.2", date: "2026-03-20" },
+    { id: "t_3", playerId: "p_2", test: "30m Sprint", result: "4.5s", date: "2026-03-28" }
+  ],
+  nlz_academic_records: [
+    { id: "a_1", playerId: "p_1", subject: "Mathematik", grade: "2", status: "Stable" },
+    { id: "a_2", playerId: "p_1", subject: "Englisch", grade: "3", status: "Needs Tutoring" }
+  ],
   setup_complete: false
 };
 
@@ -83,8 +95,6 @@ const App = () => {
     const stored = localStorage.getItem("gerd_truthObject");
     if (stored) {
         const parsed = JSON.parse(stored);
-        // FORCE flush dummy players: always use the newly scraped G-Jugend roster for this session
-        parsed.nlz_squad = INITIAL_TRUTH.nlz_squad;
         return parsed;
     }
     return INITIAL_TRUTH;
@@ -94,9 +104,102 @@ const App = () => {
 
   const [activeChildId, setActiveChildId] = useState(null);
 
+  // Deep clone utility
+  const clone = (obj) => JSON.parse(JSON.stringify(obj));
+
+  const fetchSupabaseData = async () => {
+      try {
+          const [info, roster, sched, tacs] = await Promise.all([
+             supabase.from('stark_club_info').select('*').limit(1).single(),
+             supabase.from('stark_roster').select('*'),
+             supabase.from('stark_schedule').select('*'),
+             supabase.from('stark_tactics').select('*')
+          ]);
+
+          setTruthObject(prev => {
+              const next = clone(prev);
+              if (info.data) {
+                  next.club_info = { ...next.club_info, ...info.data, liveIntelligence: info.data.live_intelligence || {} };
+              }
+              if (roster.data) {
+                  const profis = roster.data.filter(r => r.department === 'profi').map(r => ({...r.player_data, db_id: r.id}));
+                  const nlz = roster.data.filter(r => r.department === 'nlz').map(r => ({...r.player_data, db_id: r.id}));
+                  if(profis.length) next.players = profis;
+                  if(nlz.length) next.nlz_squad = nlz;
+              }
+              return next;
+          });
+      } catch (err) {
+          console.error("Supabase Hydration Error:", err);
+      }
+  };
+
+  const syncToSupabase = async (newObj, role) => {
+      // Convert UI arrays into relational DB structures based on Roles (to respect RLS)
+      try {
+          if (role === 'Manager' || role === 'Trainer') {
+              // Upsert Club info
+              await supabase.from('stark_club_info').upsert({
+                  id: 1, 
+                  name: newObj.club_info.name,
+                  league: newObj.club_info.league,
+                  current_budget: newObj.club_info.current_budget || 25000000,
+                  live_intelligence: newObj.club_info.liveIntelligence
+              });
+              
+              // Upsert Profi Roster
+              if (newObj.players) {
+                  const profiRows = newObj.players.map(p => ({
+                      id: p.db_id || p.id || uuidv4(), // Need a valid UUID
+                      department: 'profi',
+                      player_data: p
+                  }));
+                  // Filter out invalid UUIDs for safety
+                  const validRows = profiRows.filter(r => String(r.id).length > 20);
+                  if(validRows.length) await supabase.from('stark_roster').upsert(validRows, { onConflict: 'id' });
+              }
+          }
+
+          if (role === 'Manager' || role === 'Jugendtrainer') {
+              // Upsert NLZ Roster
+              if (newObj.nlz_squad) {
+                  const nlzRows = newObj.nlz_squad.map(p => ({
+                      id: String(p.id).length > 20 ? p.id : uuidv4(),
+                      department: 'nlz',
+                      player_data: { ...p, id: String(p.id).length > 20 ? p.id : uuidv4() } // Auto correct legacy ids
+                  }));
+                  await supabase.from('stark_roster').upsert(nlzRows, { onConflict: 'id' });
+              }
+          }
+      } catch (err) {
+          console.error("Supabase Sync Blocked (RLS Check Failed):", err.message);
+      }
+  };
+
+  // The core state wrapper
+  const setTruthObjectWrapper = (updater) => {
+      setTruthObject(prev => {
+          const newObj = typeof updater === 'function' ? updater(prev) : updater;
+          
+          // Debounce or directly sync if confident
+          syncToSupabase(newObj, activeRole);
+          
+          return newObj;
+      });
+  };
+
   useEffect(() => {
-    localStorage.setItem("gerd_truthObject", JSON.stringify(truthObject));
-  }, [truthObject]);
+    if (isAuthenticated) {
+        fetchSupabaseData();
+        const sub = supabase.channel('stark_all')
+          .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+             console.log("Realtime PG Change:", payload);
+             fetchSupabaseData();
+          })
+          .subscribe();
+        return () => supabase.removeChannel(sub);
+    }
+  }, [isAuthenticated, activeRole]);
 
   // Force upgrade legacy names in local storage for a better 2FA mock experience
   useEffect(() => {
@@ -281,24 +384,24 @@ const App = () => {
           activeRole={activeRole} 
           onLogout={handleLogout}
           truthObject={truthObject}
-          setTruthObject={setTruthObject}
+          setTruthObject={setTruthObjectWrapper}
         />
         
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroll-smooth pb-24 md:pb-8">
           {(() => {
             switch (activeTab) {
-              case "home": return <ManagementHub truthObject={truthObject} setTruthObject={setTruthObject} setActiveTab={setActiveTab} activeRole={activeRole} />;
-              case "coach_hub": return <UnifiedCoachHub truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} playbooks={playbooks} setPlaybooks={setPlaybooks} onRefreshData={handleRefreshData} />;
-              case "roster": return <RosterHub truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-              case "stadion-kurier": return <StadionKurier truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-              case "medical": return <MedicalLab truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-              case "cfo": return <CfoBoard truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-              case "nlz": return <NlzAcademy truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
-              case "training": return <TrainingLab truthObject={truthObject} setTruthObject={setTruthObject} activeRole={activeRole} />;
+              case "home": return <ManagementHub truthObject={truthObject} setTruthObject={setTruthObjectWrapper} setActiveTab={setActiveTab} activeRole={activeRole} />;
+              case "coach_hub": return <UnifiedCoachHub truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeRole={activeRole} playbooks={playbooks} setPlaybooks={setPlaybooks} onRefreshData={handleRefreshData} />;
+              case "roster": return <RosterHub truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeRole={activeRole} />;
+              case "stadion-kurier": return <MediaHub truthObject={truthObject} />;
+              case "medical": return <MedicalLab truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeRole={activeRole} />;
+              case "cfo": return <CfoBoard truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeRole={activeRole} />;
+              case "nlz": return <NlzAcademy truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeRole={activeRole} />;
+              case "training": return <TrainingLab truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeRole={activeRole} />;
               case "legacy": return <LegacyHub />;
               case "calendar": return <CalendarHub playbooks={playbooks} activeRole={activeRole} />;
-              case "parent_app": return <ParentPortal truthObject={truthObject} setTruthObject={setTruthObject} activeChildId={activeChildId} />;
-              default: return <ManagementHub truthObject={truthObject} setTruthObject={setTruthObject} setActiveTab={setActiveTab} activeRole={activeRole} />;
+              case "parent_app": return <ParentPortal truthObject={truthObject} setTruthObject={setTruthObjectWrapper} activeChildId={activeChildId} />;
+              default: return <ManagementHub truthObject={truthObject} setTruthObject={setTruthObjectWrapper} setActiveTab={setActiveTab} activeRole={activeRole} />;
             }
           })()}
         </div>

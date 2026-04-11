@@ -29,6 +29,10 @@ const SvgTacticalBoard = ({ data }) => {
     const gruen = data.spieler_gruen || [];
     const huetchen = data.huetchen || [];
     const linien = data.linien || [];
+    const zonen = data.zonen || [];
+    const tore = data.tore || [];
+    const baelle = data.baelle || [];
+    const isTraining = data.feld_typ === "trainingsviereck";
 
     // Base pitch dimensions (800x600 for consistency with AI prompt)
     const width = 800;
@@ -56,6 +60,9 @@ const SvgTacticalBoard = ({ data }) => {
                         <stop offset="0%" stopColor="#1a5d2a" />
                         <stop offset="100%" stopColor="#144d22" />
                     </linearGradient>
+                    <pattern id="net-pattern" width="6" height="6" patternUnits="userSpaceOnUse">
+                        <path d="M 6 0 L 0 6 M 0 0 L 6 6" stroke="white" strokeWidth="1" opacity="0.3"/>
+                    </pattern>
                 </defs>
 
                 {/* Pitch Background */}
@@ -67,42 +74,102 @@ const SvgTacticalBoard = ({ data }) => {
                 ))}
 
                 {/* Field Markings */}
-                <rect x="20" y="20" width={width-40} height={height-40} fill="none" stroke="white" strokeWidth="2" opacity="0.4"/>
-                
-                {isHalf ? (
+                {!isTraining && (
                     <>
-                        {/* Half-field Markings */}
-                        <line x1="20" y1={height-20} x2={width-20} y2={height-20} stroke="white" strokeWidth="2" opacity="0.4"/>
-                        <path d={`M${width/2 - 100} ${height-20} A 100 100 0 0 1 ${width/2 + 100} ${height-20}`} fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
-                        {/* Penalty Box (Half-field top) */}
-                        <rect x={width/2 - 200} y="20" width="400" height="150" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
-                        <rect x={width/2 - 80} y="20" width="160" height="50" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
-                    </>
-                ) : (
-                    <>
-                        {/* Full-field Center Line */}
-                        <line x1="20" y1={height/2} x2={width-20} y2={height/2} stroke="white" strokeWidth="3" opacity="0.6"/>
-                        <circle cx={width/2} cy={height/2} r="80" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
-                        {/* Penalty Boxes */}
-                        <rect x={width/2 - 150} y="20" width="300" height="100" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
-                        <rect x={width/2 - 150} y={height-120} width="300" height="100" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                        <rect x="20" y="20" width={width-40} height={height-40} fill="none" stroke="white" strokeWidth="2" opacity="0.4"/>
+                        {isHalf ? (
+                            <>
+                                {/* Half-field Markings */}
+                                <line x1="20" y1={height-20} x2={width-20} y2={height-20} stroke="white" strokeWidth="2" opacity="0.4"/>
+                                <path d={`M${width/2 - 100} ${height-20} A 100 100 0 0 1 ${width/2 + 100} ${height-20}`} fill="none" stroke="white" strokeWidth="2" opacity="0.4" />
+                                {/* Penalty Box (Half-field top) */}
+                                <rect x={width/2 - 200} y="20" width="400" height="150" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                                <rect x={width/2 - 80} y="20" width="160" height="50" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                            </>
+                        ) : (
+                            <>
+                                {/* Full-field Center Line */}
+                                <line x1="20" y1={height/2} x2={width-20} y2={height/2} stroke="white" strokeWidth="3" opacity="0.6"/>
+                                <circle cx={width/2} cy={height/2} r="80" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                                {/* Penalty Boxes */}
+                                <rect x={width/2 - 150} y="20" width="300" height="100" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                                <rect x={width/2 - 150} y={height-120} width="300" height="100" fill="none" stroke="white" strokeWidth="3" opacity="0.6" />
+                            </>
+                        )}
                     </>
                 )}
 
-                {/* Tactical Lines (Passes & Runs) */}
-                {linien.map((l, i) => (
-                    <line 
-                        key={`l-${i}`} 
-                        x1={l.start[0]} y1={l.start[1]} 
-                        x2={l.ende[0]} y2={l.ende[1]} 
-                        stroke={l.farbe === "gelb" ? "#facc15" : "white"} 
-                        strokeWidth="3" 
-                        strokeDasharray={l.typ === "lauf" ? "8,5" : "none"}
-                        markerEnd={l.typ === "pass" || l.typ === "lauf" ? "url(#arrowhead)" : ""}
-                        opacity="0.9"
-                        filter="url(#neon-glow)"
-                    />
+                {/* Training Zones */}
+                {zonen.map((z, i) => (
+                    <g key={`z-${i}`}>
+                        <rect x={z.x} y={z.y} width={z.width} height={z.height} fill={z.farbe === "gelb" ? "#facc15" : z.farbe === "rot" ? "#ef4444" : z.farbe === "blau" ? "#3b82f6" : "white"} fillOpacity={z.opacity || 0.15} stroke={z.farbe === "gelb" ? "#facc15" : "white"} strokeWidth="2" strokeDasharray="8,8" opacity="0.8" />
+                        {z.label && <text x={z.x + 8} y={z.y + 20} fill="white" fontSize="14" fontWeight="800" opacity="0.5" fontStyle="italic">{z.label}</text>}
+                    </g>
                 ))}
+
+                {/* Mini-Goals (Tore) */}
+                {tore.map((t, i) => {
+                    const w = (t.ausrichtung === 'oben' || t.ausrichtung === 'unten') ? 60 : 20;
+                    const h = (t.ausrichtung === 'oben' || t.ausrichtung === 'unten') ? 20 : 60;
+                    return (
+                        <g key={`t-${i}`} className="drop-shadow-lg">
+                            <rect x={t.x - w/2} y={t.y - h/2} width={w} height={h} fill="rgba(0,0,0,0.5)" stroke="white" strokeWidth="3" />
+                            <rect x={t.x - w/2} y={t.y - h/2} width={w} height={h} fill="url(#net-pattern)" />
+                        </g>
+                    )
+                })}
+
+                {/* Tactical Lines (Passes & Runs) */}
+                {linien.map((l, i) => {
+                    const isYellow = l.farbe === "gelb";
+                    const strokeColor = isYellow ? "#facc15" : "white";
+                    
+                    if (l.typ === "dribbling") {
+                        // Zigzag line for dribbling
+                        const dx = l.ende[0] - l.start[0];
+                        const dy = l.ende[1] - l.start[1];
+                        const dist = Math.hypot(dx, dy);
+                        const angle = Math.atan2(dy, dx);
+                        const segments = Math.max(3, Math.floor(dist / 15));
+                        let pathD = `M ${l.start[0]} ${l.start[1]}`;
+                        for (let j = 1; j <= segments; j++) {
+                            const prog = j / segments;
+                            const px = l.start[0] + dx * prog;
+                            const py = l.start[1] + dy * prog;
+                            const offsetAngle = angle + (j % 2 === 0 ? Math.PI/2 : -Math.PI/2);
+                            const offset = 6;
+                            pathD += ` L ${px + Math.cos(offsetAngle)*offset} ${py + Math.sin(offsetAngle)*offset}`;
+                        }
+                        pathD += ` L ${l.ende[0]} ${l.ende[1]}`;
+                        
+                        return (
+                            <path 
+                                key={`l-${i}`} 
+                                d={pathD} 
+                                fill="none" 
+                                stroke={strokeColor} 
+                                strokeWidth="3" 
+                                markerEnd="url(#arrowhead)" 
+                                opacity="0.9" 
+                                filter="url(#neon-glow)" 
+                            />
+                        );
+                    }
+
+                    return (
+                        <line 
+                            key={`l-${i}`} 
+                            x1={l.start[0]} y1={l.start[1]} 
+                            x2={l.ende[0]} y2={l.ende[1]} 
+                            stroke={strokeColor} 
+                            strokeWidth="3" 
+                            strokeDasharray={l.typ === "lauf" ? "8,5" : "none"}
+                            markerEnd={l.typ === "pass" || l.typ === "lauf" ? "url(#arrowhead)" : ""}
+                            opacity="0.9"
+                            filter="url(#neon-glow)"
+                        />
+                    );
+                })}
 
                 {/* Training Gear (Cones) */}
                 {huetchen.map((h, i) => (
@@ -133,6 +200,14 @@ const SvgTacticalBoard = ({ data }) => {
                     <g key={`g-${i}`} className="cursor-pointer group/player transition-transform hover:scale-110">
                         <circle cx={p.x} cy={p.y} r="16" fill="#22c55e" stroke="white" strokeWidth="2" filter="url(#neon-glow)" className="drop-shadow-lg" />
                         <text x={p.x} y={p.y + 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="900" style={{ pointerEvents: 'none' }}>{p.label || 'J'}</text>
+                    </g>
+                ))}
+
+                {/* Footballs */}
+                {baelle.map((b, i) => (
+                    <g key={`ball-${i}`} className="drop-shadow-md">
+                        <circle cx={b.x} cy={b.y} r="6" fill="white" stroke="black" strokeWidth="1.5" />
+                        <path d={`M ${b.x-4} ${b.y-2} Q ${b.x} ${b.y+4} ${b.x+4} ${b.y-2}`} fill="none" stroke="black" strokeWidth="1" opacity="0.5"/>
                     </g>
                 ))}
             </svg>

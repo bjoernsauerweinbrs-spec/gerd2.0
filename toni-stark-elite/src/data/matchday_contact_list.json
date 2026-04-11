@@ -1,0 +1,18 @@
+{
+  "club": "JFV Batherfeld",
+  "team": "U7 Junioren",
+  "matchday": "Sonntag, 2026-04-12",
+  "opponent": "SV Batherfeld",
+  "squad_size": 7,
+  "players": [
+    { "id": "p_1", "name": "Max Mustermann", "position": "ST", "parent_contact": "READY", "pin_sent": true },
+    { "id": "p_2", "name": "Julian Talent", "position": "ZM", "parent_contact": "READY", "pin_sent": true },
+    { "id": "p_3", "name": "Leon Blitz", "position": "RM", "parent_contact": "READY", "pin_sent": true },
+    { "id": "p_4", "name": "Mika Mauer", "position": "IV", "parent_contact": "READY", "pin_sent": true },
+    { "id": "p_5", "name": "Paul Panther", "position": "TW", "parent_contact": "READY", "pin_sent": true },
+    { "id": "p_6", "name": "Sami Sauber", "position": "LM", "parent_contact": "READY", "pin_sent": true },
+    { "id": "p_7", "name": "Toni Torjäger", "position": "ST", "parent_contact": "READY", "pin_sent": true }
+  ],
+  "formation_preferred": "2-3-1",
+  "coaching_focus": "Spaß, Mut & viele Abschlüsse"
+}

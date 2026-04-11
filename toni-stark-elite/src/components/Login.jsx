@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Icon from './Icon';
 import { scrapeClubData } from '../utils/aiConfig';
+import { supabase } from '../utils/supabaseClient';
 
 const ROLES = [
   { id: 'Trainer', name: 'Trainer Senioren', icon: 'whistle', color: 'neon', description: 'Zugriff auf Taktik, Training & Kaderplanung.', pin: '1904' },
@@ -135,7 +136,28 @@ const Login = ({ onLogin, truthObject }) => {
       }
     } else {
       if (enteredPin === selectedRole.pin) {
-        setTimeout(() => onLogin(selectedRole.id), 500);
+        setInitMessage("AUTHENTIZIERE AN SUPABASE...");
+        
+        let email = 'manager@stark.elite';
+        if (selectedRole.id === 'Trainer') email = 'profi@stark.elite';
+        else if (selectedRole.id === 'Jugendtrainer') email = 'nlz@stark.elite';
+        else if (selectedRole.id === 'Presse') email = 'media@stark.elite';
+
+        const pw = 'StarkElite2026!';
+        
+        supabase.auth.signInWithPassword({ email, password: pw }).then(({ data, error }) => {
+            if (error && error.message.includes('Invalid login')) {
+                supabase.auth.signUp({ email, password: pw }).then(() => {
+                    setTimeout(() => onLogin(selectedRole.id), 500);
+                });
+            } else if (error) {
+                // If it's another error (like email not confirmed), just proceed locally
+                console.warn("Supabase Auth Warning:", error);
+                setTimeout(() => onLogin(selectedRole.id), 500);
+            } else {
+                setTimeout(() => onLogin(selectedRole.id), 500);
+            }
+        });
       } else {
         setErrorMsg('PIN INKORREKT');
         setTimeout(() => setPinEntry(''), 800);

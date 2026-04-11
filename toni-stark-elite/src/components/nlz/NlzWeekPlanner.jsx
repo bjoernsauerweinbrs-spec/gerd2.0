@@ -10,6 +10,7 @@ const NlzWeekPlanner = ({ clubInfo }) => {
   const [activePress, setActivePress] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   useEffect(() => {
     fetchMatches();
@@ -43,8 +44,10 @@ const NlzWeekPlanner = ({ clubInfo }) => {
       });
       const data = await response.json();
       setActivePlan(data.plan);
+      setIsOfflineMode(data.isOffline || false);
     } catch (err) {
       console.error(err);
+      setIsOfflineMode(true);
     } finally {
       setIsGenerating(false);
     }
@@ -150,6 +153,11 @@ const NlzWeekPlanner = ({ clubInfo }) => {
                   <h2 className="text-2xl font-black text-white uppercase mb-6 flex items-center gap-2">
                     <Icon name="clipboard-list" className="text-redbull" />
                     Taktischer Wochenplan
+                    {isOfflineMode && (
+                       <span className="ml-auto text-[8px] bg-redbull/20 text-redbull px-2 py-0.5 rounded border border-redbull/30 animate-pulse">
+                          LOCAL NEURAL CACHE SYNC
+                       </span>
+                    )}
                   </h2>
                   <div className="prose prose-invert prose-sm max-w-none prose-p:text-white/70 prose-headings:text-white prose-strong:text-redbull">
                     <ReactMarkdown>{activePlan}</ReactMarkdown>

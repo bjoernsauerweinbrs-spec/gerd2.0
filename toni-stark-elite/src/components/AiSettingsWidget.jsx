@@ -8,6 +8,8 @@ const AiSettingsWidget = ({ context, onClose }) => {
   const [geminiKey, setGeminiKey] = useState(localStorage.getItem('stark_gemini_key') || '');
   const [isSaved, setIsSaved] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState({ state: 'idle', message: '' });
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('stark_ai_provider', provider);
@@ -22,6 +24,30 @@ const AiSettingsWidget = ({ context, onClose }) => {
        setIsSaved(false);
        if(onClose) onClose();
     }, 800);
+  };
+
+  const verifyKey = async () => {
+    if (!geminiKey) return;
+    setIsVerifying(true);
+    setVerifyStatus({ state: 'loading', message: 'Wird verifiziert...' });
+    
+    try {
+      const resp = await fetch('http://localhost:3001/api/verify-gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: geminiKey })
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        setVerifyStatus({ state: 'success', message: data.message });
+      } else {
+        setVerifyStatus({ state: 'error', message: data.error });
+      }
+    } catch (e) {
+      setVerifyStatus({ state: 'error', message: 'Verbindung zum Proxy fehlgeschlagen.' });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const isParent = context === 'parent';
@@ -116,6 +142,21 @@ const AiSettingsWidget = ({ context, onClose }) => {
                  className="w-full bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder:text-white/20 focus:border-blue-500 outline-none transition-colors"
                  placeholder="AIza..."
                />
+               <div className="flex items-center justify-between mt-2">
+                  <button 
+                    onClick={verifyKey}
+                    disabled={isVerifying || !geminiKey}
+                    className="text-[10px] font-black uppercase tracking-widest text-blue-400 hover:text-white flex items-center gap-1 transition-all disabled:opacity-30"
+                  >
+                    {isVerifying ? <Icon name="loader" size={10} className="animate-spin" /> : <Icon name="shield-check" size={10} />}
+                    Key Verifizieren
+                  </button>
+                  {verifyStatus.message && (
+                    <span className={`text-[9px] font-black uppercase tracking-tighter ${verifyStatus.state === 'success' ? 'text-green-500 font-bold' : 'text-redbull'} animate-in fade-in slide-in-from-right-2`}>
+                       {verifyStatus.message}
+                    </span>
+                  )}
+               </div>
             </div>
           )}
        </div>
