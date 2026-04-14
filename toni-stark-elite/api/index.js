@@ -969,14 +969,16 @@ app.post('/api/generate-tactic', async (req, res) => {
             : (department === "Senioren" ? "Fokus: Profi-Niveau, maximale taktische Komplexität." : `Fokus: Allgemein (${playerContext || 'Kader'}).`);
 
         let finalPrompt = "";
-        if (scoutingContext) {
+        const isYoungNlz = (isNlz || department === "NLZ") && !/(U19|U17|U16)/i.test(ageGroup || "");
+
+        if (scoutingContext && !isYoungNlz) {
             finalPrompt = `Hier sind die echten Live-Daten:\n${scoutingContext}\n\nErstelle auf dieser Basis eine knallharte Gegneranalyse und leite Trainingsschwerpunkte für das Thema "${exercise}" ab. ${contextInfo}`;
-        } else if (effectiveContext && effectiveContext.liveIntelligence) {
+        } else if (effectiveContext && effectiveContext.liveIntelligence && !isYoungNlz) {
             const intel = effectiveContext.liveIntelligence;
             const intelCtx = `VEREIN: ${effectiveContext.officialClubName || effectiveContext.name}\nGEGNER: ${intel.nextMatch}\nFORM: ${intel.form}\nANALYSE: ${intel.analyticalSummary}`;
             finalPrompt = `Nutze diesen Simulations-Kontext (März 2026) für deine Analyse:\n${intelCtx}\n\nErstelle eine Matchday-Analyse und Trainingsschwerpunkte zum Thema: "${exercise}". ${contextInfo}`;
         } else {
-            finalPrompt = `Erstelle eine komplette Trainingseinheit zum Thema: "${enrichedExercise}". ${contextInfo}`;
+            finalPrompt = `Erstelle eine komplette Themensession/Analyse zu: "${enrichedExercise}". ${contextInfo} WICHTIG: Erwähne KEINE Profi-Spieler oder Gegner, konzentriere dich nur auf die pädagogische/taktische Umsetzung dieser Altersklasse!`;
         }
 
         // Enable Search Grounding for Tactic Generation
