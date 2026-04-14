@@ -61,6 +61,7 @@ const TacticalHub = ({
   // Drill Options
   const [warmupOptions, setWarmupOptions] = useState([]);
   const [mainOptions, setMainOptions] = useState([]);
+  const [cooldownOptions, setCooldownOptions] = useState([]);
   
   // Final Draft
   const [draft, setDraft] = useState({ warmup: null, main_drill: null, cooldown: null, taktischerFokus: "" });
@@ -235,8 +236,19 @@ const TacticalHub = ({
               { focus: "Ball als Freund, freies Laufen", title: "Kometenjagd" },
               { focus: "Koordination & Spaß", title: "Tierischer Bewegungsparcours" }
           ],
-          mains: (fokus) => [`A. ${fokus} (Liniendribbling-Turnier)`, `B. ${fokus} (Vier-Tore-Chaos)`, `C. ${fokus} (Funino 3v3)`],
-          cooldowns: ["Gemeinsames Jubeln", "Ruhiges Ballrollen", "Verabschiedungskreis"],
+          mains: [
+              { focus: "Dribbeln mit Richtungswechsel", title: "Liniendribbling-Turnier" },
+              { focus: "Tore aus allen Richtungen", title: "Vier-Tore-Chaos (4 Minitore)" },
+              { focus: "Kleinfeldspiel 3v3", title: "Funino Festival" },
+              { focus: "Torschuss aus Dribbling", title: "Schießbude (Torschuss-Parcours)" },
+              { focus: "Ball behaupten & dribbeln", title: "Dribbelkönig" }
+          ],
+          cooldowns: [
+              { focus: "Gemeinsamer Mannschaftsruf", title: "Gemeinsames Jubeln" },
+              { focus: "Ruhiges Ballrollen im Kreis", title: "Ruhiges Ballrollen" },
+              { focus: "Zusammenkommen & Feedback", title: "Verabschiedungskreis" },
+              { focus: "Freies Spielen zum Abschluss", title: "Freies Spiel (2 Min)" }
+          ],
           pedagogy: "SPIELERISCH FÜR KLEINKINDER (4-8 Jahre). KEINE Taktik, KEIN 11v11, KEIN Großfeld. Nur Spaß, maximale Ballkontakte, bildhafte/märchenhafte Sprache. Spielformen: max. 4v4 auf Minitore. Beschreibe Aufbau, Regeln und Varianten kinderleicht verständlich. ZWINGEND MINITORE und Hütchen im Taktikboard JSON verwenden."
       };
       if (isU10_U13) return {
@@ -247,8 +259,19 @@ const TacticalHub = ({
               { focus: "Leichtes Ballhalten", title: "Rondo 4v1 (Spaß)" },
               { focus: "Reaktion & Richtungswechsel", title: "Tic-Tac-Toe Sprints" }
           ],
-          mains: (fokus) => [`A. ${fokus} (3v3 Funino Festival)`, `B. ${fokus} (1v1 Duelle)`, `C. ${fokus} (Überzahl 3v2)`],
-          cooldowns: ["Lockerer Auslauf", "Lattenschüeßen", "Dehnen im Kreis"],
+          mains: [
+              { focus: "Schnelles Passspiel in kleinen Gruppen", title: "3v3 Funino Festival" },
+              { focus: "Zweikampf & Abschluss", title: "1v1 Duelle mit Torschuss" },
+              { focus: "Spiel mit Überzahl lernen", title: "Überzahlspiel 3v2" },
+              { focus: "Passstafetten & Laufen", title: "DFB Pass-Kombi-Stafette" },
+              { focus: "Spielform mit Zonen", title: "Vier-Zonen-Spiel (5v5)" }
+          ],
+          cooldowns: [
+              { focus: "Gemeinsames lockeres Auslaufen", title: "Lockerer Auslauf" },
+              { focus: "Schießen aus Spaß", title: "Lattenschüeßen" },
+              { focus: "Dehnen & Besprechen", title: "Dehnen im Kreis" },
+              { focus: "Balltricks üben", title: "Freestyle Jonglieren" }
+          ],
           pedagogy: "AUSBILDUNG KINDER (9-13 Jahre). Kurze Instruktionen, Fokus auf viele Ballkontakte. Spielformen 3v3 bis 7v7. Taktikboard JSON muss kleine Trainingsvierecke mit Hütchen und Minitoren nutzen!"
       };
       if (isU14_U17) return {
@@ -258,8 +281,18 @@ const TacticalHub = ({
               { focus: "La Masia Gitter-Passspiel", title: "Barcelona Warm-Up" },
               { focus: "Athletik + Ball", title: "Dynamisches Aufwärmen mit Ball" }
           ],
-          mains: (fokus) => [`A. ${fokus} (Positionsspiel 4v4+2)`, `B. ${fokus} (DFB-Nachwuchs Form)`, `C. ${fokus} (Übergangsspiel 8v8)`],
-          cooldowns: ["Active Recovery Jogging", "Dehnen & Blackroll", "Taktik-Besprechung"],
+          mains: [
+              { focus: "Ballbesitz in engem Raum", title: "Positionsspiel 4v4+2" },
+              { focus: "DFB-Stufenmodell", title: "DFB B-Jugend Spielform" },
+              { focus: "Umschalten Angriff/Verteidigung", title: "Übergangsspiel 8v8" },
+              { focus: "Pressing nach Ballverlust", title: "Gegenpressing-Spielform" },
+              { focus: "Flügelspiel & Flanken", title: "Flügelangriffe mit Torabschluss" }
+          ],
+          cooldowns: [
+              { focus: "Lockeres Jogging & Atmung", title: "Active Recovery Jogging" },
+              { focus: "Faszienrolle & Mobilität", title: "Dehnen & Blackroll" },
+              { focus: "Video & Feedback", title: "Taktik-Besprechung" }
+          ],
           pedagogy: "AUSBILDUNG JUGEND (14-17). Nutze Taktik-Grundbegriffe wie 'Schulterblick', 'Freilaufverhalten'. Spielformen 7v7 bis 11v11. Taktikboard JSON nutzt saubere Übungszonen."
       };
       return {
@@ -268,8 +301,17 @@ const TacticalHub = ({
               { focus: "Präzisions-Passspiel", title: "Myelinisierungs-Passspiel" },
               { focus: "Athletische Voraktivierung", title: "Faszien-Aktivierung (Pro)" }
           ],
-          mains: (fokus) => [`Variante A: ${fokus} (Elite Tiki-Taka)`, `Variante B: ${fokus} (Elite Gegenpressing)`],
-          cooldowns: ["Blackroll", "Auslaufen", "Tiki-Taka"],
+          mains: [
+              { focus: "Elite Ballbesitz", title: "Elite Tiki-Taka" },
+              { focus: "Gegenpressing nach Ballverlust", title: "Gegenpressing (Klopp-Style)" },
+              { focus: "Schnelles Umschaltspiel", title: "Konter über Außen (Nagelsmann)" },
+              { focus: "Spielaufbau von hinten", title: "Positional Play (Pep-Style)" }
+          ],
+          cooldowns: [
+              { focus: "Faszienrolle & Mobilität", title: "Blackroll" },
+              { focus: "Lockeres Auslaufen", title: "Auslaufen" },
+              { focus: "Leichtes Passspiel", title: "Tiki-Taka Cool-Down" }
+          ],
           pedagogy: "ELITE SENIOREN. Hochprofessionelles Vokabular (Nagelsmann-Niveau). Große Felder (11v11) in der JSON Generierung nutzen."
       };
   };
@@ -320,35 +362,89 @@ const TacticalHub = ({
   // Legacy wrapper for buttons that still call generateWarmups
   const generateWarmups = () => showWarmupMenu();
 
-  const generateMainDrills = async (fokus) => {
+  // INSTANT MENU: Show main drill options immediately
+  const showMainMenu = (fokus) => {
       setDraft(p => ({...p, taktischerFokus: fokus}));
-      setPhase('generating_main'); setIsGenerating(true);
       const conf = getAgeSpecificConfig(ageGroup || clubName);
-      const topics = conf.mains(fokus);
-      const results = [];
-      const dept = isNlzTheme ? "NLZ" : "Senioren";
-      try {
-          for (let i = 0; i < topics.length; i++) {
-              setGerdFeedback(`Berechne Hauptübung ${i+1}/${topics.length}...`);
-              const data = await askAi(`Hauptübung: "${topics[i]}". REGEL: ${conf.pedagogy}. Millimetergenaues altersgerechtes Kopfkino. Min. 150 Wörter. Zwingend ein "taktiktafel" JSON Output am Ende.`, false, 0.2, dept);
-              results.push({ title: topics[i], markdownContent: data.markdownText, tacticJson: data.tacticJson });
-          }
-          setMainOptions(results);
-          addChatMessage('gerd', `Hauptteil-Übungsformen für ${fokus} berechnet.`);
-      } catch(e) { console.error(e); }
-      setIsGenerating(false); setPhase('main_options');
+      const menuItems = conf.mains.map(m => ({ title: m.title, focus: m.focus, markdownContent: null, tacticJson: null }));
+      setMainOptions(menuItems);
+      addChatMessage('gerd', `Hauptteil-Übungen für "${fokus}" (${ageGroup || 'Team'}). Wähle eine Form oder gib eine eigene ein!`);
+      setPhase('main_options');
   };
 
-  const generateCooldown = async (type) => {
-      setPhase('generating_cooldown'); setIsGenerating(true);
-      const dept = isNlzTheme ? "NLZ" : "Senioren";
+  // Generate SINGLE main drill after trainer clicks
+  const generateSingleMain = async (drillTitle, drillFocus) => {
+      setPhase('generating_main'); setIsGenerating(true);
       const conf = getAgeSpecificConfig(ageGroup || clubName);
+      const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
-          const data = await askAi(`Generiere Cooldown/Abschluss: "${type}". REGEL: ${conf.pedagogy}. Inkludiere ein passendes "taktiktafel" JSON Output für den Kreis.`, false, 0.2, dept);
-          setDraft(p => ({...p, cooldown: { title: `3. Abschluss (${type})`, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
-      } catch(e) { }
+          setGerdFeedback(`Erstelle Hauptübung: ${drillTitle}...`);
+          const data = await askAi(
+              `Hauptübung: "${drillTitle}". Thema/Fokus: ${drillFocus}. Trainerfokus: ${draft.taktischerFokus || drillFocus}. Altersklasse: ${ageGroup || 'Allgemein'}.
+              REGEL: ${conf.pedagogy}.
+              PFLICHT-STRUKTUR:
+              1. NAME & ZIEL (1 Satz + taktisches Lernziel)
+              2. AUFBAU: Exakte Feldmaße, Material, Spielerzahl, Mannschaftsgröße
+              3. ABLAUF: Chronologisch, Millimeter-genau, mindestens 150 Wörter
+              4. VARIANTEN: Mindestens 2 Steigerungsformen
+              5. COACHING-TIPPS: 3 konkrete Trainer-Anweisungen
+              Schreibe zwingend eine passende "taktiktafel" JSON Definition am Ende (Aufbau von oben).`,
+              false, 0.2, dept
+          );
+          if (data && data.markdownText) {
+              setDraft(p => ({...p, main_drill: { title: drillTitle, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
+              addChatMessage('gerd', `"${drillTitle}" steht. Wähle jetzt den Abschluss/Cool-Down.`);
+              showCooldownMenu();
+          } else throw new Error('Keine Daten');
+      } catch(e) {
+          console.error(e);
+          setGerdFeedback("FEHLER beim Generieren der Hauptübung.");
+          addChatMessage('gerd', "Fehler. Bitte erneut versuchen.");
+          showMainMenu(draft.taktischerFokus || 'Training');
+      }
+      setIsGenerating(false);
+  };
+
+  // Legacy wrapper
+  const generateMainDrills = (fokus) => showMainMenu(fokus);
+
+  // INSTANT MENU: Show cooldown options immediately
+  const showCooldownMenu = () => {
+      const conf = getAgeSpecificConfig(ageGroup || clubName);
+      const menuItems = conf.cooldowns.map(c => ({ title: c.title, focus: c.focus }));
+      setPhase('cooldown_selection');
+      // Store in state so render can access them
+      setCooldownOptions(menuItems);
+      addChatMessage('gerd', `Wähle den Abschluss für die ${ageGroup || 'Mannschaft'}.`);
+  };
+
+  // Generate SINGLE cooldown after trainer clicks
+  const generateSingleCooldown = async (coolTitle, coolFocus) => {
+      setPhase('generating_cooldown'); setIsGenerating(true);
+      const conf = getAgeSpecificConfig(ageGroup || clubName);
+      const dept = isNlzTheme ? "NLZ" : "Senioren";
+      try {
+          setGerdFeedback(`Erstelle Abschluss: ${coolTitle}...`);
+          const data = await askAi(
+              `Abschluss/Cool-Down: "${coolTitle}". Fokus: ${coolFocus}. Altersklasse: ${ageGroup || 'Allgemein'}.
+              REGEL: ${conf.pedagogy}.
+              PFLICHT-STRUKTUR:
+              1. NAME & ZIEL
+              2. AUFBAU: Material, Kreis/Formation
+              3. ABLAUF: Schritt-für-Schritt (2-5 Min)
+              4. COACHING-TIPPS: 2 Hinweise
+              Schreibe zwingend eine passende "taktiktafel" JSON Definition am Ende.`,
+              false, 0.2, dept
+          );
+          if (data && data.markdownText) {
+              setDraft(p => ({...p, cooldown: { title: coolTitle, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
+          }
+      } catch(e) { console.error(e); }
       setIsGenerating(false); setPhase('summary');
   };
+
+  // Legacy wrapper
+  const generateCooldown = (type) => generateSingleCooldown(type, type);
 
   const generateWeeklyPlan = async () => {
       setPhase('generating_week'); setIsGenerating(true);
@@ -675,9 +771,31 @@ Antworte in diesem EXAKTEN Format:
                           <TextInput placeholder="Eigenes Warm-Up eingeben (z.B. Hase und Jäger)..." onSubmit={(custom) => { addChatMessage('coach', custom); generateSingleWarmup(custom, custom); }} buttonText="Generieren" />
                       </div>
                   )}
-                  {phase === 'focus_selection' && <TextInput placeholder="Fokus..." onSubmit={(f) => { addChatMessage('coach', f); generateMainDrills(f); }} buttonText="Generieren" />}
-                  {phase === 'main_options' && <PillSelect options={mainOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, main_drill: mainOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('cooldown_selection'); }} />}
-                  {phase === 'cooldown_selection' && <PillSelect options={getAgeSpecificConfig(ageGroup || clubName).cooldowns || ["CoolDown"]} onSelect={(v) => { addChatMessage('coach', v); generateCooldown(v); }} />}
+                  {phase === 'focus_selection' && <TextInput placeholder="Fokus für den Hauptteil (z.B. Passspiel, Torschuss, Dribbling)..." onSubmit={(f) => { addChatMessage('coach', f); showMainMenu(f); }} buttonText="Weiter" />}
+                  {phase === 'main_options' && (
+                      <div className="flex flex-col gap-3 animate-fade-in">
+                          <div className="flex flex-wrap gap-3">
+                              {mainOptions.map((opt, i) => (
+                                  <button key={i} onClick={() => { addChatMessage('coach', opt.title); generateSingleMain(opt.title, opt.focus || opt.title); }}
+                                      className="px-5 py-3 bg-white/5 hover:bg-neon hover:text-black border border-white/10 rounded-full text-xs font-bold uppercase text-white transition-all"
+                                  >{opt.title}</button>
+                              ))}
+                          </div>
+                          <TextInput placeholder="Eigene Hauptübung eingeben (z.B. Torschuss nach Doppelpass)..." onSubmit={(custom) => { addChatMessage('coach', custom); generateSingleMain(custom, custom); }} buttonText="Generieren" />
+                      </div>
+                  )}
+                  {phase === 'cooldown_selection' && (
+                      <div className="flex flex-col gap-3 animate-fade-in">
+                          <div className="flex flex-wrap gap-3">
+                              {(cooldownOptions || []).map((opt, i) => (
+                                  <button key={i} onClick={() => { addChatMessage('coach', opt.title); generateSingleCooldown(opt.title, opt.focus || opt.title); }}
+                                      className="px-5 py-3 bg-white/5 hover:bg-neon hover:text-black border border-white/10 rounded-full text-xs font-bold uppercase text-white transition-all"
+                                  >{opt.title}</button>
+                              ))}
+                          </div>
+                          <TextInput placeholder="Eigenes Auslaufen/Cool-Down eingeben..." onSubmit={(custom) => { addChatMessage('coach', custom); generateSingleCooldown(custom, custom); }} buttonText="Generieren" />
+                      </div>
+                  )}
               </div>
           )}
       </div>
