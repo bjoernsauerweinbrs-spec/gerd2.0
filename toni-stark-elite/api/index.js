@@ -74,6 +74,7 @@ Format:
 const NLZ_TACTIC_SYSTEM_INSTRUCTION = `
 Du bist der sportliche Leiter des NLZ. Generiere ein Training für die [Altersklasse].
 Wende ZWINGEND diese Ausbildungs-Matrix an:
+- Wenn U6-U8 (Bambini/F-Jugend): Nutze reine Spielfreude, Minitore, Hütchenwälder (Dribbling), absolute bildhafte/märchenhafte Sprache ohne Taktik!
 - Wenn U9-U11: Nutze kleine Felder, 4 Minitore (Funino-Elemente), maximal 4v4.
 - Wenn U12-U15: Nutze Positionsspiele (z.B. 4v2, 6v4) auf Ballbesitz.
 - Wenn U16-U19: Nutze großräumige taktische Spielformen mit Torabschlüssen.

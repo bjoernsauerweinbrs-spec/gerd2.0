@@ -220,36 +220,61 @@ const TacticalHub = ({
       setIsNeuralResearchActive(false);
   };
 
+  const getAgeSpecificConfig = (ageInput = "") => {
+      const isU6_U9 = /(U6|U7|U8|U9|Bambini|F-Jugend|G-Jugend)/i.test(ageInput);
+      const isU10_U13 = /(U10|U11|U12|U13|E-Jugend|D-Jugend)/i.test(ageInput);
+      const isU14_U17 = /(U14|U15|U16|U17|C-Jugend|B-Jugend)/i.test(ageInput);
+      
+      if (isU6_U9) return {
+          warmups: [{ focus: "Spielerisches Fangen", title: "1. Piraten und Schatzsucher" }, { focus: "Einfaches Dribbling", title: "2. Kometenjagd" }, { focus: "Bewegungsfreude", title: "3. Tierischer Parcours" }],
+          mains: (fokus) => [`A. ${fokus} (Liniendribbling-Turnier)`, `B. ${fokus} (Vier-Tore-Chaos)`],
+          cooldowns: ["Gemeinsames Jubeln", "Ruhiges Ballrollen", "Verabschiedungskreis"],
+          pedagogy: "SPIELERISCH FÜR KLEINKINDER. Keine Taktik, nur Spaß, bildhafte Sprache (Märchen). ZWINGEND MINITORE (kein Großfeld) im SVG Code verwenden."
+      };
+      if (isU10_U13) return {
+          warmups: [{ focus: "Koordination & Ball", title: "1. Nummern-Dribbling" }, { focus: "Reaktion", title: "2. Tic-Tac-Toe Sprints" }, { focus: "Passen im Chaos", title: "3. Zombie-Ball" }],
+          mains: (fokus) => [`A. ${fokus} (3v3 Funino Festival)`, `B. ${fokus} (1v1 Duelle)`],
+          cooldowns: ["Lockerer Auslauf", "Lattenschießen"],
+          pedagogy: "AUSBILDUNG KINDER. Kurze Instruktionen, Fokus auf Ballkontakte. Taktikboard JSON muss kleine Trainingsvierecke mit Hütchen und Minitoren nutzen!"
+      };
+      if (isU14_U17) return {
+          warmups: [{ focus: "Kognitives Umschalten", title: "1. Ajax-Passdreiecke" }, { focus: "Technik unter Druck", title: "2. Leichtes 4v1 Rondo" }],
+          mains: (fokus) => [`A. ${fokus} (Positionsspiel 4v4+2)`, `B. ${fokus} (DFB-Nachwuchs Form)`],
+          cooldowns: ["Active Recovery Jogging", "Dehnen & Blackroll"],
+          pedagogy: "AUSBILDUNG JUGEND. Nutze Taktik-Grundbegriffe wie 'Schulterblick'. Taktikbaord JSON nutzt saubere Übungszonen."
+      };
+      return {
+          warmups: [{ focus: "Kognition & Handlungsschnelligkeit", title: "1. Kognitives Rondo (Elite)" }, { focus: "Präzisionspassspiel", title: "2. Myelinisierungs-Passspiel (Pro)" }],
+          mains: (fokus) => [`Variante A: ${fokus} (Elite Tiki-Taka)`, `Variante B: ${fokus} (Elite Gegenpressing)`],
+          cooldowns: ["Blackroll", "Auslaufen", "Tiki-Taka"],
+          pedagogy: "ELITE SENIOREN. Hochprofessionelles Vokabular. Große Felder in der JSON Generierung nutzen."
+      };
+  };
+
   const generateWarmups = async () => {
       setPhase('generating_warmup'); setIsGenerating(true);
-      const options = [
-          { focus: "Kognition & Handlungsschnelligkeit", title: "1. Kognitives Rondo (Elite)" },
-          { focus: "Präzisions-Passspiel & Myelinisierung", title: "2. Myelinisierungs-Passspiel (Pro)" }
-      ];
+      const conf = getAgeSpecificConfig(ageGroup || clubName);
+      const options = conf.warmups;
       const results = [];
       const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
           for (let opt of options) {
               setGerdFeedback(`Berechne Warmup: ${opt.title}...`);
-              const data = await askAi(`Generiere Warmup: "${opt.title}". Fokus: ${opt.focus}. Nutze die 5-Punkte-Struktur. KEINE Bulletpoints im Ablauf!`, false, 0.2, dept);
+              const data = await askAi(`Generiere das Warmup: "${opt.title}". Fokus: ${opt.focus}. REGEL: ${conf.pedagogy}. Nutze die 5-Punkte-Struktur. Schreibe zwingend eine passende "taktiktafel" JSON Definition am Ende.`, false, 0.2, dept);
               if (data && data.markdownText) {
                   results.push({ title: opt.title, markdownContent: data.markdownText, tacticJson: data.tacticJson });
-              } else {
-                  throw new Error(`Ungültige Daten für ${opt.title}`);
-              }
+              } else throw new Error(`Fehler bei ${opt.title}`);
           }
           if (results.length > 0) {
               setWarmupOptions(results);
-              addChatMessage('gerd', "Warmup-Varianten bereit. Wähle deinen Fokus.");
+              addChatMessage('gerd', "Altersgerechte Warmup-Varianten bereit. Wähle deinen Fokus.");
               setPhase('warmup_options');
-          } else {
-              throw new Error("Keine Warmup-Optionen generiert.");
-          }
-      } catch(e) { 
+          } else throw new Error("Keine Warmups.");
+      } catch(e) {
           console.error(e); 
           setGerdFeedback("FEHLER: KI-Intelligence konnte nicht geladen werden.");
-          addChatMessage('gerd', "System-Fehler: Die Verbindung zur KI-Core ist unterbrochen. Bitte API-Key und Proxy-Verbindung prüfen.");
-          setPhase('intro'); // Go back to start if it fails
+          addChatMessage('gerd', "System-Fehler beim Laden.");
+          setPhase('intro');
       }
       setIsGenerating(false);
   };
@@ -257,17 +282,18 @@ const TacticalHub = ({
   const generateMainDrills = async (fokus) => {
       setDraft(p => ({...p, taktischerFokus: fokus}));
       setPhase('generating_main'); setIsGenerating(true);
+      const conf = getAgeSpecificConfig(ageGroup || clubName);
+      const topics = conf.mains(fokus);
       const results = [];
-      const topics = [`Variante A: ${fokus} (Inspir. Nagelsmann)`, `Variante B: ${fokus} (Inspir. Klopp)`];
       const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
-          for (let i = 0; i < 2; i++) {
-              setGerdFeedback(`Berechne Hauptübung ${i+1}/2...`);
-              const data = await askAi(`Hauptübung: "${topics[i]}". Fokus: ${fokus}. Millimetergenaues Kopfkino. Min. 150 Wörter für Ablauf.`, false, 0.2, dept);
-              results.push({ title: `${i === 0 ? 'A' : 'B'}. ${fokus} Elite`, markdownContent: data.markdownText, tacticJson: data.tacticJson });
+          for (let i = 0; i < topics.length; i++) {
+              setGerdFeedback(`Berechne Hauptübung ${i+1}/${topics.length}...`);
+              const data = await askAi(`Hauptübung: "${topics[i]}". REGEL: ${conf.pedagogy}. Millimetergenaues altersgerechtes Kopfkino. Min. 150 Wörter. Zwingend ein "taktiktafel" JSON Output am Ende.`, false, 0.2, dept);
+              results.push({ title: topics[i], markdownContent: data.markdownText, tacticJson: data.tacticJson });
           }
           setMainOptions(results);
-          addChatMessage('gerd', `Taktik-Mastering für ${fokus} abgeschlossen.`);
+          addChatMessage('gerd', `Hauptteil-Übungsformen für ${fokus} berechnet.`);
       } catch(e) { console.error(e); }
       setIsGenerating(false); setPhase('main_options');
   };
@@ -275,9 +301,10 @@ const TacticalHub = ({
   const generateCooldown = async (type) => {
       setPhase('generating_cooldown'); setIsGenerating(true);
       const dept = isNlzTheme ? "NLZ" : "Senioren";
+      const conf = getAgeSpecificConfig(ageGroup || clubName);
       try {
-          const data = await askAi(`Generiere Cooldown: "${type}". Fokus: Active Recovery.`, false, 0.2, dept);
-          setDraft(p => ({...p, cooldown: { title: `5. Recovery (${type})`, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
+          const data = await askAi(`Generiere Cooldown/Abschluss: "${type}". REGEL: ${conf.pedagogy}. Inkludiere ein passendes "taktiktafel" JSON Output für den Kreis.`, false, 0.2, dept);
+          setDraft(p => ({...p, cooldown: { title: `3. Abschluss (${type})`, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
       } catch(e) { }
       setIsGenerating(false); setPhase('summary');
   };
@@ -598,7 +625,7 @@ Antworte in diesem EXAKTEN Format:
                   {phase === 'warmup_options' && <PillSelect options={warmupOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, warmup: warmupOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('focus_selection'); }} />}
                   {phase === 'focus_selection' && <TextInput placeholder="Fokus..." onSubmit={(f) => { addChatMessage('coach', f); generateMainDrills(f); }} buttonText="Generieren" />}
                   {phase === 'main_options' && <PillSelect options={mainOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, main_drill: mainOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('cooldown_selection'); }} />}
-                  {phase === 'cooldown_selection' && <PillSelect options={["Blackroll", "Auslaufen", "Tiki-Taka"]} onSelect={(v) => { addChatMessage('coach', v); generateCooldown(v); }} />}
+                  {phase === 'cooldown_selection' && <PillSelect options={getAgeSpecificConfig(ageGroup || clubName).cooldowns || ["CoolDown"]} onSelect={(v) => { addChatMessage('coach', v); generateCooldown(v); }} />}
               </div>
           )}
       </div>
