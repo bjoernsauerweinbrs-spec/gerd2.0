@@ -226,58 +226,99 @@ const TacticalHub = ({
       const isU14_U17 = /(U14|U15|U16|U17|C-Jugend|B-Jugend)/i.test(ageInput);
       
       if (isU6_U9) return {
-          warmups: [{ focus: "Spielerisches Fangen", title: "1. Piraten und Schatzsucher" }, { focus: "Einfaches Dribbling", title: "2. Kometenjagd" }, { focus: "Bewegungsfreude", title: "3. Tierischer Parcours" }],
-          mains: (fokus) => [`A. ${fokus} (Liniendribbling-Turnier)`, `B. ${fokus} (Vier-Tore-Chaos)`],
+          warmups: [
+              { focus: "Fangspiel mit Befreiung", title: "Feuer und Eis" },
+              { focus: "Gruppenfangen mit wachsender Kette", title: "Kettenfangen" },
+              { focus: "Ball erobern & dribbeln", title: "Piraten & Schatzsucher" },
+              { focus: "Schwanz abziehen & schützen", title: "Schwänzchenfangen" },
+              { focus: "Farb-Reaktion beim Dribbeln", title: "Ampel-Dribbling" },
+              { focus: "Ball als Freund, freies Laufen", title: "Kometenjagd" },
+              { focus: "Koordination & Spaß", title: "Tierischer Bewegungsparcours" }
+          ],
+          mains: (fokus) => [`A. ${fokus} (Liniendribbling-Turnier)`, `B. ${fokus} (Vier-Tore-Chaos)`, `C. ${fokus} (Funino 3v3)`],
           cooldowns: ["Gemeinsames Jubeln", "Ruhiges Ballrollen", "Verabschiedungskreis"],
-          pedagogy: "SPIELERISCH FÜR KLEINKINDER. Keine Taktik, nur Spaß, bildhafte Sprache (Märchen). ZWINGEND MINITORE (kein Großfeld) im SVG Code verwenden."
+          pedagogy: "SPIELERISCH FÜR KLEINKINDER (4-8 Jahre). KEINE Taktik, KEIN 11v11, KEIN Großfeld. Nur Spaß, maximale Ballkontakte, bildhafte/märchenhafte Sprache. Spielformen: max. 4v4 auf Minitore. Beschreibe Aufbau, Regeln und Varianten kinderleicht verständlich. ZWINGEND MINITORE und Hütchen im Taktikboard JSON verwenden."
       };
       if (isU10_U13) return {
-          warmups: [{ focus: "Koordination & Ball", title: "1. Nummern-Dribbling" }, { focus: "Reaktion", title: "2. Tic-Tac-Toe Sprints" }, { focus: "Passen im Chaos", title: "3. Zombie-Ball" }],
-          mains: (fokus) => [`A. ${fokus} (3v3 Funino Festival)`, `B. ${fokus} (1v1 Duelle)`],
-          cooldowns: ["Lockerer Auslauf", "Lattenschießen"],
-          pedagogy: "AUSBILDUNG KINDER. Kurze Instruktionen, Fokus auf Ballkontakte. Taktikboard JSON muss kleine Trainingsvierecke mit Hütchen und Minitoren nutzen!"
+          warmups: [
+              { focus: "Abwerfen & Ausweichen", title: "Zombie-Ball" },
+              { focus: "Passen auf Zuruf (Nummern)", title: "Nummern-Passen im Chaos" },
+              { focus: "Koordinationsleiter + Sprint", title: "Koordinations-Wettkampf" },
+              { focus: "Leichtes Ballhalten", title: "Rondo 4v1 (Spaß)" },
+              { focus: "Reaktion & Richtungswechsel", title: "Tic-Tac-Toe Sprints" }
+          ],
+          mains: (fokus) => [`A. ${fokus} (3v3 Funino Festival)`, `B. ${fokus} (1v1 Duelle)`, `C. ${fokus} (Überzahl 3v2)`],
+          cooldowns: ["Lockerer Auslauf", "Lattenschüeßen", "Dehnen im Kreis"],
+          pedagogy: "AUSBILDUNG KINDER (9-13 Jahre). Kurze Instruktionen, Fokus auf viele Ballkontakte. Spielformen 3v3 bis 7v7. Taktikboard JSON muss kleine Trainingsvierecke mit Hütchen und Minitoren nutzen!"
       };
       if (isU14_U17) return {
-          warmups: [{ focus: "Kognitives Umschalten", title: "1. Ajax-Passdreiecke" }, { focus: "Technik unter Druck", title: "2. Leichtes 4v1 Rondo" }],
-          mains: (fokus) => [`A. ${fokus} (Positionsspiel 4v4+2)`, `B. ${fokus} (DFB-Nachwuchs Form)`],
-          cooldowns: ["Active Recovery Jogging", "Dehnen & Blackroll"],
-          pedagogy: "AUSBILDUNG JUGEND. Nutze Taktik-Grundbegriffe wie 'Schulterblick'. Taktikbaord JSON nutzt saubere Übungszonen."
+          warmups: [
+              { focus: "Kognitives Umschalten", title: "Ajax-Passdreiecke" },
+              { focus: "Technik unter Druck", title: "Rondo 5v2 (progressiv)" },
+              { focus: "La Masia Gitter-Passspiel", title: "Barcelona Warm-Up" },
+              { focus: "Athletik + Ball", title: "Dynamisches Aufwärmen mit Ball" }
+          ],
+          mains: (fokus) => [`A. ${fokus} (Positionsspiel 4v4+2)`, `B. ${fokus} (DFB-Nachwuchs Form)`, `C. ${fokus} (Übergangsspiel 8v8)`],
+          cooldowns: ["Active Recovery Jogging", "Dehnen & Blackroll", "Taktik-Besprechung"],
+          pedagogy: "AUSBILDUNG JUGEND (14-17). Nutze Taktik-Grundbegriffe wie 'Schulterblick', 'Freilaufverhalten'. Spielformen 7v7 bis 11v11. Taktikboard JSON nutzt saubere Übungszonen."
       };
       return {
-          warmups: [{ focus: "Kognition & Handlungsschnelligkeit", title: "1. Kognitives Rondo (Elite)" }, { focus: "Präzisionspassspiel", title: "2. Myelinisierungs-Passspiel (Pro)" }],
+          warmups: [
+              { focus: "Kognition & Handlungsschnelligkeit", title: "Kognitives Rondo (Elite)" },
+              { focus: "Präzisions-Passspiel", title: "Myelinisierungs-Passspiel" },
+              { focus: "Athletische Voraktivierung", title: "Faszien-Aktivierung (Pro)" }
+          ],
           mains: (fokus) => [`Variante A: ${fokus} (Elite Tiki-Taka)`, `Variante B: ${fokus} (Elite Gegenpressing)`],
           cooldowns: ["Blackroll", "Auslaufen", "Tiki-Taka"],
-          pedagogy: "ELITE SENIOREN. Hochprofessionelles Vokabular. Große Felder in der JSON Generierung nutzen."
+          pedagogy: "ELITE SENIOREN. Hochprofessionelles Vokabular (Nagelsmann-Niveau). Große Felder (11v11) in der JSON Generierung nutzen."
       };
   };
 
-  const generateWarmups = async () => {
+  // INSTANT MENU: Show warmup options immediately, generate only when selected
+  const showWarmupMenu = () => {
+      const conf = getAgeSpecificConfig(ageGroup || clubName);
+      // Build placeholder results from config titles (no AI call yet)
+      const menuItems = conf.warmups.map(w => ({ title: w.title, focus: w.focus, markdownContent: null, tacticJson: null }));
+      setWarmupOptions(menuItems);
+      addChatMessage('gerd', `Wähle dein Warm-Up für die ${ageGroup || 'Mannschaft'}. Du kannst auch unten ein eigenes Spiel eingeben!`);
+      setPhase('warmup_options');
+  };
+
+  // Generate SINGLE warmup after trainer clicks
+  const generateSingleWarmup = async (warmupTitle, warmupFocus) => {
       setPhase('generating_warmup'); setIsGenerating(true);
       const conf = getAgeSpecificConfig(ageGroup || clubName);
-      const options = conf.warmups;
-      const results = [];
       const dept = isNlzTheme ? "NLZ" : "Senioren";
       try {
-          for (let opt of options) {
-              setGerdFeedback(`Berechne Warmup: ${opt.title}...`);
-              const data = await askAi(`Generiere das Warmup: "${opt.title}". Fokus: ${opt.focus}. REGEL: ${conf.pedagogy}. Nutze die 5-Punkte-Struktur. Schreibe zwingend eine passende "taktiktafel" JSON Definition am Ende.`, false, 0.2, dept);
-              if (data && data.markdownText) {
-                  results.push({ title: opt.title, markdownContent: data.markdownText, tacticJson: data.tacticJson });
-              } else throw new Error(`Fehler bei ${opt.title}`);
-          }
-          if (results.length > 0) {
-              setWarmupOptions(results);
-              addChatMessage('gerd', "Altersgerechte Warmup-Varianten bereit. Wähle deinen Fokus.");
-              setPhase('warmup_options');
-          } else throw new Error("Keine Warmups.");
+          setGerdFeedback(`Erstelle: ${warmupTitle}...`);
+          const data = await askAi(
+              `Generiere das Aufwärm-Spiel/Übung: "${warmupTitle}". Fokus: ${warmupFocus}. Altersklasse: ${ageGroup || 'Allgemein'}.
+              REGEL: ${conf.pedagogy}.
+              PFLICHT-STRUKTUR:
+              1. NAME & ZIEL (1 Satz)
+              2. AUFBAU: Feldgröße, Material (Hütchen, Leibchen etc.), Spieleranzahl
+              3. REGELN & ABLAUF: Schritt-für-Schritt chronologisch, lebendig und verständlich formuliert
+              4. VARIANTEN: Mindestens 2 Variationen zum Steigern
+              5. COACHING-TIPPS: 2-3 Trainer-Hinweise
+              Schreibe zwingend eine passende "taktiktafel" JSON Definition am Ende (Aufbau der Übung von oben gesehen).`,
+              false, 0.2, dept
+          );
+          if (data && data.markdownText) {
+              setDraft(p => ({...p, warmup: { title: warmupTitle, markdownContent: data.markdownText, tacticJson: data.tacticJson }}));
+              addChatMessage('gerd', `"${warmupTitle}" steht. Wähle jetzt den Fokus für den Hauptteil.`);
+              setPhase('focus_selection');
+          } else throw new Error('Keine Daten');
       } catch(e) {
-          console.error(e); 
-          setGerdFeedback("FEHLER: KI-Intelligence konnte nicht geladen werden.");
-          addChatMessage('gerd', "System-Fehler beim Laden.");
-          setPhase('intro');
+          console.error(e);
+          setGerdFeedback("FEHLER: KI konnte das Warm-Up nicht generieren.");
+          addChatMessage('gerd', "Fehler beim Generieren. Bitte erneut versuchen.");
+          showWarmupMenu(); // back to menu
       }
       setIsGenerating(false);
   };
+
+  // Legacy wrapper for buttons that still call generateWarmups
+  const generateWarmups = () => showWarmupMenu();
 
   const generateMainDrills = async (fokus) => {
       setDraft(p => ({...p, taktischerFokus: fokus}));
@@ -595,7 +636,7 @@ Antworte in diesem EXAKTEN Format:
                   )}
                   
                   <div className="flex flex-wrap gap-3">
-                      <button onClick={generateWarmups} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">Warmup Generieren</button>
+                      <button onClick={showWarmupMenu} className="px-6 py-4 bg-neon text-black rounded-xl font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(0,243,255,0.4)]">Warm-Up wählen</button>
                       <button onClick={generateWeeklySchedule} className="px-6 py-4 bg-white/10 hover:bg-white/20 text-white rounded-xl font-black uppercase text-[10px] tracking-widest border border-white/10 transition-all">Wochenplaner Starten</button>
                   </div>
               </div>
@@ -622,7 +663,18 @@ Antworte in diesem EXAKTEN Format:
                             {planningMode === 'week' ? 'Wochenplan Generieren' : 'Warmup Generieren'}
                        </button>
                    )}
-                  {phase === 'warmup_options' && <PillSelect options={warmupOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, warmup: warmupOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('focus_selection'); }} />}
+                  {phase === 'warmup_options' && (
+                      <div className="flex flex-col gap-3 animate-fade-in">
+                          <div className="flex flex-wrap gap-3">
+                              {warmupOptions.map((opt, i) => (
+                                  <button key={i} onClick={() => { addChatMessage('coach', opt.title); generateSingleWarmup(opt.title, opt.focus || opt.title); }}
+                                      className="px-5 py-3 bg-white/5 hover:bg-neon hover:text-black border border-white/10 rounded-full text-xs font-bold uppercase text-white transition-all"
+                                  >{opt.title}</button>
+                              ))}
+                          </div>
+                          <TextInput placeholder="Eigenes Warm-Up eingeben (z.B. Hase und Jäger)..." onSubmit={(custom) => { addChatMessage('coach', custom); generateSingleWarmup(custom, custom); }} buttonText="Generieren" />
+                      </div>
+                  )}
                   {phase === 'focus_selection' && <TextInput placeholder="Fokus..." onSubmit={(f) => { addChatMessage('coach', f); generateMainDrills(f); }} buttonText="Generieren" />}
                   {phase === 'main_options' && <PillSelect options={mainOptions.map(o => o.title)} onSelect={(t) => { setDraft(p => ({...p, main_drill: mainOptions.find(o => o.title === t)})); addChatMessage('coach', t); setPhase('cooldown_selection'); }} />}
                   {phase === 'cooldown_selection' && <PillSelect options={getAgeSpecificConfig(ageGroup || clubName).cooldowns || ["CoolDown"]} onSelect={(v) => { addChatMessage('coach', v); generateCooldown(v); }} />}
