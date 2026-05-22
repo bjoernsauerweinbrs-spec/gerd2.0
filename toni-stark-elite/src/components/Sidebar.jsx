@@ -6,7 +6,7 @@ const Sidebar = ({ activeTab, setActiveTab, activeRole }) => {
     { id: "home", label: activeRole === 'Trainer' ? 'Trainer-Büro' : 'Executive Board', icon: "home", color: "neon", roles: ["Trainer", "Admin", "Manager"] },
     { id: "coach_hub", label: "Coach Hub", icon: "activity", color: "neon", roles: ["Trainer", "Admin"] },
     { id: "roster", label: "Mannschaftskader", icon: "users", color: "gold", roles: ["Trainer", "Admin"] },
-    { id: "cfo", label: "Transfermarkt", icon: "pie-chart", color: "gold", roles: ["Manager", "Admin"] },
+    { id: "cfo", label: "Transfermarkt", icon: "pie-chart", color: "gold", roles: ["Manager", "Admin", "Trainer"] },
     { id: "nlz", label: "NLZ Hub", icon: "layout-grid", color: "neon", roles: ["Jugendtrainer", "Admin"] },
     { id: "medical", label: "Medizin", icon: "heart-pulse", color: "redbull", roles: ["Trainer", "Admin"] },
     { id: "calendar", label: "Kalender", icon: "calendar", color: "neon", roles: ["Trainer", "Manager", "Admin", "Jugendtrainer"] },
