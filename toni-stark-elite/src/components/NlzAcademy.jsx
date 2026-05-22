@@ -993,7 +993,7 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
                   { id: 'biomechanics', label: 'Biomechanik', icon: 'activity', color: 'text-redbull' },
                   { id: 'training', label: 'Training Lab', icon: 'cpu', color: 'text-neon' },
                   { id: 'board', label: 'Taktik Board', icon: 'layout', color: 'text-neon' },
-                  { id: 'pr', label: 'PR & Medien', icon: 'radio', color: 'text-navy' }
+                  { id: 'media', label: 'PR & Medien', icon: 'radio', color: 'text-navy' }
                 ].map(tab => (
                   <button 
                     key={tab.id}
@@ -2060,6 +2060,138 @@ Regeln: NUR rohes, validiertes JSON zurückgeben. Kein Markdown.
               prefilledAgeGroup={activeYouthTeam}
               shouldSkipIntro={true}
             />
+        )}
+
+        {/* === BUDGET / FINANZEN === */}
+        {activeNlzView === "finance" && (
+           <div className="space-y-6 animate-fade-in pl-2 pr-2">
+              <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 p-8 opacity-5"><Icon name="dollar-sign" size={120}/></div>
+                 <div className="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center relative z-10">
+                    <div>
+                       <h2 className="text-2xl font-black uppercase tracking-tighter text-navy flex items-center gap-3">
+                          <Icon name="dollar-sign" size={24} className="text-gold" /> NLZ Budget- & Finanz-Cockpit
+                       </h2>
+                       <div className="text-[10px] font-mono text-gray-400 tracking-widest uppercase mt-1">Akademie-Budgetierung, Mitgliedsbeiträge & Transparenz</div>
+                    </div>
+                 </div>
+
+                 {/* KPIs */}
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10 mb-8">
+                     <div className="bg-navy/5 border border-navy/10 p-6 rounded-2xl">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-navy/40 mb-1">NLZ Budget-Zuweisung</p>
+                         <h3 className="text-2xl font-black text-navy">75.000 €</h3>
+                     </div>
+                     <div className="bg-red-500/5 border border-red-500/10 p-6 rounded-2xl">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-red-500/40 mb-1">Freigegebene Ausgaben</p>
+                         <h3 className="text-2xl font-black text-red-600">
+                             {ledger.filter(e => e.type === 'expense' && e.status === 'approved').reduce((sum, e) => sum + (parseFloat(e.amount) || 349), 0).toLocaleString()} €
+                         </h3>
+                     </div>
+                     <div className="bg-green-500/5 border border-green-500/10 p-6 rounded-2xl">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-green-600/40 mb-1">Verfügbares Restbudget</p>
+                         <h3 className="text-2xl font-black text-green-600">
+                             {(75000 - ledger.filter(e => e.type === 'expense' && e.status === 'approved').reduce((sum, e) => sum + (parseFloat(e.amount) || 349), 0)).toLocaleString()} €
+                         </h3>
+                     </div>
+                     <div className="bg-gold/5 border border-gold/10 p-6 rounded-2xl">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-gold/60 mb-1">Einnahmen Beiträge (Ist)</p>
+                         <h3 className="text-2xl font-black text-gold">{(truthObject?.nlz_squad?.length * annualFee).toLocaleString()} €</h3>
+                     </div>
+                 </div>
+
+                 {/* Interactive Fee Calculator */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10 mb-8 border-t border-gray-100 pt-8">
+                     <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                         <h3 className="text-navy font-black uppercase text-xs tracking-widest mb-4">Mitgliedsbeitrag-Kalkulator</h3>
+                         <div className="space-y-4">
+                             <div className="flex justify-between items-center">
+                                 <span className="text-xs text-gray-500 uppercase font-black">Jahresbeitrag pro Kind:</span>
+                                 <div className="flex items-center gap-2">
+                                     <input 
+                                         type="number" 
+                                         value={annualFee} 
+                                         onChange={e => setAnnualFee(parseInt(e.target.value) || 0)} 
+                                         className="w-20 bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-xs text-center font-bold"
+                                     />
+                                     <span className="text-xs font-bold">€</span>
+                                 </div>
+                             </div>
+                             <div className="flex justify-between items-center text-xs">
+                                 <span className="text-gray-500 uppercase font-black">Registrierte NLZ-Spieler:</span>
+                                 <span className="font-black text-navy">{truthObject?.nlz_squad?.length || 0} Kinder</span>
+                             </div>
+                             <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+                                 <span className="text-xs text-gray-500 uppercase font-black">Projizierte Einnahmen:</span>
+                                 <span className="text-lg font-black text-gold">{(truthObject?.nlz_squad?.length * annualFee).toLocaleString()} € / Jahr</span>
+                             </div>
+                         </div>
+                     </div>
+
+                     <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex flex-col justify-between">
+                         <div>
+                             <h3 className="text-navy font-black uppercase text-xs tracking-widest mb-2">Förderziel Jahres-Budget</h3>
+                             <p className="text-[9px] text-gray-400 uppercase tracking-widest mb-4">Projektion der Selbstbeteiligung zur Entlastung des Hauptvereins</p>
+                             <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden mb-3 relative shadow-inner">
+                                 <div 
+                                     className="h-full bg-gold transition-all duration-1000" 
+                                     style={{ width: `${Math.min(((truthObject?.nlz_squad?.length * annualFee) / 10000) * 100, 100)}%` }}
+                                 />
+                                 <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-navy">
+                                     {((truthObject?.nlz_squad?.length * annualFee) / 10000 * 100).toFixed(1)}% von 10.000 € Ziel
+                                 </span>
+                             </div>
+                         </div>
+                         <p className="text-[9px] text-gray-500 leading-relaxed italic">
+                             * Die Beiträge fließen direkt in den NLZ-Förderpool zur Finanzierung von Biometrie-Scans, Trainingsgeräten und Schulnachhilfe-Tutoren.
+                         </p>
+                     </div>
+                 </div>
+
+                 {/* NLZ Transactions List */}
+                 <div className="relative z-10 border-t border-gray-100 pt-8">
+                     <h3 className="text-navy font-black uppercase text-xs tracking-widest mb-6">Akademie-Material-Ledger (Einnahmen & Ausgaben)</h3>
+                     <div className="overflow-x-auto">
+                         <table className="w-full text-left text-xs text-gray-600">
+                             <thead className="border-b border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                 <tr>
+                                     <th className="pb-4 px-4">Datum</th>
+                                     <th className="pb-4 px-4">Kategorie</th>
+                                     <th className="pb-4 px-4">Bezeichnung</th>
+                                     <th className="pb-4 px-4">Antragsteller</th>
+                                     <th className="pb-4 px-4 text-right">Betrag</th>
+                                     <th className="pb-4 px-4 text-center">Status</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 {ledger.map(entry => (
+                                     <tr key={entry.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                         <td className="py-4 px-4">{new Date(entry.created_at).toLocaleDateString()}</td>
+                                         <td className="py-4 px-4 uppercase font-bold text-[10px] text-navy">{entry.category}</td>
+                                         <td className="py-4 px-4 font-black text-navy">{entry.item_name}</td>
+                                         <td className="py-4 px-4">{entry.requester_name || "NLZ System"}</td>
+                                         <td className={`py-4 px-4 text-right font-black ${entry.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                                             {entry.type === 'income' ? '+' : '-'}{parseFloat(entry.amount || 349).toLocaleString()} €
+                                         </td>
+                                         <td className="py-4 px-4 text-center">
+                                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${entry.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-gold/10 text-gold'}`}>
+                                                 {entry.status}
+                                             </span>
+                                         </td>
+                                     </tr>
+                                 ))}
+                                 {ledger.length === 0 && (
+                                     <tr>
+                                         <td colSpan="6" className="text-center py-8 text-gray-400 italic">Keine Transaktionen erfasst.</td>
+                                     </tr>
+                                 )}
+                             </tbody>
+                         </table>
+                     </div>
+                 </div>
+
+              </div>
+           </div>
         )}
 
         {/* === LOGISTIK HUB === */}

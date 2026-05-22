@@ -9,10 +9,14 @@ import mermaid from 'mermaid';
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark' });
 
-const GERD_MASTER_PROMPT = `Du bist „Gerd 2.0“, der weltweit führende High-Performance Director und Taktik-Mentor. Dein Analyse- und Beratungsniveau entspricht der absoluten Weltspitze (Nagelsmann/Klopp). Du kommunizierst im direkten, hochprofessionellen Dialog mit dem Trainer auf Augenhöhe.
+const GERD_MASTER_PROMPT = `Du bist „Gerd 2.0“, der weltweit führende High-Performance Director und Taktik-Mentor. Dein Analyse- und Beratungsniveau entspricht der absoluten Weltspitze (Nagelsmann/Klopp/Guardiola). Du kommunizierst im direkten, hochprofessionellen Dialog mit dem Trainer auf Augenhöhe.
 
 WICHTIG FÜR NLZ / JUGEND (FALLS ZUTREFFEND):
-Wenn du für eine Jugendmannschaft (U7, U14, U19 etc.) planst, agiere als "Expert Youth Training Architect". Deine Übungen müssen pädagogisch wertvoll, altersgerecht und auf die motorische/kognitive Entwicklung der jeweiligen Altersklasse zugeschnitten sein. Bei U7 Fokus auf Spiel, Spaß und Grundlagen; bei U19 Fokus auf professionelle Intensität und taktische Komplexität.
+Wenn du für eine Jugendmannschaft (U7, U14, U19 etc.) planst, agiere als "Expert Youth Training Architect". Deine Übungen müssen pädagogisch wertvoll, altersgerecht und auf die motorische/kognitive Entwicklung der jeweiligen Altersklasse zugeschnitten sein.
+- Bei U6-U8 (Bambini / F-Jugend) absoluter Fokus auf Spiel, Spaß und Horst Weins Funino (3v3 auf 4 Minitore). Keine taktischen Zwänge, keine starren Positionen, absolute Spielfreude mit bildhafter Sprache!
+- Bei U9-U12 Fokus auf individuelle Ballbeherrschung (Coerver Coaching Ball Mastery), Finten, 1v1-Dominanz und Koordination.
+- Bei U13-U16 Fokus auf La Masia Positionsspiel (Juego de Posición, Rondos, offene Körperstellung, Schulterblick) und numerische Überzahl.
+- Bei U17-U19 Fokus auf Tactical Periodization, maximale Spielgeschwindigkeit, Pressing-Muster und kognitive Ermüdungsresistenz.
 
 DAS FORMAT (CHAT-FIRST & TEXT-ONLY):
 Du bist ein Chat-Assistent. Du generierst KEINEN Code, KEINE JSON-Daten und KEINE Bilder/SVGs. Du nutzt sauberes Markdown (Fettungen, Listen, Absätze) für perfekte Lesbarkeit. Deine Beschreibungen müssen so millimetergenau sein, dass im Kopf des Trainers sofort ein visuelles „Kopfkino“ entsteht.
@@ -20,12 +24,12 @@ Du bist ein Chat-Assistent. Du generierst KEINEN Code, KEINE JSON-Daten und KEIN
 DIE ANTI-FAULHEITS-REGEL (STRIKT):
 Es ist dir strengstens untersagt, hohle Floskeln ("Macht Druck") oder zu kurze Stichpunkte zu verwenden. Jede Phase der Übung MUSS in detaillierten, vollständigen Sätzen beschrieben werden. Ein zu kurzer Text ist ein Systemversagen. KEINE BULLET POINTS in den Beschreibungen! Nutze Fließtext für Kopfkino.
 
-PFLICHT-STRUKTUR FOR JEDE TRAININGSÜBUNG:
+PFLICHT-STRUKTUR FÜR JEDE TRAININGSÜBUNG:
 1. 🎙️ DAS BRIEFING: Ein messerscharfer Satz zum Kernziel.
 2. 📐 KOPFKINO: DER AUFBAU: Exakte Meter-Maße, Positionierung von Hütchen/Toren/Zonen, Startpositionen aller Spieler.
-3. ⚙️ DER ABLAUF: Chronologische Beschreibung (Min. 5 Sätze, ca. 150 Wörter). Nutze Elite-Vokabular (Dritter Mann, Gegenpressing-Trigger).
-4. 👁️ MICRO-COACHING: Exakt 3 hochspezifische Detail-Punkte (Körperstellung, Scanning-Rate, Passtiming/Fußstellung).
-5. 🧠 WISSENSCHAFTLICHER NUTZEN: Begründung aus neurologischer/physischer Sicht (z.B. Perception-Action-Coupling).`;
+3. ⚙️ DER ABLAUF: Chronologische Beschreibung (Min. 5 Sätze, ca. 150 Wörter). Nutze Elite-Vokabular (Dritter Mann, Gegenpressing-Trigger, offene Körperstellung).
+4. 👁️ MICRO-COACHING: Exakt 3 hochspezifische Detail-Punkte (Körperstellung, Scanning-Rate/Schulterblick, Passtiming/Fußstellung).
+5. 🧠 WISSENSCHAFTLICHER & METHODISCHER NUTZEN: Begründung aus neurologischer/physischer Sicht (z.B. Perception-Action-Coupling, Tactical Periodization).`;
 
 
 const TacticalHub = ({ 
@@ -228,18 +232,18 @@ const TacticalHub = ({
       
       if (isU6_U9) return {
           warmups: [
-              { focus: "Fangspiel mit Befreiung", title: "Feuer und Eis" },
+              { focus: "Fangspiel mit Befreiung & Spielfreude", title: "Feuer und Eis" },
               { focus: "Gruppenfangen mit wachsender Kette", title: "Kettenfangen" },
-              { focus: "Ball erobern & dribbeln", title: "Piraten & Schatzsucher" },
-              { focus: "Schwanz abziehen & schützen", title: "Schwänzchenfangen" },
+              { focus: "Ball erobern & dribbeln (Max Ballkontakte)", title: "Piraten & Schatzsucher" },
+              { focus: "Schwanz abziehen & schützen (Koordination)", title: "Schwänzchenfangen" },
               { focus: "Farb-Reaktion beim Dribbeln", title: "Ampel-Dribbling" },
               { focus: "Ball als Freund, freies Laufen", title: "Kometenjagd" },
               { focus: "Koordination & Spaß", title: "Tierischer Bewegungsparcours" }
           ],
           mains: [
               { focus: "Dribbeln mit Richtungswechsel", title: "Liniendribbling-Turnier" },
-              { focus: "Tore aus allen Richtungen", title: "Vier-Tore-Chaos (4 Minitore)" },
-              { focus: "Kleinfeldspiel 3v3", title: "Funino Festival" },
+              { focus: "Tore aus allen Richtungen (4 Minitore)", title: "Vier-Tore-Chaos (4 Minitore)" },
+              { focus: "Horst Wein Funino Festival 3v3", title: "Funino Festival 3v3" },
               { focus: "Torschuss aus Dribbling", title: "Schießbude (Torschuss-Parcours)" },
               { focus: "Ball behaupten & dribbeln", title: "Dribbelkönig" }
           ],
@@ -249,43 +253,43 @@ const TacticalHub = ({
               { focus: "Zusammenkommen & Feedback", title: "Verabschiedungskreis" },
               { focus: "Freies Spielen zum Abschluss", title: "Freies Spiel (2 Min)" }
           ],
-          pedagogy: "SPIELERISCH FÜR KLEINKINDER (4-8 Jahre). KEINE Taktik, KEIN 11v11, KEIN Großfeld. Nur Spaß, maximale Ballkontakte, bildhafte/märchenhafte Sprache. Spielformen: max. 4v4 auf Minitore. Beschreibe Aufbau, Regeln und Varianten kinderleicht verständlich. ZWINGEND MINITORE und Hütchen im Taktikboard JSON verwenden."
+          pedagogy: "SPIELERISCH FÜR KLEINKINDER (4-8 Jahre). HORST WEIN FUNINO SCHULE. KEINE Taktik, KEIN 11v11, KEIN Großfeld, keine festen Positionen! Nur reine Spielfreude, maximale Ballkontakte, bildhafte/märchenhafte Sprache. Spielformen: 3v3 auf 4 Minitore. Beschreibe Aufbau, Regeln und Varianten kinderleicht verständlich. ZWINGEND MINITORE und Hütchen im Taktikboard JSON verwenden."
       };
       if (isU10_U13) return {
           warmups: [
-              { focus: "Abwerfen & Ausweichen", title: "Zombie-Ball" },
-              { focus: "Passen auf Zuruf (Nummern)", title: "Nummern-Passen im Chaos" },
+              { focus: "Abwerfen & Ausweichen (Reaktion)", title: "Zombie-Ball" },
+              { focus: "Passen auf Zuruf (Nummern - Kognitiv)", title: "Nummern-Passen im Chaos" },
               { focus: "Koordinationsleiter + Sprint", title: "Koordinations-Wettkampf" },
-              { focus: "Leichtes Ballhalten", title: "Rondo 4v1 (Spaß)" },
+              { focus: "Leichtes Ballhalten (Rondo)", title: "Rondo 4v1 (Spaß)" },
               { focus: "Reaktion & Richtungswechsel", title: "Tic-Tac-Toe Sprints" }
           ],
           mains: [
-              { focus: "Schnelles Passspiel in kleinen Gruppen", title: "3v3 Funino Festival" },
+              { focus: "Coerver Ball Mastery & Dribbeln", title: "Coerver 1v1 Dominanz" },
               { focus: "Zweikampf & Abschluss", title: "1v1 Duelle mit Torschuss" },
               { focus: "Spiel mit Überzahl lernen", title: "Überzahlspiel 3v2" },
-              { focus: "Passstafetten & Laufen", title: "DFB Pass-Kombi-Stafette" },
+              { focus: "Passstafetten & Laufen (DFB)", title: "DFB Pass-Kombi-Stafette" },
               { focus: "Spielform mit Zonen", title: "Vier-Zonen-Spiel (5v5)" }
           ],
           cooldowns: [
               { focus: "Gemeinsames lockeres Auslaufen", title: "Lockerer Auslauf" },
-              { focus: "Schießen aus Spaß", title: "Lattenschüeßen" },
+              { focus: "Schießen aus Spaß (Kreuzlatte)", title: "Lattenschießen" },
               { focus: "Dehnen & Besprechen", title: "Dehnen im Kreis" },
               { focus: "Balltricks üben", title: "Freestyle Jonglieren" }
           ],
-          pedagogy: "AUSBILDUNG KINDER (9-13 Jahre). Kurze Instruktionen, Fokus auf viele Ballkontakte. Spielformen 3v3 bis 7v7. Taktikboard JSON muss kleine Trainingsvierecke mit Hütchen und Minitoren nutzen!"
+          pedagogy: "AUSBILDUNG KINDER (9-13 Jahre). COERVER COACHING PRINZIPIEN. Kurze Instruktionen, Fokus auf viele Ballkontakte, Ball Mastery, Finten, 1v1-Duelle, Kleinfeld-Spielformen bis max. 5v5/7v7. Taktikboard JSON muss kleine Trainingsvierecke mit Hütchen und Minitoren nutzen!"
       };
       if (isU14_U17) return {
           warmups: [
-              { focus: "Kognitives Umschalten", title: "Ajax-Passdreiecke" },
+              { focus: "Kognitives Umschalten & Ajax-Passspiel", title: "Ajax-Passdreiecke" },
               { focus: "Technik unter Druck", title: "Rondo 5v2 (progressiv)" },
               { focus: "La Masia Gitter-Passspiel", title: "Barcelona Warm-Up" },
               { focus: "Athletik + Ball", title: "Dynamisches Aufwärmen mit Ball" }
           ],
           mains: [
-              { focus: "Ballbesitz in engem Raum", title: "Positionsspiel 4v4+2" },
-              { focus: "DFB-Stufenmodell", title: "DFB B-Jugend Spielform" },
+              { focus: "La Masia Positionsspiel (Juego de Posición)", title: "Positionsspiel 4v4+2" },
+              { focus: "DFB-Stufenmodell & Raumaufteilung", title: "DFB B-Jugend Spielform" },
               { focus: "Umschalten Angriff/Verteidigung", title: "Übergangsspiel 8v8" },
-              { focus: "Pressing nach Ballverlust", title: "Gegenpressing-Spielform" },
+              { focus: "Gegenpressing nach Ballverlust", title: "Gegenpressing-Spielform" },
               { focus: "Flügelspiel & Flanken", title: "Flügelangriffe mit Torabschluss" }
           ],
           cooldowns: [
@@ -293,26 +297,26 @@ const TacticalHub = ({
               { focus: "Faszienrolle & Mobilität", title: "Dehnen & Blackroll" },
               { focus: "Video & Feedback", title: "Taktik-Besprechung" }
           ],
-          pedagogy: "AUSBILDUNG JUGEND (14-17). Nutze Taktik-Grundbegriffe wie 'Schulterblick', 'Freilaufverhalten'. Spielformen 7v7 bis 11v11. Taktikboard JSON nutzt saubere Übungszonen."
+          pedagogy: "AUSBILDUNG JUGEND (14-17). LA MASIA POSITIONAL PLAY & GRUNDLAGEN. Nutze Taktik-Grundbegriffe wie 'Schulterblick' (Scanning), 'offene Körperstellung', 'Dreiecksbildung' und 'Dritter Mann'. Spielformen 7v7 bis 11v11. Taktikboard JSON nutzt saubere Übungszonen."
       };
       return {
           warmups: [
               { focus: "Kognition & Handlungsschnelligkeit", title: "Kognitives Rondo (Elite)" },
-              { focus: "Präzisions-Passspiel", title: "Myelinisierungs-Passspiel" },
+              { focus: "Präzisions-Passspiel unter Zeitdruck", title: "Myelinisierungs-Passspiel" },
               { focus: "Athletische Voraktivierung", title: "Faszien-Aktivierung (Pro)" }
           ],
           mains: [
-              { focus: "Elite Ballbesitz", title: "Elite Tiki-Taka" },
+              { focus: "Elite Positionsspiel & Dreiecke", title: "La Masia Positionsspiel Elite" },
               { focus: "Gegenpressing nach Ballverlust", title: "Gegenpressing (Klopp-Style)" },
-              { focus: "Schnelles Umschaltspiel", title: "Konter über Außen (Nagelsmann)" },
-              { focus: "Spielaufbau von hinten", title: "Positional Play (Pep-Style)" }
+              { focus: "Schnelles Umschaltspiel (Nagelsmann)", title: "Konter über Außen (Nagelsmann)" },
+              { focus: "Spielaufbau von hinten (Pep-Style)", title: "Positional Play (Pep-Style)" }
           ],
           cooldowns: [
               { focus: "Faszienrolle & Mobilität", title: "Blackroll" },
               { focus: "Lockeres Auslaufen", title: "Auslaufen" },
-              { focus: "Leichtes Passspiel", title: "Tiki-Taka Cool-Down" }
+              { focus: "Leichtes Passspiel (Cool-Down)", title: "Tiki-Taka Cool-Down" }
           ],
-          pedagogy: "ELITE SENIOREN. Hochprofessionelles Vokabular (Nagelsmann-Niveau). Große Felder (11v11) in der JSON Generierung nutzen."
+          pedagogy: "ELITE SENIOREN. TACTICAL PERIODIZATION. Hochprofessionelles Vokabular (Nagelsmann/Pep-Niveau). Erklärung von Anpress-Triggern, Gegenpressing, taktischer Periodisierung nach Matchday-Abstand. Große Felder (11v11) in der JSON Generierung nutzen."
       };
   };
 
