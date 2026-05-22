@@ -15,6 +15,18 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/ollama-proxy/, '/api'),
         timeout: 300000,
+      },
+      // Route all other /api/* calls to the local Stark Elite proxy server
+      '/api': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+        secure: false,
+        timeout: 60000,
+      },
+      '/kicker': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: true,
+        secure: false,
       }
     }
   },

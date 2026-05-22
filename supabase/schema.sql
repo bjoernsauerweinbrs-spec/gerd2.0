@@ -1,61 +1,149 @@
--- Phase 3: PostgreSQL Schema for Supabase (Gerd 2.0 – The Legacy)
+-- Phase 4: Operation P0 (Supabase Realtime Migration & RLS)
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Training Plans Table
-CREATE TABLE IF NOT EXISTS training_plans (
+-- 1. GLOBAL CLUB INFO (Singleton)
+CREATE TABLE IF NOT EXISTS stark_club_info (
+  id INT PRIMARY KEY DEFAULT 1,
+  name TEXT NOT NULL DEFAULT 'Stark Elite',
+  league TEXT DEFAULT 'Bundesliga',
+  current_budget BIGINT DEFAULT 25000000,
+  live_intelligence JSONB DEFAULT '{}'::jsonb
+);
+
+-- 2. ROSTERS (Profi & NLZ)
+CREATE TABLE IF NOT EXISTS stark_roster (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  author_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  department TEXT CHECK (department IN ('profi', 'nlz')) NOT NULL,
+  player_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. SCHEDULES (Training Lab)
+CREATE TABLE IF NOT EXISTS stark_schedule (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  department TEXT CHECK (department IN ('profi', 'nlz')) NOT NULL,
+  day TEXT NOT NULL,
+  type TEXT NOT NULL,
+  intensity INT DEFAULT 50,
+  schedule_time TEXT DEFAULT '16:30 - 18:00',
+  completed BOOLEAN DEFAULT false,
+  is_matchday BOOLEAN DEFAULT false,
+  sim_data JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. TACTICS & PLAYBOOKS
+CREATE TABLE IF NOT EXISTS stark_tactics (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  department TEXT CHECK (department IN ('profi', 'nlz')) NOT NULL,
   title TEXT NOT NULL,
   markdown_content TEXT NOT NULL,
-  visibility TEXT CHECK (visibility IN ('private', 'team_parents', 'public')) DEFAULT 'private',
+  tactic_json JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Messages Table (Communication between Trainer and Parents)
-CREATE TABLE IF NOT EXISTS messages (
+-- 5. ENABLE REALTIME
+ALTER PUBLICATION supabase_realtime ADD TABLE stark_club_info;
+ALTER PUBLICATION supabase_realtime ADD TABLE stark_roster;
+ALTER PUBLICATION supabase_realtime ADD TABLE stark_schedule;
+ALTER PUBLICATION supabase_realtime ADD TABLE stark_tactics;
+
+-- 6. SETUP ROW-LEVEL SECURITY (RLS)
+ALTER TABLE stark_club_info ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stark_roster ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stark_schedule ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stark_tactics ENABLE ROW LEVEL SECURITY;
+
+-- Helper function to get current user role loosely based on email
+CREATE OR REPLACE FUNCTION get_stark_role() RETURNS TEXT AS $$
+BEGIN
+  IF auth.jwt() ->> 'email' = 'media@stark.elite' THEN
+    RETURN 'media';
+  ELSIF auth.jwt() ->> 'email' = 'profi@stark.elite' THEN
+    RETURN 'profi';
+  ELSIF auth.jwt() ->> 'email' = 'nlz@stark.elite' THEN
+    RETURN 'nlz';
+  ELSIF auth.jwt() ->> 'email' = 'manager@stark.elite' THEN
+    RETURN 'manager';
+  ELSE
+    RETURN 'unknown';
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- POLICIES FOR CLUB INFO
+CREATE POLICY "Manager can manage club info" ON stark_club_info FOR ALL USING (get_stark_role() IN ('manager', 'profi'));
+CREATE POLICY "Everyone can view club info" ON stark_club_info FOR SELECT USING (true);
+
+
+-- POLICIES FOR ROSTERS
+CREATE POLICY "Media can view rosters" ON stark_roster FOR SELECT USING (true);
+
+CREATE POLICY "Manager/Profi can edit profi roster" ON stark_roster
+FOR ALL USING (
+  (get_stark_role() = 'manager') OR
+  (get_stark_role() = 'profi' AND department = 'profi')
+);
+
+CREATE POLICY "NLZ Trainer can edit nlz roster" ON stark_roster
+FOR ALL USING (
+  (get_stark_role() = 'nlz' AND department = 'nlz')
+);
+
+
+-- POLICIES FOR SCHEDULES
+CREATE POLICY "Media can view schedules" ON stark_schedule FOR SELECT USING (true);
+
+CREATE POLICY "Manager/Profi can edit profi schedules" ON stark_schedule
+FOR ALL USING (
+  (get_stark_role() = 'manager') OR
+  (get_stark_role() = 'profi' AND department = 'profi')
+);
+
+CREATE POLICY "NLZ Trainer can edit nlz schedules" ON stark_schedule
+FOR ALL USING (
+  (get_stark_role() = 'nlz' AND department = 'nlz')
+);
+
+
+-- POLICIES FOR TACTICS & PLAYBOOKS
+CREATE POLICY "Media can view tactics" ON stark_tactics FOR SELECT USING (true);
+
+CREATE POLICY "Manager/Profi can edit profi tactics" ON stark_tactics
+FOR ALL USING (
+  (get_stark_role() = 'manager') OR
+  (get_stark_role() = 'profi' AND department = 'profi')
+);
+
+CREATE POLICY "NLZ Trainer can edit nlz tactics" ON stark_tactics
+FOR ALL USING (
+  (get_stark_role() = 'nlz' AND department = 'nlz')
+);
+
+-- INITIAL SEED (Only if safe/empty)
+INSERT INTO stark_club_info (id, name, league, current_budget) 
+VALUES (1, 'Stark Elite', 'Bundesliga', 25000000)
+ON CONFLICT (id) DO NOTHING;
+
+-- 7. LOGISTICS LEDGER (CFO HUB)
+CREATE TABLE IF NOT EXISTS logistics_ledger (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  plan_id UUID REFERENCES training_plans(id) ON DELETE CASCADE,
-  sender_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-  message_text TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  item_name TEXT NOT NULL,
+  category TEXT DEFAULT 'material',
+  quantity INT DEFAULT 0,
+  price_per_unit NUMERIC DEFAULT 0,
+  total_value NUMERIC GENERATED ALWAYS AS (quantity * price_per_unit) STORED,
+  status TEXT DEFAULT 'ok',
+  ordered_by TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ROW LEVEL SECURITY (RLS) policies
+ALTER PUBLICATION supabase_realtime ADD TABLE logistics_ledger;
+ALTER TABLE logistics_ledger ENABLE ROW LEVEL SECURITY;
 
--- Enable RLS
-ALTER TABLE training_plans ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-
--- 1. Trainers: Full access to their own plans
-CREATE POLICY "Trainers manage own plans" ON training_plans
-  FOR ALL
-  USING (auth.uid() = author_id);
-
--- 2. Parents/Members: Read-only access to 'team_parents' or 'public' plans
-CREATE POLICY "Others view shared plans" ON training_plans
-  FOR SELECT
-  USING (visibility = 'team_parents' OR visibility = 'public');
-
--- 3. Messages: View messages on accessible plans
-CREATE POLICY "View messages on accessible plans" ON messages
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM training_plans 
-      WHERE id = messages.plan_id 
-      AND (visibility = 'team_parents' OR visibility = 'public' OR author_id = auth.uid())
-    )
-  );
-
--- 4. Messages: Insert messages to shared plans
-CREATE POLICY "Users can post messages to shared plans" ON messages
-  FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM training_plans 
-      WHERE id = plan_id 
-      AND (visibility = 'team_parents' OR visibility = 'public')
-    )
-  );
+CREATE POLICY "Media cannot view logistics" ON logistics_ledger FOR SELECT USING (get_stark_role() != 'media');
+CREATE POLICY "Manager/Profi can manage logistics" ON logistics_ledger FOR ALL USING (get_stark_role() IN ('manager', 'profi'));
